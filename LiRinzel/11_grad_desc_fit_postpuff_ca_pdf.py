@@ -92,8 +92,20 @@ class ExpIF:
         self.r0 = r0
         self.x0 = ut.fixed_point(ip3)[0]
         self.x_max = ut.critical_point(ip3)[0]
+
         self.integral_caR_caT = self.integral_ca_caT(xR)
         self.full_integral = self.integral_ca_caT(0)
+        self.norm = self.normalization()
+
+
+    def normalization(self):
+        norm = 0
+        xs = np.linspace(0, self.x_max, 200)
+        dx = self.x_max/200
+        for x in xs:
+            p0 = self.p0(x)
+            norm += p0*dx
+        return norm
 
 
     def U(self, x):
@@ -136,6 +148,8 @@ class ExpIF:
 
     def gradient_descent(self, xs, ysaim):
         epsilon = 0.01
+
+        # Used to calculate the square error if a single variable is varied
         sqerr = 0
         sqerr_dxR = 0
         sqerr_dD = 0
@@ -143,13 +157,28 @@ class ExpIF:
         sqerr_dxT = 0
         sqerr_ddelta = 0
         m = len(xs)
+
+        # Ensures that the probability is normalized
+        sum_p0xdxR = 1
+        sum_p0xdD = 1
+        sum_p0xdtau = 1
+        sum_p0xdxT = 1
+        sum_p0xddelta = 1
+
+        dx = xs[1] - xs[0]
+        for x in xs:
+            sum_p0xdxR += self.p0x(x, 1.01*self.xR, self.D, self.tau, self.xT, self.delta)*dx
+            sum_p0xdD += self.p0x(x, self.xR, 1.01*self.D, self.tau, self.xT, self.delta)*dx
+            sum_p0xdtau += self.p0x(x, self.xR, self.D, 1.01*self.tau, self.xT, self.delta)*dx
+            sum_p0xdxT += self.p0x(x, self.xR, self.D, self.tau, 1.01*self.xT, self.delta)*dx
+            sum_p0xddelta += self.p0x(x, self.xR, self.D, self.tau, self.xT, 1.01*self.delta)*dx
         for x, yaim in zip(xs, ysaim):
             sqerr += (1 / 2) * (self.p0x(x, self.xR, self.D, self.tau, self.xT, self.delta) - yaim) ** 2
-            sqerr_dxR += (1 / 2) * (self.p0x(x, 1.01*self.xR, self.D, self.tau, self.xT, self.delta) - yaim) ** 2
-            sqerr_dD += (1 / 2) * (self.p0x(x, self.xR, 1.01*self.D, self.tau, self.xT, self.delta) - yaim) ** 2
-            sqerr_dtau += (1 / 2) * (self.p0x(x, self.xR, self.D, 1.01*self.tau, self.xT, self.delta) - yaim) ** 2
-            sqerr_dxT += (1 / 2) * (self.p0x(x, self.xR, self.D, self.tau, 1.01*self.xT, self.delta) - yaim) ** 2
-            sqerr_ddelta += (1 / 2) * (self.p0x(x, self.xR, self.D, self.tau, self.xT, 1.01*self.delta) - yaim) ** 2
+            sqerr_dxR += (1 / 2) * (self.p0x(x, 1.01*self.xR, self.D, self.tau, self.xT, self.delta)/sum_p0xdxR - yaim) ** 2
+            sqerr_dD += (1 / 2) * (self.p0x(x, self.xR, 1.01*self.D, self.tau, self.xT, self.delta)/sum_p0xdD - yaim) ** 2
+            sqerr_dtau += (1 / 2) * (self.p0x(x, self.xR, self.D, 1.01*self.tau, self.xT, self.delta)/sum_p0xdtau - yaim) ** 2
+            sqerr_dxT += (1 / 2) * (self.p0x(x, self.xR, self.D, self.tau, 1.01*self.xT, self.delta)/sum_p0xdxT - yaim) ** 2
+            sqerr_ddelta += (1 / 2) * (self.p0x(x, self.xR, self.D, self.tau, self.xT, 1.01*self.delta)/sum_p0xddelta - yaim) ** 2
 
         gradient_xR = (1 / m) * (sqerr_dxR - sqerr) / (0.01 * self.xR)
         gradient_D = (1 / m)*(sqerr_dD - sqerr) / (0.01 * self.D)
@@ -163,6 +192,10 @@ class ExpIF:
         self.xT -= epsilon * gradient_xT
         self.delta -= epsilon * gradient_delta
         self.integral_caR_caT = self.integral_ca_caT(self.xR)
+        norm = 0
+        for x in xs:
+            norm += dx*self.p0(x)
+        self.norm = norm
 
 
 def pre_puff_ca(ts, cas, starts, stops):
@@ -214,7 +247,7 @@ def probability(valuess, min, max, bins=100):
             index = int((value - min) * bins / (max - min)) - 1
             pxs[index] += 1
     sum = np.sum(pxs)
-    pxs = [x / (sum * (max - min)) for x in pxs]
+    pxs = [x * (len(xs)/ (sum * (max - min))) for x in pxs]
     return xs, pxs
 
 
@@ -265,17 +298,22 @@ if __name__ == "__main__":
     tau = 0.1
     D = 0.005
     Delta = 0.01
-    xR = 0.1
+    xR = 0.09
     xT = 0.1
     r0 = 1 / np.mean(ipis)
 
 
     exIF = ExpIF(ip3, r0, tau, xR, xT, Delta, D)
     p0 = []
-    for i in range(301):
+    norm = exIF.normalization()
+    for x in cas:
+       p0.append(exIF.p0(x)/norm)
+    ax.plot(cas, p0)
+
+    for i in range(0):
         exIF.gradient_descent(cas, pcas)
         print(i)
-        if i % 100 == 0:
+        if i % 20 == 0:
             print("tau: ", exIF.tau, "D: ", exIF.D, "xR:", exIF.xR, "xT: ", exIF.xT, "Delta: ", exIF.delta)
             p0 = []
             sqerr = 0

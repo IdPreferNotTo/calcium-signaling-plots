@@ -6,7 +6,7 @@ from LiRinzel import utilities as ut
 for i in range(1):
     ip3 = 0.3
 
-    N = 64
+    N = 32
     data = np.loadtxt("/home/lukas/CLionProjects/li-rinzel-calcium-phd/out/lr_model_ca_waves_N{:d}_ip{:.2f}".format(N, ip3), skiprows=10_000)
     ts, ca, j1, n_open = np.transpose(data)
 

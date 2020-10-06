@@ -20,7 +20,7 @@ for j in range(10):
         data = np.loadtxt("/home/lukas/CLionProjects/li-rinzel-calcium-phd/out/lr_model_ca_waves_N{:d}_ip{:.2f}".format(n_total, ip3))
         t, ca, j1, n_open = np.transpose(data)
         t_max = 200
-        ca_crit, h_crit = ut.critical_value(ip3)
+        ca_crit, h_crit = ut.critical_point(ip3)
         n_open_crit = h_crit**3
         ipis, puff_times, puff_stop_times = ut.spike_times(t, ca, n_open, ip3)
         for puff_time, puff_stop_time in zip(puff_times, puff_stop_times):
