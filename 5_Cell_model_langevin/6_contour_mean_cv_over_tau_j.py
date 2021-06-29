@@ -65,4 +65,4 @@ def plot_cv_mean_contour(text, adap):
             plt.savefig(home + "/Data/Calcium/Plots/Contour_langevin_CV_no_adap_nClu10_nCha4.pdf", transparent=True)
     plt.show()
 
-plot_cv_mean_contour("R", adap=True)
+plot_cv_mean_contour("CV", adap=True)
