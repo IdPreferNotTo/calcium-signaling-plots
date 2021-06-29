@@ -11,17 +11,17 @@ def moments(xs, k):
     return moment/len(xs)
 
 home = os.path.expanduser("~")
-taus = np.logspace(-1, 2, 50)
-jcas = np.logspace(-3, 0, 50)
-fixedCa = 0.35
+fixedCa = 0.33
 Ncl = 10
 Nch = 4
 jca = 1
 tau = 1
 for i in range(1):
-    data = np.loadtxt(home + "/CLionProjects/calcium-spikes-from-puff-phd/out/fixed calcium/spikes_fixedCa{:.2f}_adap_taua5.00e+01_e1.00e-01_tau{:.2e}_j{:.2e}_Ncha4_Nclu10_Ncls4_rO0.13_rC50.00_rR1.30_N0.dat".format(fixedCa, tau, jca))
-    ts, cas, jleaks, jpuffs = np.transpose(data)
+    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/"
+    file = "ca_markov_cafix{:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat".format(fixedCa)
+    data = np.loadtxt(home + folder + file)
 
+    ts, cas, jpuffs, adaps = np.transpose(data)
     ts_clear = []
     cas_clear = []
     jpuffs_clear = []
@@ -71,5 +71,5 @@ for i in range(1):
     ax0.set_yscale("log")
     ax0.set_xlabel("$\Delta t$")
     ax0.set_xscale("log")
-    plt.savefig(home + "/Data/Calcium/Plots/moments_log_fixedCa{:.2f}_tau{:.2e}_j{:.2e}_nClu10_nCha4_adap.pdf".format(fixedCa, tau, jca), transparent=True)
+    plt.savefig(home + "/Data/Calcium/Plots/markov_jpuff_moments_over_deltat_static.pdf".format(fixedCa, tau, jca), transparent=True)
     plt.show()
