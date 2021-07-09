@@ -2,8 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
+from matplotlib import rc
+from matplotlib import rcParams
+
+def set_default_plot_style():
+        rcParams['font.family'] = 'serif'
+        rcParams['font.serif'] = 'Computer Modern Roman'
+        rc('text', usetex=True)
+
+def remove_top_right_axis(axis):
+        for ax in axis:
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
 
 
+set_default_plot_style()
 home = os.path.expanduser("~")
 taus = np.logspace(-1, 2, 50)
 jcas = np.logspace(-3, 0, 50)
@@ -51,10 +64,13 @@ for i in range(1):
     ax_hist1 = fig.add_subplot(gs[0, 1])
     ax_ts2 = fig.add_subplot(gs[1, 0])
     ax_hist2 = fig.add_subplot(gs[1, 1])
+    remove_top_right_axis([ax_ts1, ax_hist1, ax_ts2, ax_hist2])
+
     plt_start = 0
     plt_stop = plt_start + 500
 
     mean = np.mean(jpuffs_clear)
+    ax_ts1.set_ylim([0, 6])
     ax_ts1.set_ylabel(r"$y_{0.1}$")
     ax_ts1.plot(ts_clear[plt_start:plt_stop], jpuffs_clear[plt_start:plt_stop], c="C3",label="$\mu_0 = {:.2f}$".format(mean_jpuffs_clear[1]))
     ax_ts1.plot(ts_clear[plt_start:plt_stop], mean_jpuffs_clear[plt_start:plt_stop], c="k", label="$\mu = {:.2f}$".format(mean))
@@ -73,6 +89,7 @@ for i in range(1):
         ts_clear_dt1_new.append(t2)
         jpuffs_dt1_new.append(jpuff1)
 
+    ax_ts2.set_ylim([0, 6])
     ax_ts2.plot(ts_clear_dt1_new[plt_start:plt_stop], jpuffs_dt1_new[plt_start:plt_stop], c="C0",label="$\mu_0 = {:.2f}$".format(mean_jpuffs_clear[1]))
     ax_ts2.plot(ts_clear_dt1[plt_start:plt_stop], mean_jpuffs_clear[plt_start:plt_stop], c="k", label="$\mu = {:.2f}$".format(mean))
     ax_ts2.set_xlabel("$t$")
@@ -94,16 +111,18 @@ for i in range(1):
         return gauss_dist
 
     ax_hist1.plot(gauss001, gauss_dist(gauss001, mean, std01), c="C3")
-    ax_hist1.hist(jpuffs_dt01, bins = 20, alpha = 0.7, color="C3", density=True, label=r"$\Delta t = {:.1f}$".format(0.1) + "\n" + "$\sigma_{y_{0.1}}$" + " = {:.2f}".format(std01))
+    ax_hist1.hist(jpuffs_dt01, bins = 50, alpha = 0.7, color="C3", density=True, label=r"$\Delta t = {:.1f}$".format(0.1) + "\n" + "$\sigma_{y_{0.1}}$" + " = {:.2f}".format(std01))
     ax_hist1.set_xlabel("$y_{0.1}$")
-    ax_hist1.set_ylabel("$P(y)$")
+    ax_hist1.set_ylabel("$P(y_{0.1})$")
+    ax_hist1.set_xlim([-1, 6])
     ax_hist1.legend(loc=1)
 
     ax_hist2.plot(gauss01, gauss_dist(gauss01, mean, std1), c="C0")
-    ax_hist2.hist(jpuffs_dt1, bins=20, alpha=0.7, color="C0", density=True,
+    ax_hist2.hist(jpuffs_dt1, bins=50, alpha=0.7, color="C0", density=True,
              label=r"$\Delta t = {:.1f}$".format(1.0) + "\n" + "$\sigma_{y_{1.0}}$" + " = {:.2f}".format(std1))
     ax_hist2.set_xlabel("$y_{1.0}$")
-    ax_hist2.set_ylabel("$P(y)$")
+    ax_hist2.set_ylabel("$P(y_{1.0})$")
+    ax_hist2.set_xlim([-1, 6])
     ax_hist2.legend(loc=1)
 
 
