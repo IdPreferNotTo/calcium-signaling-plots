@@ -2,6 +2,21 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib import rc
+from matplotlib import rcParams
+
+
+def set_default_plot_style():
+        rcParams['font.family'] = 'serif'
+        rcParams['font.serif'] = 'Computer Modern Roman'
+        rc('text', usetex=True)
+
+
+def remove_top_right_axis(axis):
+        for ax in axis:
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
+
 
 def get_ipis_from_single_cluster(data, nr_cluster):
     # data = [t, state, idx]
@@ -24,11 +39,13 @@ def get_ipis_from_single_cluster(data, nr_cluster):
 
 
 if __name__ == "__main__":
+    set_default_plot_style()
     home = os.path.expanduser("~")
     fig = plt.figure(tight_layout=True, figsize=(9 / 2, 6))
     gs = gridspec.GridSpec(2, 1)
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1])
+    remove_top_right_axis([ax1, ax2])
 
     num_cls = 4
     folder = "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/"
@@ -38,7 +55,7 @@ if __name__ == "__main__":
     ipis = get_ipis_from_single_cluster(data, 0)
     mean_ipi = np.mean(ipis)
     CV = np.std(ipis)/np.mean(ipis)
-    ax1.hist(ipis, bins=20, density=True, label=rf"$n_{{\rm cls}} = {num_cls}$" + "\n" + f"$\mu(I) = {mean_ipi:.2f}$" + "\n" + f"$C_V(I) = {CV:.2f}$")
+    ax1.hist(ipis, bins=50, density=True, alpha=0.7, label=rf"$n_{{\rm cls}} = {num_cls}$" + "\n" + f"$\mu(I) = {mean_ipi:.2f}$" + "\n" + f"$C_V(I) = {CV:.2f}$")
     m=4
     n=4
 
@@ -70,7 +87,7 @@ if __name__ == "__main__":
             p4 = c4*np.exp(-ropn*t)
             p_ipi.append(ropn*p4)
 
-    ax1.plot(ts, p_ipi)
+    ax1.plot(ts, p_ipi, c="k")
     print(mean, var)
     print(np.mean(ipis), np.var(ipis))
     ax1.legend()

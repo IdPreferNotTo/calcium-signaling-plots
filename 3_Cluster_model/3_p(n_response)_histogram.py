@@ -2,8 +2,23 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib import rc
+from matplotlib import rcParams
+
+
+def set_default_plot_style():
+        rcParams['font.family'] = 'serif'
+        rcParams['font.serif'] = 'Computer Modern Roman'
+        rc('text', usetex=True)
+
+
+def remove_top_right_axis(axis):
+        for ax in axis:
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
 
 if __name__ == "__main__":
+    set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(9/2, 6))
     gs = gridspec.GridSpec(10, 1)
     axis = []

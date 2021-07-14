@@ -2,7 +2,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import os
+from matplotlib import rc
+from matplotlib import rcParams
 
+
+def set_default_plot_style():
+        rcParams['font.family'] = 'serif'
+        rcParams['font.serif'] = 'Computer Modern Roman'
+        rc('text', usetex=True)
+
+
+def remove_top_right_axis(axis):
+        for ax in axis:
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
+
+set_default_plot_style()
 home = os.path.expanduser("~")
 
 CaRest = 0.33

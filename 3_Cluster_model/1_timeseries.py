@@ -4,14 +4,30 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import rc
+from matplotlib import rcParams
+
+
+def set_default_plot_style():
+        rcParams['font.family'] = 'serif'
+        rcParams['font.serif'] = 'Computer Modern Roman'
+        rc('text', usetex=True)
+
+
+def remove_top_right_axis(axis):
+        for ax in axis:
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
+
 
 if __name__ == "__main__":
+    set_default_plot_style()
     home = os.path.expanduser("~")
     fig = plt.figure(tight_layout=True, figsize=(4, 3))
     gs = gridspec.GridSpec(1, 1)
     ax = fig.add_subplot(gs[0])
     axin = inset_axes(ax, width=1.5, height=0.8)
-
+    remove_top_right_axis([ax])
     n = 4
     m = 4
     data = np.loadtxt(home + "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/puff_markov_cafix0.33_tau1.00e+00_j1.00e+00_N10_0.dat")

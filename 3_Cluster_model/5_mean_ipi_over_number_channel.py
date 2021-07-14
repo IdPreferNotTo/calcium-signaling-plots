@@ -2,7 +2,20 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib import rc
+from matplotlib import rcParams
 
+
+def set_default_plot_style():
+        rcParams['font.family'] = 'serif'
+        rcParams['font.serif'] = 'Computer Modern Roman'
+        rc('text', usetex=True)
+
+
+def remove_top_right_axis(axis):
+        for ax in axis:
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
 
 def ipi_distribution(data):
     minimum = min([x[1] for x in data])
@@ -18,6 +31,7 @@ def ipi_distribution(data):
 
 
 if __name__ == "__main__":
+    set_default_plot_style()
     home = os.path.expanduser("~")
     N = 10
     Ns = range(N)
@@ -37,6 +51,7 @@ if __name__ == "__main__":
     fig = plt.figure(tight_layout=True, figsize=(4, 3))
     gs = gridspec.GridSpec(1, 1)
     ax = fig.add_subplot(gs[0])
+    remove_top_right_axis([ax])
     ax.scatter([n+1 for n in Ns], [1/x for x in means])
     ax.set_xlabel("Cluster size")
     ax.set_ylabel("Mean event frequency")
