@@ -2,56 +2,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-
-def coarse_grained_list(list, f):
-    coarse_grained_list = []
-    for i in range(0, len(list), f):
-        average = sum(list[i:i+f])/f
-        coarse_grained_list.append(average)
-    return coarse_grained_list
-
-
-def delta(a, b):
-    if a==b:
-        return 1
-    else:
-        return 0
-
-def steady_states_theory_invert_A(r_ref, r_opn, r_cls, m, n):
-    A = np.array([[-n*r_ref, 0, 0, 0, 0, 0, 0, r_cls],
-                  [n*r_ref, -n*r_ref, 0, 0, 0, 0, 0, 0],
-                  [0, n*r_ref, -n*r_ref, 0, 0, 0, 0, 0],
-                  [0, 0, n*r_ref, -n*r_opn, 0, 0, 0, 0],
-                  [0, 0, 0, r_opn, -r_cls, 0, 0, 0],
-                  [0, 0, 0, r_opn, r_cls, -r_cls, 0, 0],
-                  [0, 0, 0, r_opn, 0, r_cls, -r_cls, 0],
-                  [1, 1, 1, 1, 1, 1, 1, 1]])
-    Ainv = np.linalg.inv(A)
-    inhomgeneity = np.array([0, 0, 0, 0, 0, 0, 0, 1])
-    p0s = Ainv.dot(inhomgeneity)
-    return p0s
-
-def f_from_k_invert_A(k, r_ref, r_opn, r_cls, m, n):
-    A = np.array([[-n * r_ref, 0, 0, 0, 0, 0, 0, r_cls],
-                  [n * r_ref, -n * r_ref, 0, 0, 0, 0, 0, 0],
-                  [0, n * r_ref, -n * r_ref, 0, 0, 0, 0, 0],
-                  [0, 0, n * r_ref, -n * r_opn, 0, 0, 0, 0],
-                  [0, 0, 0, r_opn, -r_cls, 0, 0, 0],
-                  [0, 0, 0, r_opn, r_cls, -r_cls, 0, 0],
-                  [0, 0, 0, r_opn, 0, r_cls, -r_cls, 0],
-                  [1, 1, 1, 1, 1, 1, 1, 1]])
-    Ainv = np.linalg.inv(A)
-    p0s = steady_states_theory_invert_A(r_ref, r_opn, r_cls, m, n)
-    p0s[-1] = 0
-    p0s = np.asarray(p0s)
-    deltas = np.array([delta(k, 0), delta(k, 1), delta(k, 2), delta(k, 3), delta(k,4), delta(k, 5), delta(k, 6), 0])
-    inhomgeneity = np.subtract(p0s, deltas)
-    f_from_k = Ainv.dot(inhomgeneity)
-    return f_from_k
-
+from matplotlib import rc
+from functions import *
 
 if __name__ == "__main__":
+    set_default_plot_style()
     cas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     for ca in cas:
         ca_fix = ca
@@ -85,7 +40,7 @@ if __name__ == "__main__":
             dt0 = 0.1
             factors = np.arange(1, 101)
             for idx, f in enumerate(factors):
-                cg_list = coarse_grained_list(jpuffs, f)
+                cg_list = coarse_grain_list(jpuffs, f)
                 dt = dt0 * f
                 dts[idx] = dt
                 varss[idx][k] = np.var(cg_list)*dt
@@ -97,6 +52,7 @@ if __name__ == "__main__":
         fig = plt.figure(tight_layout=True, figsize=(4, 3))
         gs = gridspec.GridSpec(1, 1)
         ax = fig.add_subplot(gs[0, 0])
+        remove_top_right_axis([ax])
         ax.plot(dts, [np.sqrt(x[0]) for x in vars_mean_and_var], label=r"$\sigma \sqrt{\Delta t}  =  \left\langle \left(\Delta \int_0^{\Delta t} dt\,  j_{\rm puff}(t)\right)^2 \right\rangle^{1/2}$ ")
         var_upper = [x[0] + 3*x[1] for x in vars_mean_and_var]
         var_lower = [x[0] - 3*x[1] for x in vars_mean_and_var]
@@ -130,7 +86,8 @@ if __name__ == "__main__":
 
         ax.axhline(np.sqrt(2*N*D_theory), ls="--", c="C7", label="$\sqrt{{2D_N}}={:.2f}$".format(np.sqrt(2*N*D_theory)))
         ax.set_xlim([0.1, 10])
-        ax.legend()
-        plt.savefig(home + "/Data/Calcium/Plots/markov_jpuff_D_var_over_deltat_static.pdf".format(ca_fix), transparent=True)
+        legend = ax.legend(loc=3, fancybox=False, edgecolor="k", framealpha=1.0)
+        legend.get_frame().set_linewidth(0.5)
+        plt.savefig(home + "/Data/Calcium/Plots/4_markov_jpuff_D_var_over_deltat_static.pdf", transparent=True)
         plt.show()
         plt.close()

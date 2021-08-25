@@ -44,20 +44,24 @@ if __name__ == "__main__":
             spike_times.append(t)
             ax.arrow(x=t, y=1, dx=0, dy=1, color="C0", length_includes_head = True, head_width = 7.5, head_length=0.1)
             ax.plot(t_isi, ca_isi, c="C0")
-            ax.plot([t, t], [cR, cT], ls=":", c="C0")
-
+            ax.plot([t, t], [cR, cT], lw=1, ls=(0, (1,0.5)), c="k", zorder=1)
+            ax.plot([t, t+10], [cR, cR], lw=1, ls=(0, (1,0.5)), c="k", zorder=1)
             ax2.plot(t_isi, jpuff_isi, c="C0")
+            ax2.plot([t, t+10], [0, 0], lw=1, ls=(0, (1,0.5)), c="k", zorder=1)
             #ax2.plot([t, t], [cR, cT], ls=":", c="C0")
             t_isi.clear()
             ca_isi.clear()
             jpuff_isi.clear()
 
 
-    for i in range(7):
-        x_left = spike_times[i]
-        x_right = spike_times[i + 1]
-        dx = spike_times[i + 1] - spike_times[i]
-        ax.text(x_left + dx/2, 1.6, f"$T_{i+1}$", ha="center", va="center", clip_on=False)
+    for i in range(8):
+        if i == 0:
+            x_left = 0
+        else:
+            x_left = spike_times[i - 1]
+        x_right = spike_times[i]
+        dx = x_right - x_left
+        ax.text(x_left + dx/2, 1.6, f"$T_{i}$", ha="center", va="center", clip_on=False)
 
         ax.arrow(x_left + 0.05*dx, 1.5, 0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=15.0, lw=0.5,
                 clip_on=False)
@@ -68,10 +72,11 @@ if __name__ == "__main__":
     ax2.set_xlabel("$t$ [s]")
     ax2.set_xlim([0, 500])
     ax2.set_ylabel(r"$J_{\rm puff}$ [a.u.]")
-
+    ax2.set_ylim([-0.05, 0.75])
     ax.set_ylabel(r"[Ca\textsuperscript{2+}] [a.u.]")
     ax.set_ylim([0.8*cR, 2.1*cT])
     ax.set_yticks([cR, cT])
     ax.set_yticklabels(["$c_R$", "$c_T$"])
 
+    plt.savefig(home + f"/Data/Calcium/Plots/1_markov_ca_timeseries_tau{tau:.2e}j{j:.2e}.pdf", transparent=True)
     plt.show()

@@ -116,6 +116,6 @@ if __name__ == "__main__":
     legend_hs2 = ax_hist2.legend(fancybox=False, edgecolor="k", framealpha=1.0)
     legend_hs2.get_frame().set_linewidth(0.5)
 
-    plt.savefig(home + "/Data/Calcium/Plots/markov_jpuff_coarse_grained_static.pdf".format(ca_fix, tau, jca),
+    plt.savefig(home + "/Data/Calcium/Plots/2_markov_jpuff_coarse_grain.pdf".format(ca_fix, tau, jca),
                 transparent=True)
     plt.show()

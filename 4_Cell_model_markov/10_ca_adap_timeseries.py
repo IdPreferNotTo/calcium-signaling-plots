@@ -2,18 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from  matplotlib import gridspec
 import os
-from matplotlib import rc
-from matplotlib import rcParams
-
-def set_default_plot_style():
-        rcParams['font.family'] = 'serif'
-        rcParams['font.serif'] = 'Computer Modern Roman'
-        rc('text', usetex=True)
-
-def remove_top_right_axis(axis):
-        for ax in axis:
-                ax.spines['right'].set_visible(False)
-                ax.spines['top'].set_visible(False)
+from functions import *
 
 
 if __name__ == "__main__":
@@ -24,7 +13,6 @@ if __name__ == "__main__":
     ax2 = fig.add_subplot(gs[1:3])
     ax3 = fig.add_subplot(gs[3])
     remove_top_right_axis([ax1, ax2, ax3])
-
 
     tau = 2.81
     j = 0.0728
@@ -82,7 +70,7 @@ if __name__ == "__main__":
         ax2.arrow(x_right -0.05*dx, 1.5, -0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=15.0, lw=0.5,
                 clip_on=False)
 
-    ax1.set_ylabel(r"$\delta $[Ca\textsuperscript{2+}]$_{\rm ER}$ [a.u.]")
+    ax1.set_ylabel(r"[Ca\textsuperscript{2+}]$_{\rm ER}$ [a.u.]")
     ax1.set_xlim([0, 500])
     ax1.set_ylim([0.5, 1])
 
@@ -95,5 +83,6 @@ if __name__ == "__main__":
     ax3.set_xlabel("$t$ [s]")
     ax3.set_xlim([0, 500])
     ax3.set_ylabel(r"$J_{\rm puff}$ [a.u.]")
+    plt.savefig(home + f"/Data/Calcium/Plots/7_markov_ca_adap_timeseries_tau{tau:.2e}j{j:.2e}.pdf", transparent=True)
 
     plt.show()
