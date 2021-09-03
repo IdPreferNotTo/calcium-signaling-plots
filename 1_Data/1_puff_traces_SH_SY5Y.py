@@ -5,9 +5,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import os
 
 home = os.path.expanduser("~")
-#file_str = home + "/Desktop/puff_data/puffs_thurley_t1.dat"
-file_str = home + "/Desktop/Ca data/SH_SY5Y_puffs_longtraces.dat"
-#file_str = home + "/Desktop/puff_data/HEK_traces/0712runb6_2"
+file_str = home + "/Desktop/Ca data/Puffs/SH_SY5Y_puffs_longtraces.dat"
 data = np.loadtxt(file_str)
 
 n = len(data[0])
@@ -18,7 +16,7 @@ for j in range(1, n):
     for i, idx in enumerate(idxs):
         data = np.delete(data, (idx-i), axis=0)
 
-    n_avr = 100
+    n_avr = 50
     stat_cas = []
     times = [x[0]/1000 for x in data]
     cas = [x[j] for x in data]
@@ -40,8 +38,11 @@ for j in range(1, n):
             puff = False
 
     fig = plt.figure()
-    gs = gridspec.GridSpec(1, 1)
-    ax = fig.add_subplot(gs[0, 0])
+    gs = gridspec.GridSpec(3, 1)
+    ax2 = fig.add_subplot(gs[1:3, 0])
+    ax1 = fig.add_subplot(gs[0, 0], sharex=ax2)
+    axis = [ax1, ax2]
+    axin = inset_axes(ax2, width="40%", height="40%", loc=1)
     ipis = []
     for t1, t2 in zip(puff_times[:-1], puff_times[1:]):
         ipis.append(t2-t1)
@@ -49,12 +50,22 @@ for j in range(1, n):
     ipi_var =  np.var(ipis)
     Cv = np.sqrt(ipi_var)/ipi_mean
 
-    ts = np.linspace(0, 20, 200)
+    #cas_unbias = [ca - avr_ca for ca, avr_ca in zip(cas, avr_cas)]
+    for ptime in puff_times:
+        ax1.axvline(ptime)
+    ax2.plot(times[n_avr:-n_avr], cas[n_avr:-n_avr])
+    ax2.plot(times[n_avr:-n_avr], avr_cas, c="k")
+    axin.hist(ipis, density=True)
     inv_gauss = []
+
+    ts = np.linspace(0, 20, 200)
     for t in ts[1:]:
         pt = (ipi_mean/t)**(3/2)*(1/(np.sqrt(2*np.pi)*Cv*ipi_mean))*np.exp(-(ipi_mean*(t -ipi_mean)**2)/(2*t*(Cv*ipi_mean)**2))
         inv_gauss.append(pt)
-    ax.plot(ts[1:], inv_gauss, c="C3")
-    ax.hist(ipis, density=True)
+    axin.plot(ts[1:], inv_gauss, c="C3")
+    #ax2.plot(times[n_avr:-n_avr], [x + 20 for x in avr_cas], c="C7")
+    #ax2.set_ylim([80, 200])
+    #ax2.set_xlim([0,50])
+    plt.savefig(home + "/Desktop/Ca data/Puffs/Plots/SH_{:d}.png".format(j), transparent=True)
     plt.show()
     plt.close()

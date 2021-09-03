@@ -5,9 +5,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import os
 
 home = os.path.expanduser("~")
-#file_str = home + "/Desktop/puff_data/puffs_thurley_t1.dat"
-file_str = home + "/Desktop/Ca data/SH_SY5Y_puffs_longtraces.dat"
-#file_str = home + "/Desktop/puff_data/HEK_traces/0712runb6_2"
+file_str = home + "/Desktop/Ca data/Puffs/HEK2_ThuSmi_BiophyJ11/HEK_t1_parker.dat"
 data = np.loadtxt(file_str)
 
 n = len(data[0])
@@ -68,6 +66,6 @@ for j in range(1, n):
     #ax2.plot(times[n_avr:-n_avr], [x + 20 for x in avr_cas], c="C7")
     #ax2.set_ylim([80, 200])
     #ax2.set_xlim([0,50])
-    plt.savefig(home + "/Desktop/Ca data/sh puffs/plots/sh puffs idx{:d}.pdf".format(j), transparent=True)
+    plt.savefig(home + "/Desktop/Ca data/Puffs/Plots/HEK_t1_{:d}.png".format(j), transparent=True)
     plt.show()
     plt.close()
