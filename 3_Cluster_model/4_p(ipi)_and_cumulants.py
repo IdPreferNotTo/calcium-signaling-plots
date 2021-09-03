@@ -41,9 +41,11 @@ def get_ipis_from_single_cluster(data, nr_cluster):
 if __name__ == "__main__":
     set_default_plot_style()
     home = os.path.expanduser("~")
-    fig = plt.figure(tight_layout=True, figsize=(9 / 2, 6))
+    fig = plt.figure(tight_layout=True, figsize=(4, 6*(3/4)))
+
     gs = gridspec.GridSpec(2, 1)
     ax1 = fig.add_subplot(gs[0])
+    #ax1in = inset_axes(ax1, width=1.5, height=0.8)
     ax2 = fig.add_subplot(gs[1])
     remove_top_right_axis([ax1, ax2])
 
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     ipis = get_ipis_from_single_cluster(data, 0)
     mean_ipi = np.mean(ipis)
     CV = np.std(ipis)/np.mean(ipis)
-    ax1.hist(ipis, bins=50, density=True, alpha=0.7, label=rf"$n_{{\rm cls}} = {num_cls}$" + "\n" + f"$\mu(I) = {mean_ipi:.2f}$" + "\n" + f"$C_V(I) = {CV:.2f}$")
+    ax1.hist(ipis, bins=25, density=True, alpha=0.7, label=rf"$n_{{\rm cls}} = {num_cls}$" + "\n" + f"$\mu(I) = {mean_ipi:.2f}$" + "\n" + f"$C_V(I) = {CV:.2f}$")
     m=4
     n=4
 

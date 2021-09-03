@@ -17,9 +17,9 @@ if __name__ == "__main__":
     file = f"ca_markov_ip1.00_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     file_spike =  f"spike_times_markov_ip1.00_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     data = np.loadtxt(home + folder + file)
-    isis  = np.loadtxt(home + folder + file_spike)
-    mean_isi = np.mean(isis)
-    std_isi = np.std(isis)
+    isis_data  = np.loadtxt(home + folder + file_spike)
+    mean_isi = np.mean(isis_data)
+    std_isi = np.std(isis_data)
     cv_isi = std_isi/mean_isi
     print(1/mean_isi, cv_isi)
 
@@ -28,15 +28,15 @@ if __name__ == "__main__":
     spike_data_chunks = []
     chunks = []
     t = 0
-    Tmax = 1_000
-    for isi in isis:
+    Tmax = 500
+    for isi in isis_data:
         t += isi
         chunks.append(isi)
         if t > Tmax:
             spike_data_chunks.append(chunks.copy())
             chunks.clear()
             t = 0
-
+    print(len(spike_data_chunks))
     ws = np.logspace(-2, 1, 100)
     spectrum = []
     for w in ws:
@@ -48,10 +48,13 @@ if __name__ == "__main__":
             fws_img.append(fw.imag)
         spectrum.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))
 
-    cas_theory = np.linspace(0, 1, 1001)
+    cas_theory = np.linspace(0.30, 1, 1001)
     dca = cas_theory[1] - cas_theory[0]
     p0s_theo_ca = []
+    Ds_theo_ca = []
+    I2s_theo_ca = []
     integral = 0
+
     for ca in reversed(cas_theory[1:]):
         print(ca)
         h = h_func(ca, tau, j, n_clu)
@@ -60,10 +63,34 @@ if __name__ == "__main__":
             integral += 0
         elif ca >= 0.33:
             integral += np.exp(-h)*dca
+        Ds_theo_ca.append(d)
         p0s_theo_ca.append(integral * np.exp(h) / d)
 
+    integral = 0
+    for ca in cas_theory[1:]:
+        print(ca)
+        h = h_func(ca, tau, j, n_clu)
+        d = d_func(ca, j, n_clu)
+        integral += (np.exp(h) / d)*dca
+        I2s_theo_ca.append(np.power(integral*np.exp(-h),2))
+
     norm = np.sum(p0s_theo_ca) * dca
-    r0 = 1/norm
+    r0theo = 1 / norm
+    r0sim = 1 / np.mean(isis_data)
+    cvsim = np.std(isis_data) / np.mean(isis_data)
+    print(r0theo)
+    print(r0sim)
+    p0s_theo_ca = [x / norm for x in p0s_theo_ca]
+
+    print(I2s_theo_ca)
+    print(Ds_theo_ca)
+    print(p0s_theo_ca)
+    cv2_theo = 0
+    for I2s, D, P0 in zip(I2s_theo_ca, Ds_theo_ca, p0s_theo_ca):
+        cv2_theo += 2 * r0theo * I2s * D * P0 * dca
+    cv_theo = np.sqrt(cv2_theo)
+    print(cv_theo)
+
 
     set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(4, 6 / 2))
@@ -74,8 +101,9 @@ if __name__ == "__main__":
     ax.set_xscale("log")
     ax.set_ylabel("$S(\omega)$")
     ax.set_yscale("log")
-    ax.axhline(r0, ls=":", c="C7", label="firing rate")
-    ax.plot(ws, spectrum, c="C0", label="power spectrum")
+    ax.axhline(r0theo, ls=":", c="C7", label=r"$\lim_{\omega\to\infty}S(\omega) = r_0$")
+    ax.axhline(r0theo*cv2_theo, ls="--", c="C7", label=r"$\lim_{\omega\to 0}S(\omega) = r_0 C_V^2$")
+    ax.plot(ws, spectrum, c="C0", label="$S(\omega)$")
 
     legend = ax.legend(loc=4, fancybox=False, edgecolor="k", framealpha=1.0)
     legend.get_frame().set_linewidth(0.5)

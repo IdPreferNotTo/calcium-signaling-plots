@@ -81,20 +81,6 @@ if __name__ == "__main__":
         integral += (np.exp(h) / d)*dca
         I2s_theo_ca.append(np.power(integral*np.exp(-h),2))
 
-    #mean_T = 0
-    #integral = 0
-    #for ca in cas_theory[1:]:
-    #    print(ca)
-    #    h = h_func(ca, tau, j, n_clu)
-    #    d = d_func(ca, j, n_clu)
-    #    if ca < 0.33:
-    #        integral += (np.exp(h)/d)*dca
-    #    else:
-    #        mean_T += np.exp(-h)*integral*dca
-    #        integral += (np.exp(h)/d)*dca
-
-    #print(1/mean_T)
-
     norm = np.sum(p0s_theo_ca) * dca
     r0theo = 1/norm
     r0sim = 1/np.mean(isi_data)

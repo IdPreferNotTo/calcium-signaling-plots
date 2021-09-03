@@ -7,20 +7,21 @@ import os
 
 def markov_model(ts, dt, r1, r2, r3):
     data = []  # time state
-    state = 1
+    idx  = 1
+    xs = [2, 3, 1]
     for t in ts:
         rng = np.random.uniform(0, 1)
-        if state == 1:
+        if idx == 1:
             pt = r1
-        elif state == 2:
+        elif idx == 2:
             pt = r2
-        elif state == 3:
+        elif idx == 3:
             pt = r3
         if (rng < pt * dt):
-            state += 1
-            if state == 4:
-                state = 1
-        data.append([t, state])
+            idx += 1
+            if idx == 4:
+                idx = 1
+        data.append([t, xs[idx-1]])
     return data
 
 if __name__ == "__main__":
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     r3 = 0.3
 
     dt = 0.1
-    tmax = 1_000_000
+    tmax = 100_000
     ts = np.arange(0, tmax, step=dt)
     datas = markov_model(ts, dt, r1, r2, r3)
 

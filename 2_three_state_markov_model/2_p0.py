@@ -16,13 +16,14 @@ def steady_state_sim(data):
     n1 = 0
     n2 = 0
     n3 = 0
+    xs = [2, 3, 1]
     for x in data:
         N += 1
-        if x == 1:
+        if x == xs[0]:
             n1 += 1
-        if x == 2:
+        if x == xs[1]:
             n2 += 1
-        if x == 3:
+        if x == xs[2]:
             n3 += 1
     p1 = n1/N
     p2 = n2/N
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     r2 = 0.2
     r3 = 0.3
 
-    data = np.loadtxt(home + "/Data/3_state_Markov_model/3_state.dat")
+    data = np.loadtxt(home + "/Data/3_state_Markov_model/3_state_t1e+05.dat")
     ts, states = np.transpose(data)
 
     ps_theory = [p1_t, p2_t, p3_t] = steady_states_theory(r1, r2, r3)
