@@ -89,7 +89,7 @@ if __name__ == "__main__":
     ax4.set_xlabel("$i$")
     ax4.set_ylabel("$T_i$ / s")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1_ca_integrate_and_fire.pdf",
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.pdf",
                 transparent=True)
     plt.show()
     plt.close()
