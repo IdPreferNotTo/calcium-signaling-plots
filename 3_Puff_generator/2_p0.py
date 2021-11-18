@@ -83,5 +83,5 @@ if __name__ == "__main__":
     ax1.set_xlabel("$x$")
     ax1.set_ylabel("$P_0(x)$")
     ax1.legend(fancybox=False, framealpha=1.0)
-    plt.savefig(home + "/Data/Calcium/Plots/puff_state_prob_a{:.2f}.pdf".format(ca))
+    plt.savefig(home + "/Data/Calcium/Plots/puff_gen_steady_state_prob.pdf".format(ca))
     plt.show()

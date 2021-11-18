@@ -32,6 +32,5 @@ if __name__ == "__main__":
     axis[-1].set_xticklabels(range(1, nmax_channel+1))
     axis[-1].set_xlabel(r"$n_{\rm opn}$")
     home = os.path.expanduser("~")
-    #plt.savefig(
-    #    home + "/Data/Calcium/Plots/histo_responding_channel.pdf", transparent=True)
+    plt.savefig(home + "/Data/Calcium/Plots/puff_gen_prob_nopen.pdf", transparent=True)
     plt.show()
