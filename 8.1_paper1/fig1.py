@@ -15,7 +15,7 @@ if __name__ == "__main__":
     file_str = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
     data = np.loadtxt(file_str)
     n = len(data[0])
-    j = 12
+    j = 13
     row = [x[j] for x in data]
     idxs = [i for (i, x) in enumerate(row) if x > 500]
     print(idxs)
@@ -45,11 +45,13 @@ if __name__ == "__main__":
             ca_plot.append(y)
 
     ISIs = []
-    for t1, t2 in zip(spike_times[:-1], spike_times[1:]):
+    for t1, t2 in zip(spike_times[1:-1], spike_times[2:]):
         ISIs.append(t2 - t1)
-    isi_mean = np.mean(ISIs)
-    isi_var = np.var(ISIs)
-    Cv = np.sqrt(isi_var) / isi_mean
+
+    Mean = np.mean(ISIs[10:])
+    Cv = np.std(ISIs[10:])/Mean
+    print(f"Mean: {Mean:.2f}")
+    print(f"CV: {Cv:.2f}")
 
     st.set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(6, 4))
@@ -60,7 +62,7 @@ if __name__ == "__main__":
     ax4 = fig.add_subplot(gs[1,1])
 
     ax1.set_xlabel("$t$ / s")
-    ax1.set_xlim([0, 1500])
+    ax1.set_xlim([0, 1000])
     st.remove_top_right_axis([ax1, ax2, ax3, ax4])
     ax1.plot(t_plot, ca_plot, c=st.colors[4])
     ax1.set_ylabel("Ratio (340/380) / a.u.")
@@ -74,7 +76,7 @@ if __name__ == "__main__":
 
     ax2.set_xlim([0, nr_ISIs])
     ax2.set_xlabel("$i$")
-    ax2.set_ylim([0, 200])
+    ax2.set_ylim([0, 1.5*popt[1]])
     ax2.set_ylabel("$T_i$ / s")
     ax2.scatter(index_ISIs, ISIs, fc="w", ec=st.colors[4], s=20, zorder=3)
     ax2.plot(i_ISI_fit, ISI_fit, lw=1, c="k", zorder=2)
@@ -82,12 +84,42 @@ if __name__ == "__main__":
     ax2.text(nr_ISIs+2, popt[1], "$T_0$", va="center", ha="center")
     ax2.fill_between([0, 10], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
 
+    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_no_adap/"
+    file = "ca_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
+    file_spikes = "spike_times_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
+    data = np.loadtxt(folder + file)
+    ts, cas, jpuffs, adaps = np.transpose(data)
+    ISIs = np.loadtxt(folder + file_spikes)
+
+    ts_plot = []
+    cas_plot= []
+    n_spikes = 0
+    for t, c in zip(ts, cas):
+        ts_plot.append(t + n_spikes*10)
+        cas_plot.append(c)
+        if c == 1:
+           ts_plot.append(t + n_spikes*10)
+           cas_plot.append(3)
+           ts_plot.append(t + n_spikes*10)
+           cas_plot.append(0.33)
+           n_spikes += 1
+
+    ax3.axhline(1, lw=1, ls=":", color="C7")
+    ax3.set_xlim([0, 1000])
     ax3.set_xlabel("$t$ / s")
-    ax3.set_ylabel("$c_i$")
+    ax3.set_ylim([0.2, 4])
+    ax3.set_yticks([0.33, 1])
+    ax3.set_yticklabels(["$c_R$", "$c_T$"])
+    ax3.set_ylabel("$c_i$ / a.u.")
+    ax3.plot(ts_plot, cas_plot, lw=1, color=st.colors[1])
 
-
+    ax4.set_xlim([0, nr_ISIs])
     ax4.set_xlabel("$i$")
+    ax4.set_ylim([0, 1.5 * popt[1]])
     ax4.set_ylabel("$T_i$ / s")
+    ax4.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[1], s=20, zorder=3)
+    ax4.axhline(popt[1], ls=":", lw=1, c="k")
+    ax4.fill_between([0, 10], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
 
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.pdf",
                 transparent=True)
