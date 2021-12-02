@@ -1,116 +1,157 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import gridspec
-import matplotlib.patches as patches
+from matplotlib import gridspec, cm
 import os
-
-from matplotlib.collections import PatchCollection
 
 import styles as st
 import functions as fc
 
-def get_ns_open(data):
-    ns_opn = []
-    for ele1, ele2, in zip(data[:-1], data[1:]):
-        if ele1[1] == 0:
-           ns_opn.append(int(ele2[1]))
-    return ns_opn
+def get_mean_opn_channel(data):
+    # data = [time, state, idx]
+    data_single_cluster = []
+    for set in data:
+        if set[2] == 0:
+            data_single_cluster.append(set)
+    data_single_cluster_no_ref = []
+    for set in data_single_cluster:
+        if set[1] < 0:
+            data_single_cluster_no_ref.append([set[0], 0, set[2]])
+        else:
+            data_single_cluster_no_ref.append(set)
+    A = 0
+    for set1, set2 in zip(data_single_cluster_no_ref[:-1], data_single_cluster_no_ref[1:]):
+        time = set2[0] - set1[0]
+        state = set1[1]
+        A += time*state
+    return A/1000
 
-def get_As(data):
-    # data = [t, state, idx]
-    # Turn data into release ca per puff
-    As = []
-    A_puff = 0
-    for ele1, ele2 in zip(data[:-1], data[1:]):
-        if ele1[1] > 0:
-            A_puff += ele1[1]*(ele2[0] - ele1[0])
-        if ele1[1] <= 0:
-            if A_puff != 0:
-                As.append(A_puff)
-                A_puff = 0
-    return As
+
+def get_var_open_channel(data):
+    # data = [time, state, idx]
+    data_single_cluster = []
+    for set in data:
+        if set[2] == 0:
+            data_single_cluster.append(set)
+    data_single_cluster_no_ref = []
+    for set in data_single_cluster:
+        if set[1] < 0:
+            data_single_cluster_no_ref.append([set[0], 0, set[2]])
+        else:
+            data_single_cluster_no_ref.append(set)
+    A2 = 0
+    for set1, set2 in zip(data_single_cluster_no_ref[:-1], data_single_cluster_no_ref[1:]):
+        time = set2[0] - set1[0]
+        state = set1[1]
+        A2 += time*(state**2)
+    return A2/1000
+
+
+def r_opn_full(x, y, n, a, b, c, K0, rmax):
+    K = K0*(y**3 / (1 + y**3))
+    r_opn_full = n * rmax * (np.power(x, a) / (1. + np.power(x, a))) * (np.power(K, c) / (np.power(K, c) + np.power(x, c)))
+    return r_opn_full
+
+
+def r_opn(x, y, n, a, b, rmax):
+    r_opn = n * rmax * (np.power(x, a)/(1. + np.power(x, a)))*(np.power(y, b)/(1. + np.power(y, b)))
+    return r_opn
+
+
+def r_ref(x, y, n, a, b, rmax):
+    r_ref = n * rmax * (np.power(x, a) / (1. + np.power(x, a))) * (np.power(y, b) / (1. + np.power(y, b)))
+    return r_ref
+
 
 if __name__ == "__main__":
-    st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(4.5, 3))
-    grids = gridspec.GridSpec(2, 2)
-    ax0 = fig.add_subplot(grids[0, 0])
-    ax1 = fig.add_subplot(grids[0, 1])
-    ax2 = fig.add_subplot(grids[1, 0])
-    ax3 = fig.add_subplot(grids[1, 1])
-
-    axis = [ax0, ax1, ax2, ax3]
-    st.remove_top_right_axis(axis)
     home = os.path.expanduser("~")
+    n_cha = 5
+    m_ref = 4
+    a = 3
+    b = 3
+    c = 3
+    K = 10
+    r0_opn = 0.13
+    r0_ref = 1.30
+    r0_opn_max = r0_opn*((1. + np.power(0.33, 3))/np.power(0.33, 3))*(2/1)
+    r0_ref_max = r0_ref*((1. + np.power(0.33, 3))/np.power(0.33, 3))*(2/1)
 
-    # Subplot 1: x(t) over t
-    ax0.set_xlabel("$t$ / s")
-    ax0.set_ylabel("$x(t)$")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/"
-    data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_taua1.00e+00_ampa1.00e+00_tau1.00e+00_j1.00e+00_N1_5.dat")
-    data_tmp = []
+    cas = np.linspace(0.2 , 0.99, 80)
+    mean_x0s = []
+    mean_x0s_sim = []
+    var_x0s = []
+    var_x0s_sim = []
+    var_jpuffs = []
+    mean_jpuffs = []
+    D_jpuffs = []
+    for ca in cas:
+        print(f"{ca:.2f}")
+        folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+        file = f"puff_markov_cafix{ca:.2f}_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat"
+        data = np.loadtxt(folder + file)
+        mean_x0_sim = get_mean_opn_channel(data)
+        var_x0_sim =  get_var_open_channel(data) - mean_x0_sim**2
+        mean_x0s_sim.append(mean_x0_sim)
+        var_x0s_sim.append(var_x0_sim)
+        Popen = np.power(1 + 2 * np.power(n_cha * (n_cha + 1), -1, dtype=float) * np.power(0.33 / ca, 3) * (1 + ca ** 3) / (1 + 0.33 ** 3) * 10 / 0.02, -1)
+        mean_x0 = ((n_cha + 2) / 3) * Popen
+        mean_x0s.append(mean_x0)
+        var_x0 = Popen*(n_cha + 1)*(n_cha + 2)/ 6 - mean_x0**2
+        var_x0s.append(var_x0)
 
-    data_no_ref = [(t, x, i) if x>= 0 else (t, 0, i) for (t, x, i) in data]
-    data2 = []
-    for set1, set2 in zip(data_no_ref[:-1], data_no_ref[1:]):
-        data2.append(set1)
-        data2.append([set2[0], set1[1], set1[2]])
-    ts, xs, idxs = np.transpose(data2)
+        file_ca = f"ca_markov_cafix{ca:.2f}_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat"
+        data_ca = np.loadtxt(folder + file_ca)
+        ts, cas_dyn, jpuffs, adap = np.transpose(data_ca)
+        cgrain_factor2 = 50
+        jpuffs_f2 = fc.coarse_grain_list(jpuffs, cgrain_factor2)
+        mean_jpuff = np.mean(jpuffs_f2)/10
+        mean_jpuffs.append(mean_jpuff)
+        var_jpuff = cgrain_factor2*0.1*np.var(jpuffs_f2)/10
+        var_jpuffs.append(var_jpuff)
+        D1 = fc.intensity_puff_single(ca, 5, 4, 1)
+        D_jpuffs.append(2*D1)
 
-    starts_ipi =  []
-    stops_ipi = []
-    is_puff = False
-    for elem in data:
-        if elem[1] > 0 and not is_puff:
-            is_puff = True
-            t_start = elem[0]
-            starts_ipi.append(t_start)
-        if elem[1] < 0 and is_puff:
-            is_puff = False
-            t_stop = elem[0]
-            stops_ipi.append(t_stop)
+    st.set_default_plot_style()
+    fig = plt.figure(tight_layout=True, figsize=(3*2.25, 2))
+    grids = gridspec.GridSpec(1, 3)
+    ax1 = fig.add_subplot(grids[0])
+    ax2 = fig.add_subplot(grids[1])
+    ax3 = fig.add_subplot(grids[2])
+    axis = [ax1, ax2, ax3]
+    st.remove_top_right_axis(axis)
 
-    t_left = starts_ipi[8] - ts[0]
-    t_right = stops_ipi[8] - ts[0]
+    ax1.text(0.1, 0.95, "A", fontsize=13, transform=ax1.transAxes, va='top')
+    ax2.text(0.1, 0.95, "B", fontsize=13, transform=ax2.transAxes, va='top')
+    ax3.text(0.1, 0.95, "C", fontsize=13, transform=ax3.transAxes, va='top')
 
-    ax0.plot(ts[:500] - ts[0], xs[:500], lw=1, color=st.colors[0])
-    ax0.set_xlim([t_left-0.15, t_right+0.15])
-    ax0.fill_between(ts[:500] - ts[0], xs[:500], color=st.colors[0], alpha=0.5)
+    ax1.set_xlim([0.2, 1])
+    ax1.set_xticks([0.33, 1])
+    ax1.set_xticklabels(["$c_R$", "$c_T$"])
+    ax1.set_xlabel("$c_i$")
+    ax1.set_ylabel(r"$\langle x \rangle$")
+    ax1.plot(cas, mean_x0s_sim, lw=1, color=st.colors[0])
+    ax1.plot(cas, mean_x0s, lw=1, color=st.colors[2])
 
-    ax1.set_ylim([0, 1/5 + 0.15])
-    ax1.set_xlabel(r"$n_{\rm opn}$")
-    ax1.set_ylabel(r"$P(n_{\rm opn})$")
-    ns_open = get_ns_open(data)
-    ns_over_i = [0]*5
-    for n in ns_open:
-        ns_over_i[n-1] += 1
-    for i, n in enumerate(ns_over_i):
-        ax1.bar(i+1, n / len(ns_open), 0.8, align="center", color=st.colors[0])
-    ax1.set_xticks([1, 2, 3, 4, 5])
-    ax1.set_yticks([0, 0.1, 0.2, 0.3])
-    #ax1.plot([0, 1, 1, 2, 3, 4, 5, 5, 6], [0, 0, 0.2, 0.2, 0.2, 0.2, 0.2, 0, 0], lw=1, color=st.colors[2])
+    ax2.set_xlim([0.2, 1])
+    ax2.set_xticks([0.33, 1])
+    ax2.set_xticklabels(["$c_R$", "$c_T$"])
+    ax2.set_xlabel("$c_i$")
+    ax2.set_ylabel(r"$\langle \Delta x^2 \rangle$")
+    ax2.plot(cas, var_x0s_sim, lw=1, color=st.colors[0])
+    ax2.plot(cas, var_x0s, lw=1, color=st.colors[2])
 
-    ax2.set_xlabel("$A$")
-    ax2.set_ylabel("$P(A)$")
-    As = get_As(data_no_ref)
-    ax2.hist(As, bins=25, color=st.colors[0], density=True)
-
-
-    Ass = []
-    num_chas = np.arange(1, 7)
-    for num_cha in num_chas:
-        file = f"puff_markov_cafix0.33_ip1.00_taua1.00e+00_ampa1.00e+00_tau1.00e+00_j1.00e+00_N1_{num_cha:d}.dat"
-        data_n = np.loadtxt(home + folder + file)
-        As = get_As(data_n)
-        Ass.append(As)
-
-    ax3.set_xlabel("$n$")
-    ax3.set_ylabel(r"$\langle A \rangle$")
-    ax3.scatter(num_chas, [np.mean(As) for As in Ass], ec=st.colors[0], fc="w", s=15, zorder=2)
-    Ass_theo = [(1/50)*(n +1)*(n+2)/6 for n in num_chas]
-    ax3.plot(num_chas, Ass_theo, lw=1, c=st.colors[2], zorder=1)
-    ax3.set_xticks([1, 2, 3, 4, 5, 6])
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig4.pdf", transparent=True)
-
-
+    ax3.set_xlim([0.2, 1])
+    ax3.set_xticks([0.33, 1])
+    ax3.set_xticklabels(["$c_R$", "$c_T$"])
+    ax3.set_xlabel("$c_i$")
+    ax3.set_ylabel(r"$J_{\rm puff}$")
+    ax3.plot(cas, mean_jpuffs, lw=1, color=st.colors[0])
+    ax3.plot(cas, mean_x0s, lw=1, color=st.colors[2])
+    D_upper = [mean + np.sqrt(var) for mean, var in zip(mean_x0s, D_jpuffs)]
+    D_lower = [mean - np.sqrt(var) for mean, var in zip(mean_x0s, D_jpuffs)]
+    ax3.plot(cas, D_upper, lw=1, color=st.colors[2])
+    ax3.plot(cas, D_lower, lw=1, color=st.colors[2])
+    var_upper = [mean + np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
+    var_lower = [mean - np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
+    ax3.fill_between(cas, var_upper, var_lower, alpha=0.5, color=st.colors[0])
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig4.pdf",transparent=True)
     plt.show()
