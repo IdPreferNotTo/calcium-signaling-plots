@@ -8,7 +8,7 @@ import functions as fc
 
 if __name__ == "__main__":
     st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(6, 4))
+    fig = plt.figure(tight_layout=True, figsize=(6, 3))
     gs = gridspec.GridSpec(2, 2)
     ax0 = fig.add_subplot(gs[0, 0])
     ax1 = fig.add_subplot(gs[0, 1])
@@ -67,9 +67,9 @@ if __name__ == "__main__":
         ax0.arrow(x_right -0.05*dx, 1.05, -0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
                 clip_on=False)
 
-    ax0.set_xlabel("$t$ / s")
-    ax0.set_ylabel(r"$c_i$ / a.u.")
-    ax0.set_ylim([0.8*cR, 1.2*cT])
+    #ax0.set_xlabel("$t$ / s")
+    ax0.set_ylabel(r"$c_i$")
+    ax0.set_ylim([0.8*cR, 1.5*cT])
     ax0.set_yticks([cR, cT])
     ax0.set_yticklabels(["$c_R$", "$c_T$"])
     ax0.set_xticklabels([])
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     ax2.set_xlabel("$t$ / s")
     ax2.set_xlim([0, spike_times[nrISIs-1] + 20])
-    ax2.set_ylabel(r"$J_{\rm puff}$ / a.u.\ / s")
+    ax2.set_ylabel(r"$j_{\rm puff}$")
 
     file_p0_theory = home + f"/Data/Calcium/data/p0_ip1.00_tau1.05e+01_j1.10e-02_N10.dat"
     data = np.loadtxt(file_p0_theory)

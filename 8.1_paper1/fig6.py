@@ -30,7 +30,7 @@ if __name__ == "__main__":
     st.remove_top_right_axis(axis)
     home = os.path.expanduser("~")
 
-    ax0.set_xlabel("IP$_3$ / a.u.")
+    ax0.set_xlabel("IP$_3$")
     ax0.set_xlim([0.0, 2.0])
     ax0.set_ylabel(r"$1/\langle T \rangle$ / s$^{-1}$")
     IP3s = np.linspace(0.02, 2, 100)
