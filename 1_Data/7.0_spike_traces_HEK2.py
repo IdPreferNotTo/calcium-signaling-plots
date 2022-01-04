@@ -4,6 +4,8 @@ import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import os
 
+import styles as st
+
 home = os.path.expanduser("~")
 file_str = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
 data = np.loadtxt(file_str)
@@ -20,45 +22,41 @@ for j in range(1, n):
     stat_cas = []
     times = [x[0] for x in data]
     cas = [x[j] for x in data]
-    puff_times =[]
-    avr_cas = []
-    puff = False
 
+    spiking = False
+    spike_times = []
+    t_plot = []
+    ca_plot= []
     for idx, (t, y) in enumerate(zip(times, cas)):
-        if idx < n_avr or idx >= (len(cas)-n_avr):
-            continue
-        mov_avr = np.mean(cas[idx-n_avr: idx])
-        mov_std = np.std(cas[idx-n_avr: idx])
-        avr_cas.append(mov_avr)
-        stat_cas.append(y-mov_avr)
-        if y > 1.2*mov_avr and puff == False:
-            puff_times.append(t)
-            puff = True
-        if y < mov_avr + 20 and puff == True:
-            puff = False
+        if t < 10_000:
+            t_plot.append(t)
+            ca_plot.append(y)
+            if y > 0.35 and not spiking:
+                spike_times.append(t)
+                spiking = True
+            if y < 0.35 and spiking:
+                spiking = False
 
-    fig = plt.figure()
-    gs = gridspec.GridSpec(3, 1)
-    ax2 = fig.add_subplot(gs[1:3, 0])
-    ax1 = fig.add_subplot(gs[0, 0], sharex=ax2)
-    axis = [ax1, ax2]
-    axin = inset_axes(ax2, width="40%", height="40%", loc=1)
-    ipis = []
-    for t1, t2 in zip(puff_times[:-1], puff_times[1:]):
-        ipis.append(t2-t1)
-    ipi_mean = np.mean(ipis)
-    ipi_var =  np.var(ipis)
-    Cv = np.sqrt(ipi_var)/ipi_mean
+    st.set_default_plot_style()
+    fig = plt.figure(tight_layout = True, figsize=(4, 6/2))
+    gs = gridspec.GridSpec(1, 1)
+    ax1 = fig.add_subplot(gs[0])
+    ax1.set_xlim([0, 9000])
+    ax1.axhline(0.35, ls = ":", c="C7")
+    st.remove_top_right_axis([ax1])
 
-    #cas_unbias = [ca - avr_ca for ca, avr_ca in zip(cas, avr_cas)]
-    for ptime in puff_times:
-        ax1.axvline(ptime)
-    ax2.plot(times[n_avr:-n_avr], cas[n_avr:-n_avr])
-    ax2.plot(times[n_avr:-n_avr], avr_cas, c="k")
+    ISIs = []
+    for t1, t2 in zip(spike_times[:-1], spike_times[1:]):
+        ISIs.append(t2-t1)
+    isi_mean = np.mean(ISIs)
+    isi_var =  np.var(ISIs)
+    Cv = np.sqrt(isi_var)/isi_mean
 
-    #ax2.plot(times[n_avr:-n_avr], [x + 20 for x in avr_cas], c="C7")
-    #ax2.set_ylim([80, 200])
-    #ax2.set_xlim([0,50])
+    #for spike_time in spike_times:
+    #    ax1.axvline(spike_time)
+    ax1.plot(t_plot, ca_plot, c=st.colors[4])
+    ax1.set_ylabel("Ratio (340/380) [a.u.]")
+    ax1.set_xlabel("t [s]")
     plt.savefig(home + "/Desktop/Ca data/Spikes/HEK/Plots2/Traces/HEK2_bapta_{:d}.png".format(j))
     plt.show()
     plt.close()
