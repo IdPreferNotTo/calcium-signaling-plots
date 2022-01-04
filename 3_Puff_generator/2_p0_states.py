@@ -4,6 +4,7 @@ import matplotlib.gridspec as gridspec
 import os
 
 import styles as st
+import functions as fc
 
 if __name__ == "__main__":
     st.set_default_plot_style()
@@ -23,9 +24,8 @@ if __name__ == "__main__":
     r_opn = 0.13 * np.power(ca / ca_rest, 3) * (1 + ca_rest ** 3) / (1 + ca ** 3)
     r_ref = 1.3 * np.power(ca / ca_rest, 3) * (1 + ca_rest ** 3) / (1 + ca ** 3)
     r_cls = 50
-    pnorm = ((m-1) * r_cls * r_opn + r_cls * r_ref + (n + 1) * (n / 2) * r_opn * r_ref) / (r_cls * r_opn * r_ref)
 
-    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/"
+    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
     data = np.loadtxt(folder + f"puff_markov_cafix{ca:.2f}_ip{ip3:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat")
     data_tmp = []
     for x in data:
@@ -51,23 +51,7 @@ if __name__ == "__main__":
     time_per_state = [sum(times) for times in times_per_state]
     prob_per_state = [time/sum(time_per_state) for time in time_per_state]
 
-    prob_per_state_theory = []
-    for i in range(1, n+m+1):
-        # i in [1, n+m] including n+m
-        if i < m:
-            # i < m refractory states 0_m - 0_2
-            prob_per_state_theory.append(1/r_ref)
-        elif i == m:
-            # i == m closed state 0_1
-            prob_per_state_theory.append(1/r_opn)
-        elif i > m:
-            # i > m open states with n open channel
-            n = i - m
-            prob_per_state_theory.append(n/r_cls)
-    # prob still has to be normalized
-    prob_total = sum(prob_per_state_theory)
-    prob_per_state_theory = [p/prob_total for p in prob_per_state_theory]
-    p_open = sum(prob_per_state_theory)
+    prob_per_state_theory = fc.steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
 
     ax1.plot(states, prob_per_state_theory, lw=1, c=st.colors[2], zorder=1, label="Theory")
     ax1.scatter(states, prob_per_state, fc="w", ec=st.colors[0], s=20, zorder=2, label="Sim.")

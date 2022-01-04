@@ -6,7 +6,7 @@ import matplotlib.gridspec as gridspec
 import styles as st
 
 if __name__ == "__main__":
-    nmax_channel = 7
+    nmax_channel = 5
     st.set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(3, 4))
     gs = gridspec.GridSpec(nmax_channel, 1)
