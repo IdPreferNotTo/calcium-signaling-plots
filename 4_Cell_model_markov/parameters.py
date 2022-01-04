@@ -9,12 +9,12 @@ def write_parameter_file(model, N, i, ip3, bool_ca_fix, ca_fix, tau, current, bo
         json.dump({
             "num parameter": {
                 "run": i,
-                "output": "local",
+                "output": "BCCN",
                 "dt": 10 ** (-4),
                 "dt langevin": 10 ** (-2),
                 "t_out": 10 ** (-1),
                 "max spikes": 10_000,
-                "max time": 10_000
+                "max time": 1_000_000
             },
             "cell": {
                 "num cluster": number_cluster,
@@ -46,26 +46,26 @@ def write_parameter_file(model, N, i, ip3, bool_ca_fix, ca_fix, tau, current, bo
 
 if __name__ == "__main__":
     N = 0
-    for i in range(10):
-        for j in range(1):
+    for i in range(31):
+        for j in range(31):
             for k in range(1):
                 print(N)
                 model = "markov"
-                ip3 = 1.00 #IP3 is given realtive the half-max ip3 concentration.
+                ip3 = 1 #IP3 is given realtive the half-max ip3 concentration.
                 bool_ca_fix = False
                 ca_fix = 0.33
-                tau = 3 #np.logspace(-1, 2, 30)[j]
-                current = 0.075 #np.logspace(-3, 0, 30)[i]
+                tau = np.logspace(-1, 2, 31)[i]
+                current = np.logspace(-3, 0, 31)[j]
                 bool_adap = True
-                tau_adap = 100
-                amp_adap = 0.01*(i+1)
+                tau_adap = 500 #np.logspace(1, 3, 41)[i] #300
+                amp_adap = 0.05 #np.logspace(-2, 0, 41)[j] #0.1
                 number_cluster = 10
-                num_channel = 4
+                num_channel = 5
                 num_closed_states = 4
                 ratio = 0.1
                 mean_ibi = 10
                 r_close = 50
-                run = k
+                run = 0
                 write_parameter_file(model, N, run, ip3, bool_ca_fix, ca_fix, tau, current, bool_adap, tau_adap, amp_adap, number_cluster, num_channel, num_closed_states, ratio, mean_ibi,
                          r_close)
                 N+=1

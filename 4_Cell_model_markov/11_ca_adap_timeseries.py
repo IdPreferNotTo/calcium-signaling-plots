@@ -14,10 +14,10 @@ if __name__ == "__main__":
     ax3 = fig.add_subplot(gs[3])
     remove_top_right_axis([ax1, ax2, ax3])
 
-    tau = 2.81
-    j = 0.0728
-    taua = 100
-    ampa = 0.2
+    tau = 3.00
+    j = 0.06
+    taua = 300
+    ampa = 0.05
     home = os.path.expanduser("~")
 
     folder = "/CLionProjects/PhD/calcium_spikes_markov/out/"

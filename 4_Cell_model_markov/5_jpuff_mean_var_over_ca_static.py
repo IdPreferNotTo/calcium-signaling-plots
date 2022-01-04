@@ -4,11 +4,14 @@ import matplotlib.gridspec as gridspec
 import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, TransformedBbox, BboxPatch, BboxConnector
 import os
-from functions import *
+
+import functions as fc
+import styles as st
 
 
 if __name__ == "__main__":
     # Prepare data
+    home = os.path.expanduser("~")
     cas = np.linspace(0.01, 0.99, num=99)
     means_sim = []
     means_theory = []
@@ -18,49 +21,49 @@ if __name__ == "__main__":
     jpuffs_dt1_ca03 = []
     jpuffs_dt1_ca09 = []
     for ca in cas:
-        print(ca)
+        print(f"{ca:.2f}")
         ca_fix = ca
         ca_res = 0.33
-        n_cl = 10
-        n_ch = 4
-        n_ref = 4
+        N = 10
+        n = 5
+        m = 4
         jca = 1
         tau = 1
-        home = os.path.expanduser("~")
-        folder = "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/"
-        file = "ca_markov_cafix{:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix)
+        folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+        file = "ca_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix)
         data = np.loadtxt(home + folder + file)
         ts, cas_sim, jpuffs, adaps = np.transpose(data)
 
         means_sim.append(np.mean(jpuffs))
         dt0 = 0.1
         f = 10
-        cg_list = coarse_grain_list(jpuffs, f)
+        cg_list = fc.coarse_grain_list(jpuffs, f)
         vars_sim.append(np.var(cg_list) * dt0 * f)
 
         r_opn = 0.13 * np.power(ca_fix / ca_res, 3) * ((1 + ca_res**3)/(1 + ca_fix**3))
         r_ref = 1.3 * np.power(ca_fix / ca_res, 3) * ((1 + ca_res**3)/(1 + ca_fix**3))
         r_cls = 50
 
-        p0s = steady_states_theory_invert_A(r_ref, r_opn, r_cls, n_ref, n_ch)
+        p0s = fc.steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
+        xs = fc.get_states(n, m)
+        idxs = [i for i in range(n+m)]
 
-        xs = [0, 0, 0, 0, 4, 3, 2, 1]
-        idxs = [0, 1, 2, 3, 4, 5, 6, 7]
-        mean = sum([n_cl*x*p for x, p in zip(xs, p0s)])
+        mean = sum([N*x*p for x, p in zip(xs, p0s)])
         means_theory.append(mean)
+
         D_theory = 0
         for k in idxs:
             sum_over_i = 0
-            f_from_k_to = f_from_k_invert_A(k, r_ref, r_opn, r_cls, n_ref, n_ch)
+            f_from_k_to = fc.f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m)
             for i in idxs:
                 sum_over_i += xs[i]*f_from_k_to[i]
             D_theory += xs[k] * p0s[k]*sum_over_i
-        vars_theory.append(2*n_cl*D_theory)
+        vars_theory.append(2*N*D_theory)
 
         if ca == 0.3:
-            jpuffs_dt1_ca03 = coarse_grain_list(jpuffs, 10)
+            jpuffs_dt1_ca03 = fc.coarse_grain_list(jpuffs, 10)
         if ca == 0.9:
-            jpuffs_dt1_ca09 = coarse_grain_list(jpuffs, 10)
+            jpuffs_dt1_ca09 = fc.coarse_grain_list(jpuffs, 10)
 
     stds_sim = [np.sqrt(vars) for vars in vars_sim]
     stds_theory = [np.sqrt(vars) for vars in vars_theory]
@@ -71,13 +74,13 @@ if __name__ == "__main__":
     std_lower_sim = [mean - std for mean, std in zip(means_sim, stds_sim)]
 
     # Plot data
-    set_default_plot_style()
+    st.set_default_plot_style()
     fig = plt.figure(tight_layout = True, figsize=(64/9, 4))
     gs = gridspec.GridSpec(nrows=2, ncols=3)
     ax = fig.add_subplot(gs[0:2, 0:2])
     ax1 = fig.add_subplot(gs[0, 2])
     ax2 = fig.add_subplot(gs[1, 2])
-    remove_top_right_axis([ax, ax1, ax2])
+    st.remove_top_right_axis([ax, ax1, ax2])
 
     # Main ax
     ax.set_xlabel(r"$[\rm{Ca}^{2+}]$")
@@ -93,15 +96,6 @@ if __name__ == "__main__":
     legend = ax.legend(loc=2, fancybox=False, edgecolor="k", framealpha=1.0)
     legend.get_frame().set_linewidth(0.5)
 
-    # Inset main ax
-    #axins = inset_axes(ax, width="40%", height="40%", loc="upper left", bbox_to_anchor=(0.2,0,1,1), bbox_transform=ax.transAxes)
-    #axins.set_xlabel(r"$[\rm{Ca}^{2+}]$")
-    #axins.set_ylabel(r"$\sigma_{y_1}\sqrt{\Delta t}$")
-    #axins.plot(cas, stds_sim, c="C0", alpha=0.7)
-    #axins.plot(cas, stds_theory, c="C7", ls=":")
-    #axins.tick_params(direction="in")
-    #axins.set_xticks([0, 0.5, 1])
-
     # Histogram for ca = 0.9
     ax1.set_xlabel("$y_1$")
     ax1.set_xlim([0, 8])
@@ -112,7 +106,7 @@ if __name__ == "__main__":
     mean_ca09 = np.mean(jpuffs_dt1_ca09)
     std_ca09 = np.std(jpuffs_dt1_ca09)
     gauss_ca09 = np.linspace(mean_ca09 - 3 * std_ca09, mean_ca09 + 3 * std_ca09, 100)
-    ax1.plot(gauss_ca09, gaussian_dist(gauss_ca09, mean_ca09, std_ca09), c="C7")
+    ax1.plot(gauss_ca09, fc.gaussian_dist(gauss_ca09, mean_ca09, std_ca09), c="C7")
     legend = ax1.legend(loc=1, fancybox=False, edgecolor="k", framealpha=1.0)
     legend.get_frame().set_linewidth(0.5)
 
@@ -126,10 +120,10 @@ if __name__ == "__main__":
     mean_ca03 = np.mean(jpuffs_dt1_ca03)
     std_ca03 = np.std(jpuffs_dt1_ca03)
     gauss_ca03 = np.linspace(mean_ca03 - 3 * std_ca03, mean_ca03 + 3 * std_ca03, 100)
-    ax2.plot(gauss_ca03, gaussian_dist(gauss_ca03, mean_ca03, std_ca03), c="C7")
+    ax2.plot(gauss_ca03, fc.gaussian_dist(gauss_ca03, mean_ca03, std_ca03), c="C7")
     legend = ax2.legend(loc=1, fancybox=False, edgecolor="k", framealpha=1.0)
     legend.get_frame().set_linewidth(0.5)
 
     # Save and show figure
-    plt.savefig(home + "/Data/Calcium/Plots/5_markov_jpuff_mean_var_over_ca_static.pdf", transparent=True)
+    plt.savefig(home + "/Data/Calcium/Plots/puff_current_mean_var_static.pdf", transparent=True)
     plt.show()

@@ -11,7 +11,7 @@ def write_submit():
                    "log = /home/lukasra/condor_out/condor.log "
                    "\n output = /home/lukasra/condor_out/condor.out \n error = /home/lukasra/condor_out/condor.err \n")
         N=0
-        for i in range(10):
+        for i in range(961):
             for j in range(1):
                 file.write("executable = /home/lukasra/CLionProjects/calcium_spikes_markov/cmake-build-release/calcium_spikes_markov \n arguments = {:d} \n queue \n # \n".format(N))
                 N += 1

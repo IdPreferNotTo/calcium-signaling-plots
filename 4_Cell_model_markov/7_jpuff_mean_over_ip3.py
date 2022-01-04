@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
 import functions as fc
+import styles as st
 
 if __name__ == "__main__":
 
@@ -15,8 +17,8 @@ if __name__ == "__main__":
     caR = 0.33
     j = 0.1
     N = 10
-    n = 4
-    m = 3
+    n = 5
+    m = 4
     rcls = 50
     ropn_max = 0.13 * (1 + np.power(caR, 3))/np.power(caR, 3)
     rref_max = 1.3 * (1 + np.power(caR, 3))/np.power(caR, 3)
@@ -44,12 +46,12 @@ if __name__ == "__main__":
         jpuff = j*N*((n+2)/3)*(t_opn() / (t_opn() + t_cls(ca)))
         jpuff_over_ca_right.append(jpuff)
 
-    fc.set_default_plot_style()
+    st.set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(4, 6 / 2))
     grids = gridspec.GridSpec(1, 1)
     ax = fig.add_subplot(grids[:])
     axins = ax.inset_axes((0.6, 0.2, 0.4, 0.4))
-    fc.remove_top_right_axis([ax])
+    st.remove_top_right_axis([ax])
 
     axins.plot(cas_left, jpuff_over_ca_left, ls=":", c="C0")
     axins.plot(cas, jpuff_over_ca, c="C0")
