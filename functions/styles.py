@@ -30,6 +30,7 @@ def figsize(shape, size):
     width = x*width
     return width, height
 
+
 def set_default_plot_style():
     rcParams['text.latex.preamble'] = r'\usepackage{lmodern}'
     rcParams['font.family'] = 'serif'
@@ -42,6 +43,7 @@ def remove_top_right_axis(axis):
     for ax in axis:
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
+
 
 def remove_all_axis(axis):
     for ax in axis:

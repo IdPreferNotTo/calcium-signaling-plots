@@ -1,6 +1,4 @@
 import numpy as np
-from matplotlib import rc
-from matplotlib import rcParams
 from typing import List
 from scipy.integrate import quad
 
@@ -61,6 +59,7 @@ def coarse_grain_list(l: List[float], f: float):
         l_new.append(mean)
     return l_new
 
+
 def get_states(n, m):
     xs = np.empty(n + m)
     for i in range(n + m):
@@ -69,6 +68,7 @@ def get_states(n, m):
         if i >= m:
             xs[i] = n + m - i
     return xs
+
 
 def steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m):
     # M is the actual transition matrix
@@ -119,43 +119,32 @@ def f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m):
     return f_from_k
 
 
-def mean_puff_single(x, n, m):
-    r_opn = 0.13 * np.power(x / 0.33, 3) * ((1 + 0.33 ** 3) / (1 + x ** 3))
-    r_ref = 1.3 * np.power(x / 0.33, 3) * ((1 + 0.33 ** 3) / (1 + x ** 3))
+def mean_puff_single(x, n, m, IP3):
+    r_opn = 0.13 * np.power(x / 0.33, 3) * ((1 + 0.33 ** 3) / (1 + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
+    r_ref = 1.3 * np.power(x / 0.33, 3) * ((1 + 0.33 ** 3) / (1 + x ** 3)) * np.power(IP3 / 1., 3) * ((1 + 1 ** 3) / (1. + IP3 ** 3))
     r_cls = 50
 
     p0s = steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
-
-    xs = np.empty(n + m)
-    for i in range(n+m):
-        if i < m:
-            xs[i] = 0
-        if i >= m:
-            xs[i] = n+m-i
+    xs = get_states(n, m)
     mean = sum([x * p for x, p in zip(xs, p0s)])
     return mean
 
 
-def means_puff(N, tau, j, n, m):
+def means_puff(N, tau, j, n, m, IP3):
     fs = []
     cas = np.linspace(0.01, 1.00, 100)
     for ca in cas:
-        f = -(ca - 0.33)/tau + j*N*mean_puff_single(ca, n, m)
+        f = -(ca - 0.33)/tau + j*N*mean_puff_single(ca, n, m, IP3)
         fs.append(f)
     return fs
 
 
-def intensity_puff_single(x, n, m):
-    r_opn = 0.13 * np.power(x / 0.33, 3) * ((1. + 0.33 ** 3) / (1. + x ** 3))
-    r_ref = 1.3 * np.power(x / 0.33, 3) * ((1. + 0.33 ** 3) / (1. + x ** 3))
+def intensity_puff_single(x, n, m, IP3):
+    r_opn = 0.13 * np.power(x / 0.33, 3) * ((1. + 0.33 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
+    r_ref = 1.3 * np.power(x / 0.33, 3) * ((1. + 0.33 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
     r_cls = 50
 
-    xs = np.empty(n + m)
-    for i in range(n + m):
-        if i < m:
-            xs[i] = 0
-        if i >= m:
-            xs[i] = n + m - i
+    xs = get_states(n, m)
     idxs = [i for i in range(n+m)]
     p0s = steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
 
@@ -169,49 +158,59 @@ def intensity_puff_single(x, n, m):
     return D_theory
 
 
-def d_func(x, j, N, n, m):
+def d_func(x, j, N, n, m, IP3):
     if x == 0:
         return 0
     else:
-        return np.power(j, 2)*N*intensity_puff_single(x, n, m)
+        return np.power(j, 2) * N * intensity_puff_single(x, n, m, IP3)
 
 
-def f_func(x, tau, j, N, n, m):
+def f_func(x, tau, j, N, n, m, IP3):
     if x == 0:
         return -(x - 0.33) / tau
     else:
-        return -(x - 0.33) / tau + j * N * mean_puff_single(x, n, m)
+        f = mean_puff_single(x, n, m, IP3)
+        return -(x - 0.33) / tau + j * N * f
 
 
-def g_func(x, tau, j, N, n, m):
-    return f_func(x, tau, j, N, n, m)/d_func(x, j, N, n, m)
+def g_func(x, tau, j, N, n, m, IP3):
+    f = f_func(x, tau, j, N, n, m, IP3)
+    d = d_func(x, j, N, n, m, IP3)
+    return f/d
 
 
-def h_func(x, tau, j, N, n, m):
-    h = quad(g_func, 0.33, x, args=(tau, j, N, n, m))[0]
+def h_func(x, tau, j, N, n, m, IP3):
+    #dca = 0.0001
+    #h = 0
+    #ca = 0.33
+    #while(ca <= x):
+    #    print(ca)
+    #    g = g_func(ca, tau, j, N, n, m, IP3)
+    #    h += g*dca
+    #    ca += dca
+    h = quad(g_func, 0.33, x, args=(tau, j, N, n, m, IP3))[0]
     return h
 
 
-def firing_rate_no_adap(tau, j, N, n, m):
-    cas_theory = np.linspace(0.30, 1, 701)
+def firing_rate_no_adap(tau, j, N, n, m, IP3 = 1):
+    cas_theory = np.linspace(0.30, 1, 10*700 + 1)
     dca = cas_theory[1] - cas_theory[0]
     p0s_theo_ca = []
     integral = 0
 
     for ca in reversed(cas_theory[1:]):
-        print(ca)
-        h = h_func(ca, tau, j, N, n, m)
-        d = d_func(ca, j, N, n, m)
+        print(f"{ca:.3f}")
+        h = h_func(ca, tau, j, N, n, m, IP3)
+        d = d_func(ca, j, N, n, m, IP3)
         if ca == 1:
             integral += 0
         elif ca >= 0.33:
             integral += np.exp(-h)*dca
         p0s_theo_ca.append(integral * np.exp(h) / d)
-
+    print(p0s_theo_ca)
     norm = np.sum(p0s_theo_ca) * dca
     r0 = 1 / norm
     return r0
-
 
 def k_corr(data1, data2, k):
     # Get two arbitrary data set and calculate their correlation with lag k.
@@ -237,3 +236,25 @@ def fourier_transformation_isis(w, isis):
         f += np.exp(1j*w*t)
     return f
 
+def power_spectrum_isis(ws, isis, Tmax):
+    ISIs_chunks = []
+    chunks = []
+    t = 0
+    Tmax = 2000
+    for isi in isis:
+        t += isi
+        chunks.append(isi)
+        if t > Tmax:
+            ISIs_chunks.append(chunks.copy())
+            chunks.clear()
+            t = 0
+    spectrum = []
+    for w in ws:
+        fws_real = []
+        fws_img = []
+        for isis in ISIs_chunks:
+            fw = fourier_transformation_isis(w, isis)
+            fws_real.append(fw.real)
+            fws_img.append(fw.imag)
+        spectrum.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))
+    return spectrum
