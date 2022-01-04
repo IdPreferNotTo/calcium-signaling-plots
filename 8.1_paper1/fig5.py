@@ -88,7 +88,7 @@ if __name__ == "__main__":
     ax1.hist(cas, bins=25, density=True, alpha=.6, color=st.colors[1])
     ax1.set_xticks([0.33, 1.0])
     ax1.set_xticklabels(["$c_R$", "$c_T$"])
-    ax1.plot(ca_theory[::100], p0_theory[::100], color=st.colors[2])
+    ax1.plot(ca_theory[::100], p0_theory[::100], color=st.colors[0])
 
     ax3.set_xlabel("$T_i$ / s")
     ax3.set_ylabel("$P(T_i)$")
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         p = np.sqrt(mean_isi / (2 * np.pi * np.power(cv_isi, 2) * (t ** 3))) * np.exp(
             -(t - mean_isi) ** 2 / (2 * mean_isi * np.power(cv_isi, 2) * t))
         inv_gaus.append(p)
-    ax3.plot(ts_inv_gau, inv_gaus, color="k", label="Inv.\ Gaussian")
+    ax3.plot(ts_inv_gau, inv_gaus, ls="--", color="k", label="Inv.\ Gaussian")
 
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig5.pdf",transparent=True)
     plt.show()

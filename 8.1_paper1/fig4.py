@@ -150,8 +150,8 @@ if __name__ == "__main__":
     D_lower = [mean - np.sqrt(var) for mean, var in zip(mean_x0s, D_jpuffs)]
     ax3.plot(cas, D_upper, lw=1, color=st.colors[2])
     ax3.plot(cas, D_lower, lw=1, color=st.colors[2])
-    var_upper = [mean + np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
-    var_lower = [mean - np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
-    ax3.fill_between(cas, var_upper, var_lower, alpha=0.5, color=st.colors[0])
+    std_upper = [mean + np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
+    std_lower = [mean - np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
+    ax3.fill_between(cas, std_upper, std_lower, alpha=0.5, color=st.colors[0])
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig4.pdf",transparent=True)
     plt.show()

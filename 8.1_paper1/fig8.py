@@ -124,6 +124,8 @@ if __name__ == "__main__":
             fws_real.append(fw.real)
             fws_img.append(fw.imag)
         spectrum_data.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))
+
+    ws, spectrum_data = fc.power_spectrum_isis(ISIs_flat)
     Ps_fourier = []
     Fs = []
     dt = ts_inv_gau[1] - ts_inv_gau[0]
@@ -139,6 +141,7 @@ if __name__ == "__main__":
         imag = P_fourier.imag
         spectrum_f = 1/mean * (1 - (real**2 + imag**2))/((1-real)**2 + imag**2)
         spectrum_theory.append(spectrum_f)
+
 
     ax2.set_xlim([1, 100])
     ax2.set_xticks([1, 10, 100])
