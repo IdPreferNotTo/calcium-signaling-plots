@@ -9,22 +9,15 @@ def print_mean_CV_to_file():
     N = 0
     n_cha = 5
     n_clu = 10
-    taus = np.logspace(-1, 2, 50)
-    js = np.logspace(-3, 0, 50)
-    with open(home + "/Data/Calcium/data/markov_ca_mean_CV_N{:d}_n{:d}_no_adap.dat".format(n_clu, n_cha),
+    taua = 500
+    ampa = 0.05
+    with open(home + "/Data/Calcium/data/markov_ca_mean_CV_N{:d}_n{:d}_fix_adap_taua{:.2e}_ampa{:.2e}.dat".format(n_clu, n_cha, taua, ampa),
               "w") as outfile:
         outfile.write("# tau | j | <T> | CV | n \n")
-        for i in range(50):
-            for j in range(50):
-                print(i, j)
+        for j in np.logspace(-3, 0, 31):
+            for tau in np.logspace(-1, 2, 31):
                 N += 1
-                tau = taus[j]
-                j = js[i]
-
-
-                #file_str = home + "/CLionProjects/PhD/calcium_spikes_markov/out/spike_times_markov_taua{:.2e}_ampa{:.2e}_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(taua, ampa, tau, j, n_clu)
-                file_str = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_no_adap/spike_times_markov_ip1.00_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, j, n_clu)
-
+                file_str = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap_fix_adap_para/spike_times_markov_ip1.00_taua5.00e+02_ampa5.00e-02_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, j, n_clu)
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     ISIs = np.loadtxt(file_str, unpack=True)
@@ -32,12 +25,10 @@ def print_mean_CV_to_file():
                         T = np.infty
                         CV = 1.
                         n = ISIs.size
-
                     else:
                         T = np.mean(ISIs)
                         CV = np.std(ISIs)/np.mean(ISIs)
                         n = ISIs.size
-
                 outfile.write("{:.2e} {:.2e} {:.2e} {:.2e} {:d}\n".format(tau, j, T, CV, n))
 
 

@@ -13,13 +13,13 @@ def transient_func(i, T0, T8, tau):
 
 if __name__ == "__main__":
     st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(6, 3))
+    fig = plt.figure(tight_layout=True, figsize=(6, 4))
     gs = gridspec.GridSpec(1, 2)
-    gs1 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[0])
+    gs1 = gridspec.GridSpecFromSubplotSpec(4, 1, subplot_spec=gs[0], hspace=1.0)
     gs2 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1], hspace=0.75)
-    ax0 = fig.add_subplot(gs1[0])
-    ax1 = fig.add_subplot(gs1[1])
-    ax2 = fig.add_subplot(gs1[2])
+    ax0 = fig.add_subplot(gs1[0:2])
+    ax1 = fig.add_subplot(gs1[2])
+    ax2 = fig.add_subplot(gs1[3])
     ax3 = fig.add_subplot(gs2[0])
     ax4 = fig.add_subplot(gs2[1])
     st.remove_top_right_axis([ax0, ax1, ax2, ax3, ax4])
@@ -33,6 +33,12 @@ if __name__ == "__main__":
     data = np.loadtxt(folder + file)
     ts, cas, jpuffs, adaps = np.transpose(data)
     ISIs = np.loadtxt(folder + file_spikes)
+
+    nr_ISIs = len(ISIs)
+    index_ISIs = np.arange(nr_ISIs)
+    popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(100, 150, 2))
+    print(popt)
+    ISI_fit = popt[0] * np.exp(-index_ISIs / popt[2]) + popt[1] * (1. - np.exp(-index_ISIs / popt[2]))
 
     mean_isi = np.mean(ISIs)
     cv_isi = np.std(ISIs) / mean_isi
@@ -51,12 +57,12 @@ if __name__ == "__main__":
         ca_isi.append(ca)
         jpuff_isi.append(jpuff)
         adap_isi.append(adap)
-        if ca == 1 and nrISIs <= 10:
+        if ca == 1 and nrISIs <= 15:
             nrISIs += 1
             spike_times.append(t)
 
             ax0.plot(t_isi, ca_isi, lw=1, c=st.colors[1])
-            ax0.plot([t, t], [cR, cT], lw=1, c=st.colors[1], zorder=1.)
+            ax0.plot([t, t, t], [cT, 1 + 2*adap, cR], lw=1, c=st.colors[1], zorder=1.)
 
             ax1.plot(t_isi, adap_isi, lw=1, c=st.colors[1])
             ax1.plot([t, t], [adap, adap_after], c=st.colors[1], zorder=1.0)
@@ -80,27 +86,23 @@ if __name__ == "__main__":
     #              head_length=5.0, lw=0.5,
     #              clip_on=False)
 
-    # ax0.set_xlabel("$t$ / s")
+    ax0.set_xlim([0, spike_times[nrISIs - 1] + 20])
+    ax0.set_xticklabels([])
     ax0.set_ylabel(r"$c_i$")
-    ax0.set_ylim([0.8 * cR, 1.2 * cT])
+    ax0.set_ylim([0.2, 3])
     ax0.set_yticks([cR, cT])
     ax0.set_yticklabels(["$c_R$", "$c_T$"])
-    ax0.set_xticklabels([])
-    ax0.set_xlim([0, spike_times[nrISIs - 1] + 20])
+    ax0.axhline(1, lw=1, ls=":", color="C7")
 
-    ax1.set_ylabel(r"$\hat{c}_{er}$")
+    ax1.set_ylabel(r"$c_{er}$")
     ax1.set_xticklabels([])
     ax1.set_xlim([0, spike_times[nrISIs - 1] + 20])
+    ax1.set_ylim([0.5, 1])
+    ax1.axhline(1 - ampa/(1 - (1-ampa)*np.exp(-popt[1]/taua)), ls=":", c="C7")
 
     ax2.set_xlabel("$t$ / s")
     ax2.set_xlim([0, spike_times[nrISIs - 1] + 20])
     ax2.set_ylabel(r"$j_{\rm puff}$")
-
-    nr_ISIs = len(ISIs)
-    index_ISIs = np.arange(nr_ISIs)
-    popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(100, 150, 2))
-    print(popt)
-    ISI_fit = popt[0] * np.exp(-index_ISIs / popt[2]) + popt[1] * (1. - np.exp(-index_ISIs / popt[2]))
 
     ax3.set_xlim([0, 50])
     ax3.set_ylim([0, 100])
@@ -114,8 +116,8 @@ if __name__ == "__main__":
     ax3.text(25, popt[0] * 1.2, "$T_0$", ha="center")
     ax3.text(25, popt[1] * 1.2, "$T_\infty$", ha="center")
 
-    ax4.set_xlabel("$T_i$ / s")
-    ax4.set_ylabel("$P_0(T_i)$")
+    ax4.set_xlabel("$T$ / s")
+    ax4.set_ylabel("$P_0(T)$")
     ax4.hist(ISIs, bins=20, color=st.colors[1], density=True, alpha=0.6)
     ts_inv_gau = np.linspace(0, 1.75 * mean_isi, 1001)
     inv_gaus = []
@@ -125,5 +127,5 @@ if __name__ == "__main__":
         inv_gaus.append(p)
     ax4.plot(ts_inv_gau, inv_gaus, ls="--", color="k", label="Inv.\ Gaussian")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig1.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig1.png", transparent=True)
     plt.show()

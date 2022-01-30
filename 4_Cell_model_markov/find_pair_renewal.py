@@ -12,7 +12,8 @@ if __name__ == "__main__":
     tau0 = 0
     j0 = 0
     T0 = 35
-    CV0 = 0.1
+    CV0 = 0.3
+
     for set in data:
         T = set[2]
         CV = set[3]
@@ -21,6 +22,9 @@ if __name__ == "__main__":
         if (dT + dCV)/2. < d:
             tau0 = set[0]
             j0 = set[1]
+            T_found = T
+            CV_found = CV
             d = (dT + dCV)/2.
 
+    print(T_found, CV_found)
     print(tau0, j0)

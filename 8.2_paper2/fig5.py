@@ -1,133 +1,132 @@
 import numpy as np
-import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from scipy.optimize import curve_fit
-import os
 
+import os
 import styles as st
-import functions as fc
 
 
 def transient_func(i, T0, T8, tau):
     return T0*np.exp(-i/tau) + T8*(1 - np.exp(-i/tau))
 
 
+def get_isis_from_data(data, nr_cell):
+    ts = [x[0] for x in data]
+    cas = [x[nr_cell] for x in data]
+    spiking: bool = False
+    t_tmp: float = 0
+    spike_times = []
+    if nr_cell == 2:
+        for t, ca in zip(ts, cas):
+            if t < 3700:
+                if ca > 0.35 and not spiking:
+                    spike_times.append(t)
+                    spiking = True
+                if ca < 0.35 and spiking:
+                    spiking = False
+    else:
+        for t, ca in zip(ts, cas):
+            if t < 3700:
+                if ca > 0.4 and not spiking:
+                    spike_times.append(t)
+                    spiking = True
+                if ca < 0.4 and spiking:
+                    spiking = False
+    ISIs = [t2 - t1 for t2, t1 in zip(spike_times[1:], spike_times[:-1])]
+    t_ISIs = []
+    T = 0
+    for isi in ISIs:
+        T += isi
+        t_ISIs.append(T)
+    return ISIs
+
+
 if __name__ == "__main__":
-    st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(6, 3))
-    gs = gridspec.GridSpec(2, 3)
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax2 = fig.add_subplot(gs[0, 1])
-    ax3 = fig.add_subplot(gs[0, 2])
-    ax4 = fig.add_subplot(gs[1, 0])
-    ax5 = fig.add_subplot(gs[1, 1])
-    ax6 = fig.add_subplot(gs[1, 2])
-    st.remove_top_right_axis([ax1, ax2, ax3, ax4, ax5, ax6])
-
     home = os.path.expanduser("~")
-    folder = home + "/CLionProjects/PhD/calcium_spikes_langevin/out/Data_adap"
-    folder_no_adap = home + "/CLionProjects/PhD/calcium_spikes_langevin/out/Data_no_adap"
-    tau = np.logspace(-1, 2, 50)[33]
-    jca = np.logspace(-3, 0, 50)[19]
-    amp_as = np.logspace(-2, 0, 41)
+    file = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
+    data = np.loadtxt(file)
+    nr_cell = 13 #2, 12
+    isis_exp = get_isis_from_data(data, nr_cell)
+    nr_isis_exp = len(isis_exp)
+    i_isis_exp = np.arange(nr_isis_exp)
+    popt_exp, pcov = curve_fit(transient_func, i_isis_exp, isis_exp, p0=(100, 150, 2))
+    print(popt_exp)
+    isis_exp_fit = popt_exp[0]*np.exp(-i_isis_exp/popt_exp[2]) + popt_exp[1]*(1 - np.exp(-i_isis_exp/popt_exp[2]))
 
-    # VARY DELTA_A FIX TAU_A
-    rho1s = []
-    dTs = []
-    iota_effs_s = []
-    iota_effs_t = []
+    taua = 829
+    ampa = 0.0309
+    home = os.path.expanduser("~")
+    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap"
+    file_isi = f"/spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
+    isis_sim = np.loadtxt(folder + file_isi)
+    popt_sim, pcov = curve_fit(transient_func, i_isis_exp, isis_sim[:nr_isis_exp], p0=(100, 150, 2))
+    print(popt_sim)
+    isis_sim_fit = popt_sim[0] * np.exp(-i_isis_exp / popt_sim[2]) + popt_sim[1] * (1 - np.exp(-i_isis_exp / popt_sim[2]))
 
-    tau_as = np.logspace(1, 3, 41)
-    tau_a = tau_as[35]
-    print(tau_a)
-    for amp_a in amp_as:
-        file = f"/spike_times_langevin_ip1.00_taua{tau_a:.2e}_ampa{amp_a:.2e}_tau{tau:.2e}_j{jca:.2e}_N10_0.dat"
-        file_no_adap = f"/spike_times_langevin_ip1.00_tau{tau:.2e}_j{jca:.2e}_N10_0.dat"
-        ISIs = np.loadtxt(folder + file)
-        ISIs_no_adap = np.loadtxt(folder_no_adap + file_no_adap)
-        nr_ISIs = len(ISIs)
-        index_ISIs = np.arange(nr_ISIs)
+    st.set_default_plot_style()
+    fig = plt.figure(tight_layout=True, figsize=(6, 4))
+    gs = gridspec.GridSpec(2, 2)
+    ax0 = fig.add_subplot(gs[0, 0])
+    ax1 = fig.add_subplot(gs[0, 1])
+    ax2 = fig.add_subplot(gs[1, 0])
+    ax3 = fig.add_subplot(gs[1, 1])
+    st.remove_top_right_axis([ax0, ax1, ax2, ax3])
 
-        popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(50, 100, 2))
-        i_ISI_fit = np.linspace(0, nr_ISIs)
-        ISI_fit = popt[0] * np.exp(-i_ISI_fit / popt[2]) + popt[1] * (1 - np.exp(-i_ISI_fit / popt[2]))
+    # Data
+    ax0.set_xlim([0, nr_isis_exp])
+    ax0.set_ylim([0, 1.5*popt_exp[1]])
+    ax0.set_xlabel("$i$")
+    ax0.set_ylabel("$T_i$")
+    ax0.scatter(range(nr_isis_exp), isis_exp, ec=st.colors[4], fc="w", s=20, zorder=3)
+    ax0.plot(i_isis_exp, isis_exp_fit, lw=1, c="k", zorder=2, label = "fit")
+    ax0.axhline(popt_exp[0], ls=":", c="C7")
+    ax0.axhline(popt_exp[1], ls=":", c="C7")
+    ax0.text(len(isis_exp)-10, popt_exp[0]*1.1, "$T_0$", ha="center")
+    ax0.text(5, popt_exp[1]*1.1, "$T_\infty$", ha="center")
 
-        print(np.mean(ISIs[500:]), tau_a*np.log(1 - amp_a))
-        iota_eff = tau_a /(np.mean(ISIs[500:]) - tau_a*np.log(1 - amp_a))
-        iota_effs_t.append(iota_eff)
-        iota_effs_s.append(popt[2])
-        rho1 = fc.k_corr(ISIs[500:], ISIs[500:], 1) / fc.k_corr(ISIs[500:], ISIs[500:], 0)
-        rho1s.append(rho1)
-        dT = np.mean(ISIs[500:]) - np.mean(ISIs_no_adap)
-        dTs.append(dT)
+    ax1.set_xlim([-35, 110])
+    ax1.set_ylim([-35, 110])
+    ax1.set_xlabel("$T_\infty - T_{i}$")
+    ax1.set_ylabel("$T_\infty - T_{i+1}$")
+    ax1.scatter([popt_exp[1] - I for I in isis_exp[:-1]], [popt_exp[1] - I for I in isis_exp[1:]], ec=st.colors[4], fc="w", s=20, zorder=3)
+    ax1.axhline(0, ls=":", c="C7")
+    ax1.axvline(0, ls=":", c="C7")
+    m_sim = np.exp(-1/popt_exp[2])
+    xs = np.linspace(-25, 75, 200)
+    ys = [m_sim*x for x in xs]
+    ax1.plot(xs, ys, lw=1, c="k", zorder=2)
+    ax1.text(5, 90, r"$\alpha = e^{-1/\iota_{\rm eff}}$", ha="left", va="center", fontsize = 15)
 
-    cmap_viridis = plt.get_cmap("cividis", 31)
+    # Simulation
+    ax2.set_xlim([0, nr_isis_exp])
+    ax2.set_ylim([0, 1.5*popt_exp[1]])
+    ax2.set_xlabel("$i$")
+    ax2.set_ylabel("$T_i$")
+    ax2.scatter(range(nr_isis_exp), isis_sim[:nr_isis_exp], ec=st.colors[1], fc="w", s=20, zorder=3)
+    ax2.plot(i_isis_exp, isis_sim_fit, lw=1, c="k", zorder=2)
+    ax2.axhline(popt_sim[0], ls=":", c="C7")
+    T0 = popt_sim[0]
+    ax2.axhline(popt_sim[1], ls=":", c="C7")
+    ax2.text(len(isis_exp)-10, popt_sim[0]*1.1, "$T_0$", ha="center")
+    ax2.text(5, popt_sim[1]*1.1, "$T_\infty$", ha="center")
 
-    ax1.set_xlabel(r"$\Delta_a$")
-    ax1.set_ylabel(r"$\Delta T$")
-    ax1.scatter(amp_as, dTs, s=20, c=amp_as, cmap=cmap_viridis, norm=colors.LogNorm())
-
-    ax2.set_xlabel(r"$\Delta T$")
-    ax2.set_ylabel(r"$\rho_1$")
-    im0 = ax2.scatter(dTs, rho1s, s=20, c=amp_as, cmap=cmap_viridis, norm=colors.LogNorm())
-
-    ax3.set_xlim([0, 10])
-    ax3.set_xlabel(r"$\iota_{\rm eff}$")
-    ax3.set_ylabel("")
-    ax3.plot(iota_effs_t, rho1s, c="k")
-    cmap_viridis = plt.get_cmap("cividis", 31)
-    im1 = ax3.scatter(iota_effs_s, rho1s, s=20, c=amp_as, cmap=cmap_viridis, norm=colors.LogNorm())
-    cbar = fig.colorbar(im1, ax=ax3)
-    cbar.set_label(r"$\Delta_a$")
-
-    # VARY TAU_A FIX DELTA_A
-
-    rho1s = []
-    dTs = []
-    iota_effs_s = []
-    iota_effs_t = []
-
-    amp_a = 0.1
-    tau_as = np.logspace(1, 3, 41)
-    for tau_a in tau_as:
-        file = f"/spike_times_langevin_ip1.00_taua{tau_a:.2e}_ampa{amp_a:.2e}_tau{tau:.2e}_j{jca:.2e}_N10_0.dat"
-        file_no_adap = f"/spike_times_langevin_ip1.00_tau{tau:.2e}_j{jca:.2e}_N10_0.dat"
-        ISIs = np.loadtxt(folder + file)
-        ISIs_no_adap = np.loadtxt(folder_no_adap + file_no_adap)
-        nr_ISIs = len(ISIs)
-        index_ISIs = np.arange(nr_ISIs)
-
-        popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(50, 100, 2))
-        i_ISI_fit = np.linspace(0, nr_ISIs)
-        ISI_fit = popt[0] * np.exp(-i_ISI_fit / popt[2]) + popt[1] * (1 - np.exp(-i_ISI_fit / popt[2]))
-
-        print(np.mean(ISIs[500:]), tau_a*np.log(1 - amp_a))
-        iota_eff = tau_a /(np.mean(ISIs[500:]) - tau_a*np.log(1 - amp_a))
-        iota_effs_t.append(iota_eff)
-        iota_effs_s.append(popt[2])
-        rho1 = fc.k_corr(ISIs[500:], ISIs[500:], 1) / fc.k_corr(ISIs[500:], ISIs[500:], 0)
-        rho1s.append(rho1)
-        dT = np.mean(ISIs[500:]) - np.mean(ISIs_no_adap)
-        dTs.append(dT)
-
-    cmap_viridis = plt.get_cmap("cividis", 31)
-
-    ax4.set_xlabel(r"$\tau_a$")
-    ax4.set_ylabel(r"$\Delta T$")
-    ax4.scatter(tau_as, dTs, s=20, c=tau_as, cmap=cmap_viridis, norm=colors.LogNorm())
-
-    ax5.set_xlabel(r"$\Delta T$")
-    ax5.set_ylabel(r"$\rho_1$")
-    im2 = ax5.scatter(dTs, rho1s, s=20, c=tau_as, cmap=cmap_viridis, norm=colors.LogNorm())
-
-    ax6.set_xlim([0, 5])
-    ax6.set_xlabel(r"$\iota_{\rm eff}$")
-    ax6.plot(iota_effs_t, rho1s, c="k")
-    cmap_viridis = plt.get_cmap("cividis", 31)
-    im3 = ax6.scatter(iota_effs_s, rho1s, s=20, c=tau_as, cmap=cmap_viridis, norm=colors.LogNorm())
-    cbar = fig.colorbar(im3, ax=ax6)
-    cbar.set_label(r"$\tau_a$")
+    ax3.set_xlim([-35, 110])
+    ax3.set_ylim([-35, 110])
+    ax3.set_xlabel("$T_\infty - T_{i}$")
+    ax3.set_ylabel("$T_\infty - T_{i+1}$")
+    ax3.axhline(0, ls=":", c="C7")
+    ax3.axvline(0, ls=":", c="C7")
+    m_sim = np.exp(-1/popt_sim[2])
+    xs = np.linspace(-25, 75, 200)
+    ys = [m_sim*x for x in xs]
+    m_theo = np.exp(-popt_exp[1]/taua)*(1.-ampa)
+    ys2 = [m_theo * x for x in xs]
+    print(m_sim, m_theo)
+    ax3.scatter([popt_sim[1] - I for I in isis_sim[0:nr_isis_exp]], [popt_sim[1] - I for I in isis_sim[1:nr_isis_exp+1]], ec=st.colors[1], fc="w", s=20, zorder=3)
+    ax3.plot(xs, ys, lw=1, c="k", zorder=2)
+    ax3.plot(xs, ys2, lw=1, ls=":", c="k", zorder=2)
+    ax3.text(5, 90, r"$\alpha = e^{-T_\infty/\tau_a}(1 - \Delta_a)$", ha="left", va="center", fontsize = 15)
 
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig5.pdf", transparent=True)
     plt.show()

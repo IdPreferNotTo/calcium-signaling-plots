@@ -21,13 +21,13 @@ if __name__ == "__main__":
     P_ca_theory = []
 
     st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(6, 3))
-    grids = gridspec.GridSpec(1, 2)
+    fig = plt.figure(tight_layout=True, figsize=(4, 3))
+    grids = gridspec.GridSpec(1, 1)
     ax0 = fig.add_subplot(grids[0])
-    ax1 = fig.add_subplot(grids[1])
+    #ax1 = fig.add_subplot(grids[1])
     axin1 = ax0.inset_axes([0.15, 0.65, 0.35, 0.35])
-    axin2 = ax0.inset_axes([0.65, 0.15, 0.35, 0.35])
-    axis = [ax0, ax1, axin1, axin2]
+    axin2 = ax0.inset_axes([0.65, 0.20, 0.35, 0.35])
+    axis = [ax0, axin1, axin2]
     st.remove_top_right_axis(axis)
     home = os.path.expanduser("~")
 
@@ -71,11 +71,11 @@ if __name__ == "__main__":
     ax0.plot(IP3s, rates, lw=1, color=st.colors[1])
     ax0.plot(IP3s_theory_rate, rates_theory, lw=1, color=st.colors[2])
 
-    ax1.set_xlabel("IP$_3$")
-    ax1.set_xlim([0.0, 2.0])
-    ax1.set_ylabel(r"$C_V$")
-    ax1.plot(IP3s, cvISIs, lw=1, color = st.colors[1])
-    ax1.plot(IP3s_theory_cv, cvs_theory, lw=1, color=st.colors[2])
+    #ax1.set_xlabel("IP$_3$")
+    #ax1.set_xlim([0.0, 2.0])
+    #ax1.set_ylabel(r"$C_V$")
+    #ax1.plot(IP3s, cvISIs, lw=1, color = st.colors[1])
+    #ax1.plot(IP3s_theory_cv, cvs_theory, lw=1, color=st.colors[2])
 
     file = f"spike_times_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
     ISIs_ip1 = np.loadtxt(folder_ip3 + file)
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     axin2.plot(ts_inv_gau, inv_gaus, color="k", lw=1, label="Inv.\ Gaussian")
     axin2.text(0.05, 0.8, "IP$_3$=2", transform=axin2.transAxes)
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig6.pdf",transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig6.png",transparent=True)
     plt.show()

@@ -79,7 +79,7 @@ if __name__ == "__main__":
     cas = np.linspace(0.0, 1, 100)
     ax.plot(cas, mean_jpuff_over_ca)
     ax.fill_between(cas, std_upper_sim, std_lower_sim, color="C0", alpha=0.55,
-                    label=r"$\sigma_{\Delta t}, \Delta t = 1$")
+                    label=r"$\sigma_J \Delta t$")
 
     # Plot Theory
     means_theory = []
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     std_lower_theorry = [mean - std for mean, std in zip(means_theory, stds_theory)]
     ax.fill_between(cas, std_upper_theory, std_lower_theorry, color="C7", alpha=0.50, label=r"$\sqrt{2D}$")
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-    ax.set_xlabel(r"$[\rm{Ca}^{2+}]_i$")
+    ax.set_xlabel(r"$c_i$")
     ax.set_ylabel(r"$\mu, \sqrt{2D_N}$")
     ax.set_xlim([0, 1])
     ax.legend()

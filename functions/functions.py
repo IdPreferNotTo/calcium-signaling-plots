@@ -236,11 +236,10 @@ def fourier_transformation_isis(w, isis):
         f += np.exp(1j*w*t)
     return f
 
-def power_spectrum_isis(ws, isis, Tmax):
+def power_spectrum_isis(ws, isis, Tmax=2000):
     ISIs_chunks = []
     chunks = []
     t = 0
-    Tmax = 2000
     for isi in isis:
         t += isi
         chunks.append(isi)
@@ -258,3 +257,12 @@ def power_spectrum_isis(ws, isis, Tmax):
             fws_img.append(fw.imag)
         spectrum.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))
     return spectrum
+
+
+def inverse_gaussian(T, CV):
+    ps = []
+    ts = np.linspace(0, 2*T, 500)
+    for t in ts:
+        p = np.sqrt(T / (2 * np.pi * (CV**2) * (t ** 3))) * np.exp(-(t - T) ** 2 / (2 * T * (CV**2) * t))
+        ps.append(p)
+    return ts, ps

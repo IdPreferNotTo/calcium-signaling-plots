@@ -125,7 +125,7 @@ if __name__ == "__main__":
             fws_img.append(fw.imag)
         spectrum_data.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))
 
-    ws, spectrum_data = fc.power_spectrum_isis(ISIs_flat)
+    spectrum_data = fc.power_spectrum_isis(ws, ISIs_flat, Tmax=25)
     Ps_fourier = []
     Fs = []
     dt = ts_inv_gau[1] - ts_inv_gau[0]
@@ -158,5 +158,5 @@ if __name__ == "__main__":
     ax2.set_xscale("log")
     ax2.set_yscale("log")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig8.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig8.png", transparent=True)
     plt.show()

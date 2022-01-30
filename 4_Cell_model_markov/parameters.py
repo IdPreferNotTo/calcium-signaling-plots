@@ -46,18 +46,18 @@ def write_parameter_file(model, N, i, ip3, bool_ca_fix, ca_fix, tau, current, bo
 
 if __name__ == "__main__":
     N = 0
-    for i in range(31):
-        for j in range(31):
+    for i in range(100):
+        for j in range(1):
             for k in range(1):
                 print(N)
                 model = "markov"
                 ip3 = 1 #IP3 is given realtive the half-max ip3 concentration.
                 bool_ca_fix = False
                 ca_fix = 0.33
-                tau = np.logspace(-1, 2, 31)[i]
-                current = np.logspace(-3, 0, 31)[j]
+                tau = 2.0 #np.logspace(-1, 2, 31)[i]
+                current = 0.2*((i+1)/100) #np.logspace(-3, 0, 31)[j]
                 bool_adap = True
-                tau_adap = 500 #np.logspace(1, 3, 41)[i] #300
+                tau_adap = 100 #np.logspace(1, 3, 41)[i] #300
                 amp_adap = 0.05 #np.logspace(-2, 0, 41)[j] #0.1
                 number_cluster = 10
                 num_channel = 5

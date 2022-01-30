@@ -83,15 +83,15 @@ if __name__ == "__main__":
     data = np.loadtxt(file_p0_theory)
     ca_theory, p0_theory = np.transpose(data)
     ax1.set_xlabel("$c_i$")
-    ax1.set_ylabel("$P(c_i)$")
+    ax1.set_ylabel("$P_0(c_i)$")
     cas = [ca for ca in cas if ca != 1]
     ax1.hist(cas, bins=25, density=True, alpha=.6, color=st.colors[1])
     ax1.set_xticks([0.33, 1.0])
     ax1.set_xticklabels(["$c_R$", "$c_T$"])
     ax1.plot(ca_theory[::100], p0_theory[::100], color=st.colors[0])
 
-    ax3.set_xlabel("$T_i$ / s")
-    ax3.set_ylabel("$P(T_i)$")
+    ax3.set_xlabel("$T$ / s")
+    ax3.set_ylabel("$P_0(T)$")
     ax3.hist(ISIs, bins=20, color=st.colors[1], density=True, alpha=0.6)
     ts_inv_gau = np.linspace(0, 1.75*mean_isi, 1001)
     inv_gaus = []
@@ -101,5 +101,5 @@ if __name__ == "__main__":
         inv_gaus.append(p)
     ax3.plot(ts_inv_gau, inv_gaus, ls="--", color="k", label="Inv.\ Gaussian")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig5.pdf",transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig5.png",transparent=True)
     plt.show()

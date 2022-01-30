@@ -126,5 +126,5 @@ if __name__ == "__main__":
     print(mean_isis_1, mean_isis_2, mean_isis_3)
     print(cv_isis_1, cv_isis_2, cv_isis_3)
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig2.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig2.png", transparent=True)
     plt.show()

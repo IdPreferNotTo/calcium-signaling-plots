@@ -16,11 +16,14 @@ if __name__ == "__main__":
 
     for i, data in enumerate(datas[1:]):
         st.set_default_plot_style()
-        fig = plt.figure(tight_layout=True, figsize=(4, 6 / 2))
+        fig = plt.figure(tight_layout=True, figsize=(4, 2))
         gs = gridspec.GridSpec(1, 1)
         ax1 = fig.add_subplot(gs[0])
         st.remove_top_right_axis([ax1])
 
+        ax1.set_xlabel("$t$ / s")
+        ax1.set_ylabel("Ratio (340/380)")
+        ax1.set_xlim([0, 1500])
         ax1.plot(times, data, lw=1, color=st.colors[4])
         plt.savefig(home + f"/Desktop/Ca data/Spikes/HeLa/1microMfuraPLT/HeLa_{nr:d}_1_{histamine:.1f}histamine_{i:d}.png")
         plt.show()

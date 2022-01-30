@@ -109,5 +109,5 @@ if __name__ == "__main__":
     ax3.plot(fc.gaussian_dist(gauss01, mean, std_f2), gauss01, c="k", lw=1.)
     ax3.hist(jpuffs_f2, bins=7, alpha=0.7, color=st.colors[0], density=True, orientation="horizontal")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig9.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig9.png", transparent=True)
     plt.show()

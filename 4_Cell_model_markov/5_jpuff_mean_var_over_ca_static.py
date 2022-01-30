@@ -83,7 +83,7 @@ if __name__ == "__main__":
     st.remove_top_right_axis([ax, ax1, ax2])
 
     # Main ax
-    ax.set_xlabel(r"$[\rm{Ca}^{2+}]$")
+    ax.set_xlabel(r"$c_i$")
     ax.set_xlim([0, 1])
     ax.set_xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     ax.set_ylabel(r"$\mu, \sqrt{2D_N}$")

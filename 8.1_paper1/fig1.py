@@ -184,6 +184,6 @@ if __name__ == "__main__":
     ax4.axhline(popt[1], ls=":", lw=1, c="k")
     ax4.text(nr_ISIs / 2, popt[1] * 1.2, "$T_0 = T_\infty$", ha="center")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.png")
     plt.show()
     plt.close()

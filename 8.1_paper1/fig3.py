@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     # Subplot 1: x(t) over t
     ax1.set_xlabel("$t$ / s")
-    ax1.set_ylabel("$x(t)$")
+    ax1.set_ylabel("$x_i(t)$")
     folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
     data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_5.dat")
     data_tmp = []
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     # Subplot 1: x(t) over t
     ax5.set_xlabel("$t$ / s")
-    ax5.set_ylabel("$x(t)$")
+    ax5.set_ylabel("$x_i(t)$")
     folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
     data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_5.dat")
 
@@ -235,6 +235,6 @@ if __name__ == "__main__":
     ax7.text(5.2, 1.5, "$m$")
     ts = np.linspace(0, 1, 101)
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig3.pdf",
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig3.png",
                 transparent=True)
     plt.show()

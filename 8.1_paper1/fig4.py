@@ -153,5 +153,5 @@ if __name__ == "__main__":
     std_upper = [mean + np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
     std_lower = [mean - np.sqrt(var) for mean, var in zip(mean_jpuffs, var_jpuffs)]
     ax3.fill_between(cas, std_upper, std_lower, alpha=0.5, color=st.colors[0])
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig4.pdf",transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig4.png",transparent=True)
     plt.show()

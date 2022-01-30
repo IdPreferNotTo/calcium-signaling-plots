@@ -1,130 +1,95 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from scipy.optimize import curve_fit
-
 import os
+
 import styles as st
-
-
-def transient_func(i, T0, T8, tau):
-    return T0*np.exp(-i/tau) + T8*(1 - np.exp(-i/tau))
-
-
-def get_isis_from_data(data, nr_cell):
-    ts = [x[0] for x in data]
-    cas = [x[nr_cell] for x in data]
-    spiking: bool = False
-    t_tmp: float = 0
-    spike_times = []
-    if nr_cell == 2:
-        for t, ca in zip(ts, cas):
-            if t < 3700:
-                if ca > 0.35 and not spiking:
-                    spike_times.append(t)
-                    spiking = True
-                if ca < 0.35 and spiking:
-                    spiking = False
-    else:
-        for t, ca in zip(ts, cas):
-            if t < 3700:
-                if ca > 0.4 and not spiking:
-                    spike_times.append(t)
-                    spiking = True
-                if ca < 0.4 and spiking:
-                    spiking = False
-    ISIs = [t2 - t1 for t2, t1 in zip(spike_times[1:], spike_times[:-1])]
-    t_ISIs = []
-    T = 0
-    for isi in ISIs:
-        T += isi
-        t_ISIs.append(T)
-    return ISIs
-
+import functions as fc
 
 if __name__ == "__main__":
-    home = os.path.expanduser("~")
-    file = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
-    data = np.loadtxt(file)
-    nr_cell = 13 #2, 12
-    isis_exp = get_isis_from_data(data, nr_cell)
-    nr_isis_exp = len(isis_exp)
-    i_isis_exp = np.arange(nr_isis_exp)
-    popt_exp, pcov = curve_fit(transient_func, i_isis_exp, isis_exp, p0=(100, 150, 2))
-    print(popt_exp)
-    isis_exp_fit = popt_exp[0]*np.exp(-i_isis_exp/popt_exp[2]) + popt_exp[1]*(1 - np.exp(-i_isis_exp/popt_exp[2]))
-
-    taua = 829
-    ampa = 0.0309
+    n = 16
+    print(np.logspace(1, 3, 50)[-n])
+    taua = 244
+    ampa = 0.11
     home = os.path.expanduser("~")
     folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap"
     file_isi = f"/spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
-    isis_sim = np.loadtxt(folder + file_isi)
-    popt_sim, pcov = curve_fit(transient_func, i_isis_exp, isis_sim[:nr_isis_exp], p0=(100, 150, 2))
-    print(popt_sim)
-    isis_sim_fit = popt_sim[0] * np.exp(-i_isis_exp / popt_sim[2]) + popt_sim[1] * (1 - np.exp(-i_isis_exp / popt_sim[2]))
+    isis = np.loadtxt(folder + file_isi)
+    isis = [I for I in isis[100:]]
+    mean = np.mean(isis)
+    std = np.std(isis)
+    var = np.var(isis)
+    cv = std/mean
+    print(mean)
+
+    ks = np.arange(1, 5)
+    rho_ks = []
+    for k in ks:
+        var_k_isis = fc.k_corr(isis, isis, k)
+        rho_k = var_k_isis/var
+        rho_ks.append(rho_k)
+
+    ws = np.logspace(-3, 0, 100)
+    spectrum = fc.power_spectrum_isis(ws, isis, 2000)
+    isis_shuffled = list(isis)
+    np.random.shuffle(isis_shuffled)
+    spectrum_shuffle = fc.power_spectrum_isis(ws, isis_shuffled, 2000)
 
     st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(6, 4))
-    gs = gridspec.GridSpec(2, 2)
-    ax0 = fig.add_subplot(gs[0, 0])
-    ax1 = fig.add_subplot(gs[0, 1])
-    ax2 = fig.add_subplot(gs[1, 0])
-    ax3 = fig.add_subplot(gs[1, 1])
-    st.remove_top_right_axis([ax0, ax1, ax2, ax3])
+    fig = plt.figure(tight_layout=True, figsize=(3*2.25, 3))
+    gs = gridspec.GridSpec(1, 2)
+    gs1 = gridspec.GridSpecFromSubplotSpec(3, 3, subplot_spec=gs[0], hspace=0.0, wspace=0.0)
+    gs2 = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[1], hspace=1.)
+    ax0 = fig.add_subplot(gs1[1:3, 0:2])
+    ax1 = fig.add_subplot(gs1[1:3, 2])
+    ax2 = fig.add_subplot(gs1[0, 0:2])
+    ax3 = fig.add_subplot(gs2[0])
+    ax4 = fig.add_subplot(gs2[1:3])
+    st.remove_top_right_axis([ax0, ax1, ax2, ax3, ax4])
 
-    # Data
-    ax0.set_ylim([0, 1.5*popt_exp[1]])
-    ax0.set_xlabel("$i$")
-    ax0.set_ylabel("$T_i$")
-    ax0.scatter(range(nr_isis_exp), isis_exp, ec=st.colors[4], fc="w", s=20, zorder=3)
-    ax0.plot(i_isis_exp, isis_exp_fit, lw=1, c="k", zorder=2)
-    ax0.axhline(popt_exp[0], ls=":", c="C7")
-    ax0.axhline(popt_exp[1], ls=":", c="C7")
-    ax0.text(len(isis_exp)-3, popt_exp[0]*1.1, "$T_0$", ha="center")
-    ax0.text(3, popt_exp[1]*1.1, "$T_\infty$", ha="center")
+    ax0.set_xlabel("$T_i$")
+    ax0.set_ylabel("$T_{i+1}$")
+    ax0.set_xlim([0.5 * mean, 1.5 * mean])
+    ax0.set_ylim([0.5 * mean, 1.5 * mean])
+    ax0.scatter(isis[:-1], isis[1:], fc="w", ec=st.colors[1], s=20, zorder=3)
+    xmin, xmax = ax0.get_xlim()
+    ymin, ymax = ax0.get_ylim()
+    xs = np.linspace(0.6*mean, 1.4*mean)
+    ys = mean + rho_ks[0]*(xs - mean)
+    ax0.plot(xs, ys, c="k", zorder=5)
 
-    ax1.set_xlim([-35, 100])
-    ax1.set_ylim([-35, 100])
-    ax1.set_xlabel("$T_\infty - T_{i}$")
-    ax1.set_ylabel("$T_\infty - T_{i+1}$")
-    ax1.scatter([popt_exp[1] - I for I in isis_exp[:-1]], [popt_exp[1] - I for I in isis_exp[1:]], ec=st.colors[4], fc="w", s=20, zorder=3)
-    ax1.axhline(0, ls=":", c="C7")
-    ax1.axvline(0, ls=":", c="C7")
-    m_sim = np.exp(-1/popt_exp[2])
-    xs = np.linspace(-25, 100, 200)
-    ys = [m_sim*x for x in xs]
-    ax1.plot(xs, ys, lw=1, c="k", zorder=2)
-    ax1.text(80, 80, r"$\alpha = e^{-1/\tau}$", ha="right", va="center")
+    ax1.set_xlabel("$P_0(T_{i+1})$")
+    ax1.set_ylim([ymin, ymax])
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    ax1.hist(isis, bins=20, color=st.colors[1], density=True, alpha=0.6, orientation="horizontal")
+    ts_inv_gaussian, ps_inv_gaussian = fc.inverse_gaussian(mean, cv)
+    ax1.plot(ps_inv_gaussian, ts_inv_gaussian, color="k", ls="--")
 
-    # Simulation
-    ax2.set_ylim([0, 1.5*popt_exp[1]])
-    ax2.set_xlabel("$i$")
-    ax2.set_ylabel("$T_i$")
-    ax2.scatter(range(nr_isis_exp), isis_sim[:nr_isis_exp], ec=st.colors[1], fc="w", s=20, zorder=3)
-    ax2.plot(i_isis_exp, isis_sim_fit, lw=1, c="k", zorder=2)
-    ax2.axhline(popt_sim[0], ls=":", c="C7")
-    T0 = popt_sim[0]
-    ax2.axhline(popt_sim[1], ls=":", c="C7")
-    ax2.text(len(isis_exp)-3, popt_sim[0]*1.1, "$T_0$", ha="center")
-    ax2.text(3, popt_sim[1]*1.1, "$T_\infty$", ha="center")
+    ax2.set_ylabel("$P_0(T_{i})$")
+    ax2.set_xlim([xmin, xmax])
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+    ax2.hist(isis, bins=20, color=st.colors[1], density=True, alpha=0.6)
+    ax2.plot(ts_inv_gaussian, ps_inv_gaussian, color="k", ls="--")
 
-    ax3.set_xlim([-35, 100])
-    ax3.set_ylim([-35, 100])
-    ax3.set_xlabel("$T_\infty - T_{i}$")
-    ax3.set_ylabel("$T_\infty - T_{i+1}$")
+    ax3.set_ylim([-0.3, 0.05])
+    ax3.set_xlabel("$k$")
+    ax3.set_ylabel(r"$\rho_k$")
+    ax3.scatter(ks, rho_ks, fc="w", ec=st.colors[1], s=20, zorder=3)
     ax3.axhline(0, ls=":", c="C7")
-    ax3.axvline(0, ls=":", c="C7")
-    m_sim = np.exp(-1/popt_sim[2])
-    xs = np.linspace(-25, 100, 200)
-    ys = [m_sim*x for x in xs]
-    m_theo = np.exp(-popt_exp[1]/taua)*(1.-ampa)
-    ys2 = [m_theo * x for x in xs]
-    print(m_sim, m_theo)
-    ax3.scatter([popt_sim[1] - I for I in isis_sim[0:nr_isis_exp]], [popt_sim[1] - I for I in isis_sim[1:nr_isis_exp+1]], ec=st.colors[1], fc="w", s=20, zorder=3)
-    ax3.plot(xs, ys, lw=1, c="k", zorder=2)
-    ax3.plot(xs, ys2, lw=1, ls=":", c="k", zorder=2)
-    ax3.text(80, 80, r"$\alpha = e^{-T_\infty/\tau_a}(1 - \Delta)$", ha="right", va="center")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig4.pdf", transparent=True)
+    ax4.set_xlabel("$\omega$")
+    ax4.set_ylabel("$S(\omega)$")
+    ax4.set_xscale("log")
+    ax4.set_yscale("log")
+    ax4.set_xlim([0.001, 2])
+    ax4.plot(ws, spectrum, color=st.colors[1], label="unshuffled")
+    ax4.plot(ws, spectrum_shuffle, color=st.colors[0], label="shuffled")
+    ax4.legend(frameon=False, loc=4)
+
+    ax4.axhline((1. / mean), ls="--", c="C7")
+    ax4.axhline((1. / mean) * cv ** 2, ls="--", c="C7")
+
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig4.png", transparent=True)
     plt.show()
