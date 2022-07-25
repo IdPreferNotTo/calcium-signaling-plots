@@ -12,7 +12,7 @@ def transient_func(i, T0, T8, tau):
 
 if __name__ == "__main__":
     home = os.path.expanduser("~")
-    file_str = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
+    file_str = home + "/Data/calcium_spikes_experimental/Spikes/HEK/HEK2_bapta_ratio.dat"
     data = np.loadtxt(file_str)
     n = len(data[0])
     j = 13
@@ -64,21 +64,22 @@ if __name__ == "__main__":
     ax6 = fig.add_subplot(gs[2, 1])
     st.remove_top_right_axis([ax1, ax2, ax3, ax4, ax5, ax6])
 
-    ax1.text(0.1, 0.95, "A$_{i}$", fontsize=13, transform=ax1.transAxes, va='top')
-    ax2.text(0.075, 0.95, "A$_{ii}$", fontsize=13, transform=ax2.transAxes, va='top')
-    ax3.text(0.1, 0.95, "B$_{i}$", fontsize=13, transform=ax3.transAxes, va='top')
-    ax4.text(0.075, 0.95, "B$_{ii}$", fontsize=13, transform=ax4.transAxes, va='top')
-    ax5.text(0.1, 0.95, "C$_{i}$", fontsize=13, transform=ax5.transAxes, va='top')
-    ax6.text(0.075, 0.95, "C$_{ii}$", fontsize=13, transform=ax6.transAxes, va='top')
+    ax1.text(0.1, 0.95, r"A$_{\rm i}$", fontsize=13, transform=ax1.transAxes, va='top')
+    ax2.text(0.075, 0.95, r"A$_{\rm ii}$", fontsize=13, transform=ax2.transAxes, va='top')
+    ax3.text(0.1, 0.95, r"B$_{\rm i}$", fontsize=13, transform=ax3.transAxes, va='top')
+    ax4.text(0.075, 0.95, r"B$_{\rm ii}$", fontsize=13, transform=ax4.transAxes, va='top')
+    ax5.text(0.1, 0.95, r"C$_{\rm i}$", fontsize=13, transform=ax5.transAxes, va='top')
+    ax6.text(0.075, 0.95, r"C$_{\rm ii}$", fontsize=13, transform=ax6.transAxes, va='top')
 
     ax1.text(0.6, 1.00, "Data", fontsize=15, transform=ax1.transAxes, ha="center", va='top')
-    ax5.text(0.6, 1.00, "Cumulative \n refractoriness", fontsize=15, transform=ax5.transAxes, ha="center", va='top')
+    ax5.text(0.6, 1.00, "Cumulative \n refractory period", fontsize=15, transform=ax5.transAxes, ha="center", va='top')
     ax3.text(0.6, 1.00, "Renewal", fontsize=15, transform=ax3.transAxes, ha="center", va='top')
 
     ax1.set_xlabel("$t$ / s")
     ax1.set_xlim([0, 1000])
     ax1.plot(t_plot, ca_plot, c=st.colors[4])
-    ax1.set_ylabel("Ratio (340/380) / a.u.")
+    ax1.axhline(0.4, lw=1, ls=":", color="C7")
+    ax1.set_ylabel("$\Delta$F / a.u.")
 
     nr_ISIs = len(ISIs)
     index_ISIs = np.arange(nr_ISIs)
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     taua = 829
     ampa = 0.0309
     home = os.path.expanduser("~")
-    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap/"
+    folder = home + "/Data/calcium_spikes_markov/Data_adap/"
     file = f"ca_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
     file_spikes = f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
     data = np.loadtxt(folder + file)
@@ -147,7 +148,7 @@ if __name__ == "__main__":
     ax6.text(nr_ISIs/2, popt[0]*1.2, "$T_0$", ha="center")
     ax6.text(nr_ISIs/2, popt[1]*1.2, "$T_\infty$", ha="center")
 
-    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_no_adap/"
+    folder = home + "/Data/calcium_spikes_markov/Data_no_adap/"
     file = "ca_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
     file_spikes = "spike_times_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
     data = np.loadtxt(folder + file)
@@ -184,6 +185,6 @@ if __name__ == "__main__":
     ax4.axhline(popt[1], ls=":", lw=1, c="k")
     ax4.text(nr_ISIs / 2, popt[1] * 1.2, "$T_0 = T_\infty$", ha="center")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.png")
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.pdf")
     plt.show()
     plt.close()
