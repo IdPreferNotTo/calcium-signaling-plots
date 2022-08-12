@@ -132,13 +132,28 @@ if __name__ == "__main__":
     puff_index2 = puff_index1 + 1
     t_left = starts_ipi[puff_index1] - t_start
     t_right = stops_ipi[puff_index2] - t_start
+    for i, (t1, t2) in enumerate(zip(ts[:-1], ts[1:])):
+        if t1 <= t_start and t2 > t_start:
+            t_start_index = i
+        if t1 <= t_stop and t2 > t_stop:
+            t_stop_index = i+1
+        if t1 <= (t_left + t_start) and t2 > (t_left + t_start):
+            t_left_index = i
+        if t1 <= (t_right + t_start) and t2 > (t_right + t_start):
+            t_right_index = i+1
+
+    print(t_start_index, ts[t_start_index])
+    print(t_stop_index, ts[t_stop_index])
+    print(t_left, t_left_index, ts[t_left_index])
+    print(t_right, t_right_index, ts[t_right_index])
+
     Dt = t_right - t_left + 0.3
     # plt.rcParams['hatch.linewidth'] = 2
     ax_a1.axvspan(t_left - 0.05, t_right + 0.05, alpha=0.5, hatch='////', edgecolor=colors.green[1], facecolor="none")
     ax_b1.axvspan(t_left - 0.25, t_right + 0.25, alpha=0.5, hatch='/////', edgecolor=colors.green[1], facecolor="none")
 
-    ax_a1.plot(ts - t_start, xs, lw=1, color=colors.palette[0])
-    ax_a1.fill_between(ts - t_start, xs, color="#8B9FAF")
+    ax_a1.plot(ts[t_left_index:t_right_index] - t_start, xs[t_left_index:t_right_index], lw=1, color=colors.palette[0])
+    ax_a1.fill_between(ts[t_left_index:t_right_index] - t_start, xs[t_left_index:t_right_index], color="#8B9FAF")
     ax_a1.set_xlim([t_left - 0.15, t_right + 0.15])
     ax_a1.set_ylim([0, 6])
     ax_a1.text(stops_ipi[puff_index1] - t_start + 0.02, 3.5, "$A_{i}$", va="center", ha="center")
@@ -290,7 +305,7 @@ if __name__ == "__main__":
         ax_b1.arrow(t_right, height, -dt, 0, fc="k", length_includes_head=True, head_width=0.25,
                     head_length=0.5, lw=1.0, clip_on=False)
 
-    ax_b1.plot(ts - t_start, xs, lw=1, color=colors.palette[0])
+    ax_b1.plot(ts[t_start_index:t_stop_index] - t_start, xs[t_start_index:t_stop_index], lw=1, color=colors.palette[0])
     ax_b1.set_ylim([0, 7])
     ax_b1.set_xlim([0, t_stop - t_start])
 
