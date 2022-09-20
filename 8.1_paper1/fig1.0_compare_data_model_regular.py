@@ -100,57 +100,59 @@ if __name__ == "__main__":
     ax2.text(nr_ISIs/2, popt[0]*1.2, "$T_0$", ha="center")
     ax2.text(nr_ISIs/2, popt[1]*1.2, "$T_\infty$", ha="center")
 
-    taua = 829
-    ampa = 0.0309
-    home = os.path.expanduser("~")
-    folder = home + "/Data/calcium_spikes_markov/Data_adap/"
-    file = f"ca_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
-    file_spikes = f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
-    data = np.loadtxt(folder + file)
-    ts, cas, jpuffs, adaps = np.transpose(data)
-    ISIs = np.loadtxt(folder + file_spikes)
+    # taua = 829
+    # ampa = 0.0309
+    # home = os.path.expanduser("~")
+    # folder = home + "/Data/calcium_spikes_markov/Data_adap/"
+    # file = f"ca_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
+    # file_spikes = f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
+    # data = np.loadtxt(folder + file)
+    # ts, cas, jpuffs, adaps = np.transpose(data)
+    # ISIs = np.loadtxt(folder + file_spikes)
+    #
+    #
+    # ts_plot = []
+    # cas_plot = []
+    # n_spikes = 0
+    # for t, c, a in zip(ts, cas, adaps):
+    #     ts_plot.append(t + n_spikes * 10)
+    #     cas_plot.append(c)
+    #     if c == 1:
+    #         ts_plot.append(t + n_spikes * 10)
+    #         cas_plot.append(1 + 2*a)
+    #         ts_plot.append(t + n_spikes * 10)
+    #         cas_plot.append(0.33)
+    #         n_spikes += 1
+    # ax5.axhline(1, lw=1, ls=":", color="C7")
+    # ax5.set_xlim([0, 1000])
+    # ax5.set_xlabel("$t$ / s")
+    # ax5.set_ylim([0.2, 4])
+    # ax5.set_yticks([0.33, 1])
+    # ax5.set_yticklabels(["$c_R$", "$c_T$"])
+    # ax5.set_ylabel("$c_i$ / a.u.")
+    # ax5.plot(ts_plot, cas_plot, lw=1, color=st.colors[1])
+    #
+    # ax6.set_xlim([0, nr_ISIs])
+    # ax6.set_xlabel("$i$")
+    # ax6.set_ylim([0, 1.5 * popt[1]])
+    # ax6.set_ylabel("$T_i$ / s")
+    # ax6.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[1], s=20, zorder=3)
+    # ax6.fill_between([0, 10], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
+    # index_ISIs = np.arange(len(ISIs))
+    # popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(100, 150, 2))
+    # print(popt)
+    # ISI_fit = popt[0] * np.exp(-index_ISIs / popt[2]) + popt[1] * (1. - np.exp(-index_ISIs / popt[2]))
+    # ax6.plot(index_ISIs, ISI_fit, lw=1, c="k")
+    # ax6.axhline(popt[0], ls=":", lw=1, c="k")
+    # ax6.axhline(popt[1], ls=":", lw=1, c="k")
+    # ax6.text(nr_ISIs/2, popt[0]*1.2, "$T_0$", ha="center")
+    # ax6.text(nr_ISIs/2, popt[1]*1.2, "$T_\infty$", ha="center")
 
-
-    ts_plot = []
-    cas_plot = []
-    n_spikes = 0
-    for t, c, a in zip(ts, cas, adaps):
-        ts_plot.append(t + n_spikes * 10)
-        cas_plot.append(c)
-        if c == 1:
-            ts_plot.append(t + n_spikes * 10)
-            cas_plot.append(1 + 2*a)
-            ts_plot.append(t + n_spikes * 10)
-            cas_plot.append(0.33)
-            n_spikes += 1
-    ax5.axhline(1, lw=1, ls=":", color="C7")
-    ax5.set_xlim([0, 1000])
-    ax5.set_xlabel("$t$ / s")
-    ax5.set_ylim([0.2, 4])
-    ax5.set_yticks([0.33, 1])
-    ax5.set_yticklabels(["$c_R$", "$c_T$"])
-    ax5.set_ylabel("$c_i$ / a.u.")
-    ax5.plot(ts_plot, cas_plot, lw=1, color=st.colors[1])
-
-    ax6.set_xlim([0, nr_ISIs])
-    ax6.set_xlabel("$i$")
-    ax6.set_ylim([0, 1.5 * popt[1]])
-    ax6.set_ylabel("$T_i$ / s")
-    ax6.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[1], s=20, zorder=3)
-    ax6.fill_between([0, 10], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
-    index_ISIs = np.arange(len(ISIs))
-    popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(100, 150, 2))
-    print(popt)
-    ISI_fit = popt[0] * np.exp(-index_ISIs / popt[2]) + popt[1] * (1. - np.exp(-index_ISIs / popt[2]))
-    ax6.plot(index_ISIs, ISI_fit, lw=1, c="k")
-    ax6.axhline(popt[0], ls=":", lw=1, c="k")
-    ax6.axhline(popt[1], ls=":", lw=1, c="k")
-    ax6.text(nr_ISIs/2, popt[0]*1.2, "$T_0$", ha="center")
-    ax6.text(nr_ISIs/2, popt[1]*1.2, "$T_\infty$", ha="center")
-
+    tau = 12.6
+    j = 0.00631
     folder = home + "/Data/calcium_spikes_markov/Data_no_adap/"
-    file = "ca_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
-    file_spikes = "spike_times_markov_ip1.00_tau1.05e+01_j1.10e-02_N10_0.dat"
+    file = f"ca_markov_ip1.00_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
+    file_spikes = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
     data = np.loadtxt(folder + file)
     ts, cas, jpuffs, adaps = np.transpose(data)
     ISIs = np.loadtxt(folder + file_spikes)
@@ -161,28 +163,29 @@ if __name__ == "__main__":
     for t, c in zip(ts, cas):
         ts_plot.append(t + n_spikes*10)
         cas_plot.append(c)
-        if c == 1:
+        if c == 0.5:
            ts_plot.append(t + n_spikes*10)
-           cas_plot.append(3)
+           cas_plot.append(1.5)
            ts_plot.append(t + n_spikes*10)
-           cas_plot.append(0.33)
+           cas_plot.append(0.2)
            n_spikes += 1
 
-    ax3.axhline(1, lw=1, ls=":", color="C7")
+    ax3.axhline(0.5, lw=1, ls=":", color="C7")
     ax3.set_xlim([0, 1000])
     ax3.set_xlabel("$t$ / s")
-    ax3.set_ylim([0.2, 4])
-    ax3.set_yticks([0.33, 1])
+    ax3.set_ylim([0.15, 2])
+    ax3.set_yticks([0.2, 0.5])
     ax3.set_yticklabels(["$c_R$", "$c_T$"])
     ax3.set_ylabel("$c_i$ / a.u.")
-    ax3.plot(ts_plot, cas_plot, lw=1, color=st.colors[1])
+    ax3.plot(ts_plot, cas_plot, lw=1, color=st.colors[0])
 
     ax4.set_xlim([0, nr_ISIs])
     ax4.set_xlabel("$i$")
     ax4.set_ylim([0, 1.5 * popt[1]])
     ax4.set_ylabel("$T_i$ / s")
-    ax4.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[1], s=20, zorder=3)
-    ax4.axhline(popt[1], ls=":", lw=1, c="k")
+    ax4.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[0], s=20, zorder=3)
+    print(np.mean(ISIs))
+    ax4.axhline(np.mean(ISIs), ls=":", lw=1, c="k")
     ax4.text(nr_ISIs / 2, popt[1] * 1.2, "$T_0 = T_\infty$", ha="center")
 
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.pdf")

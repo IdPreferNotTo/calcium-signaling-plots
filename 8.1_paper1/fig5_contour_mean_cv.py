@@ -8,19 +8,20 @@ import os
 import styles as st
 
 if __name__ == "__main__":
-
+    pmax = 1.0
+    pmin = 0.001
+    tmax = 100
+    tmin = 0.1
     st.set_default_plot_style()
     fig = plt.figure(figsize=(9., 4.))
     w0 = 0.075
     h0 = 0.15
-
     w = 0.17
     h = 0.325
     w_cb = w/10
     dw1 = 0.11
     dw2 = 0.02
     dh = 0.1
-
     ax_mean_markov = fig.add_axes([w0, h0 + h + dh, w, h])
     ax_cv_markov = fig.add_axes([w0, h0, w, h])
 
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     cmap_cividis = plt.get_cmap("cividis", 8)
     cmap_coolwarm = plt.get_cmap("coolwarm", 8)
     cs_mean_markov = ax_mean_markov.pcolormesh(taus, js, ISI_markov, linewidth=0, rasterized=True, cmap=cmap_cividis,
-                                               norm=mcolors.SymLogNorm(linthresh=0.01, base=10, vmin=1., vmax=1000))
+                                               norm=mcolors.SymLogNorm(linthresh=0.01, base=10, vmin=1., vmax=100))
     divider = make_axes_locatable(ax_mean_markov)
     cax_mean_markov = divider.append_axes('right', size='5%', pad=0.05)
     cbar_mean_markov = fig.colorbar(cs_mean_markov, cax=cax_mean_markov, orientation='vertical')
@@ -60,11 +61,16 @@ if __name__ == "__main__":
     ax_mean_markov.set_ylabel(r"$p$")
     ax_mean_markov.set_xscale("log")
     ax_mean_markov.set_yscale("log")
+    ax_mean_markov.set_xlim([tmin, tmax])
+    ax_mean_markov.set_ylim([pmin, pmax])
+
     ax_mean_markov.set_xticklabels([])
     ax_cv_markov.set_ylabel(r"$p$")
     ax_cv_markov.set_xlabel(r"$\tau$")
     ax_cv_markov.set_xscale("log")
     ax_cv_markov.set_yscale("log")
+    ax_cv_markov.set_xlim([tmin, tmax])
+    ax_cv_markov.set_ylim([pmin, pmax])
 
 
     cs_cv_markov = ax_cv_markov.pcolormesh(taus, js, CV_markov, linewidth=0, rasterized=True, vmin=0., vmax=1.0, cmap=cmap_cividis)
@@ -74,16 +80,20 @@ if __name__ == "__main__":
     cbar_cv_markov.set_label(r"$CV_T$", loc="center")
     cbar_cv_markov.set_ticks([0, 0.5, 1])
 
-
-    for i, interpretation in enumerate(["Ito", "Stratonovich", "Hänggi"]):
+    interpretations = ["Ito", "Stratonovich", "Hänggi"]
+    for i, interpretation in enumerate(interpretations):
         ax_mean = fig.add_axes([w0 + w + w_cb + dw1 + i*(w + dw2), h0 + h + dh, w, h])
         ax_cv = fig.add_axes([w0 + w + w_cb + dw1 + i*(w + dw2), h0, w, h])
         ax_mean.set_xscale("log")
         ax_mean.set_yscale("log")
+        ax_mean.set_xlim([tmin, tmax])
+        ax_mean.set_ylim([pmin, pmax])
 
         ax_cv.set_xlabel(r"$\tau$")
         ax_cv.set_xscale("log")
         ax_cv.set_yscale("log")
+        ax_cv.set_xlim([tmin, tmax])
+        ax_cv.set_ylim([pmin, pmax])
         if interpretation == "Ito":
             interpret = "ito"
             ax_mean.set_ylabel("$p$")

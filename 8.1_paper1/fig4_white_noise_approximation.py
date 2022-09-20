@@ -72,15 +72,15 @@ if __name__ == "__main__":
     #axm1.arrow(0.02, 0.02, 0, 1 - 0.02, fc="k", lw=0.25, zorder=1)
 
     # Set up Parameters
-    ca1 = 0.33
-    ca2 = 0.99
+    ca1 = 0.20
+    ca2 = 0.50
     for i, ca in enumerate([ca1, ca2]):
         if i == 0:
-            plt_color = color.palette[1]
+            plt_color = color.palette[0]
         else:
-            plt_color = color.orange[1]
+            plt_color = color.palette[2]
             
-        ca_rest = 0.33
+        ca_rest = 0.2
         K = 10
         N = 5
         M = 3
@@ -119,8 +119,8 @@ if __name__ == "__main__":
         else:
             axm1.plot(corr_taus, corr_times, c=plt_color, zorder=2)
 
-        r_opn_s = 0.2
-        r_ref = 5
+        r_opn_s = 0.1
+        r_ref = 20
         r_cls = 50
 
         delta_t = ts[1] - ts[0]
@@ -135,6 +135,7 @@ if __name__ == "__main__":
         std_moment3s = []
         fs = np.arange(1, 100, 2)
         for f in fs:
+            print(f)
             jpuffs_f = fc.moving_coarse_grain_list(jpuffs, f)
             ms = []
             for k in range(10):

@@ -103,10 +103,10 @@ if __name__ == "__main__":
     ax_a1.set_xlabel("$t$ / s")
     ax_a1.set_ylabel("$x(t)$")
     folder = "/Data/calcium_spikes_markov/ca_fix/"
-    data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
+    data = np.loadtxt(home + folder + "puff_markov_cafix0.20_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
     data_tmp = []
 
-    data_no_ref = [(t, x, i) if x >= 0 else (t, 0, i) for (t, x, i) in data]
+    data_no_ref = [(t, x, i) if x >= 0 else (t, 0, i) for (t, x, i, n) in data]
     data2 = []
     for set1, set2 in zip(data_no_ref[:-1], data_no_ref[1:]):
         data2.append(set1)
@@ -126,12 +126,13 @@ if __name__ == "__main__":
             t_ipi_stop = elem[0]
             stops_ipi.append(t_ipi_stop)
 
-    t_start = 30
-    t_stop = 60
-    puff_index1 = 28
+    t_start = 70
+    t_stop = 120
+    puff_index1 = 39
     puff_index2 = puff_index1 + 1
     t_left = starts_ipi[puff_index1] - t_start
     t_right = stops_ipi[puff_index2] - t_start
+    print(t_left)
     for i, (t1, t2) in enumerate(zip(ts[:-1], ts[1:])):
         if t1 <= t_start and t2 > t_start:
             t_start_index = i
@@ -154,10 +155,10 @@ if __name__ == "__main__":
 
     ax_a1.plot(ts[t_left_index:t_right_index] - t_start, xs[t_left_index:t_right_index], lw=1, color=colors.palette[0])
     ax_a1.fill_between(ts[t_left_index:t_right_index] - t_start, xs[t_left_index:t_right_index], color="#8B9FAF")
-    ax_a1.set_xlim([t_left - 0.15, t_right + 0.15])
+    ax_a1.set_xlim([t_left - 0.40, t_right + 0.4])
     ax_a1.set_ylim([0, 6])
     ax_a1.text(stops_ipi[puff_index1] - t_start + 0.02, 3.5, "$A_{i}$", va="center", ha="center")
-    ax_a1.text(starts_ipi[puff_index2] - t_start + 0.05, 3.5, "$A_{i+1}$", va="center", ha="center")
+    ax_a1.text(starts_ipi[puff_index2] - t_start - 0.12, 3.5, "$A_{i+1}$", va="center", ha="center")
 
     line1, = ax_a1.plot([-1, -1], color=colors.palette[0], label="Sim.")
     line2, = ax_a1.plot([-1, -1], color=colors.palette[5], label="Theory")
@@ -191,19 +192,13 @@ if __name__ == "__main__":
     # Ass_by_n is the list that contains all those conditional Areas for varying numbers of total channels N.
     Ns = np.arange(1, 8)
     for N in Ns:
-        file = f"puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_{N:d}.dat"
+        file = f"puff_markov_cafix0.20_ip1.00_tau1.00e+00_j1.00e+00_K1_{N:d}.dat"
         data_n = np.loadtxt(home + folder + file)
         As = get_As(data_n)
         Ass.append(As)
         As_for_n = get_As_by_n0(data_n, N)
         Ass_over_n.append(As_for_n)
 
-    for n in range(1, 7):
-        for n0 in range(1, n + 1):
-            print(f"mean {n0:d}:", np.mean(Ass_over_n[n - 1][n0 - 1]), n0 * (n0 + 1) / 100)
-            print("var:", np.var(Ass_over_n[n - 1][n0 - 1]), n0 * (n0 + 1) * (2 * n0 + 1) / (6 * 50 ** 2))
-        print(np.mean(Ass[n - 1]), (n + 1) * (n + 2) / (6 * 50))
-        print(np.var(Ass[n - 1]), (n + 1) * (n + 1) * (n + 2) * (n + 2) / ((6 * 50) ** 2))
     Ass_theo = [(1 / 50) * (n + 1) * (n + 2) / 6 for n in Ns]
 
     Mean_of_VarA_over_n = []
@@ -259,12 +254,12 @@ if __name__ == "__main__":
     ax_a5.set_yticks([0.0, 0.5, 1.0])
     ax_a5.set_ylim([0, 1.5])
 
-    r_ref = 5
-    r_opn_single = 0.2
+    r_ref = 20
+    r_opn_single = 0.1
     # Subplot 1: x(t) over t
     ax_b1.set_xlabel("$t$ / s")
     ax_b1.set_ylabel("$x(t)$")
-    data_no_ref = [(t, x, i) if x >= 0 else (t, 0, i) for (t, x, i) in data]
+    data_no_ref = [(t, x, i) if x >= 0 else (t, 0, i) for (t, x, i, n) in data]
     data_plot = []
     for set1, set2 in zip(data_no_ref[:-1], data_no_ref[1:]):
         data_plot.append(set1)
@@ -289,16 +284,16 @@ if __name__ == "__main__":
         t_right = stops_ipi[puff_index1 +j] - t_start
         dt = t_right - t_left
         if j == -2:
-            height = 0.5
+            height = 1.5
             ax_b1.text((t_left + t_right) / 2, height + 1, "$...$", va="center", ha="center")
         elif j == -1:
-            height = 0.5
-            ax_b1.text((t_left + t_right) / 2, height +1, "$I_{i-1}$", va="center", ha="center")
+            height = 1.5
+            ax_b1.text((t_left + t_right) / 2, height + 1, "$I_{i-1}$", va="center", ha="center")
         elif j == 0:
             height = 2.5
             ax_b1.text((t_left + t_right) / 2, height + 3, "$I_{i}$", va="center", ha="center")
         else:
-            height = 0.5
+            height = 1.5
             ax_b1.text((t_left + t_right) / 2, height +1, "$...$", va="center", ha="center")
         ax_b1.arrow(t_left, height, dt, 0, fc="k", length_includes_head=True, head_width=0.25, head_length=0.5,
                     lw=1.0, clip_on=False)
@@ -310,16 +305,17 @@ if __name__ == "__main__":
     ax_b1.set_xlim([0, t_stop - t_start])
 
     # Subplot 2: IPI density
-    data_N1 = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_2.dat")
-    ipis_N1 = get_ipis(data_N1)
-    N = 2
+    data_cR = np.loadtxt(home + folder + "puff_markov_cafix0.20_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
+    ipis_cR = get_ipis(data_cR)
+    cv = np.std(ipis_cR)/np.mean(ipis_cR)
+    N = 5
     M = 3
     ropn = r_opn_single * N
     rref = r_ref
     mean = (M - 1) / rref + 1 / ropn
     var = (M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2
     dr = rref - ropn
-    ts = np.linspace(0, max(ipis), 100)
+    ts = np.linspace(0, max(ipis_cR), 100)
     p_ipi = []
     for t in ts:
         c3 = np.power(rref / dr, 2) * (1 - np.exp(-dr * t) * (dr * t + 1))
@@ -328,23 +324,25 @@ if __name__ == "__main__":
         p4 = c4 * np.exp(-ropn * t)
         p_ipi.append(ropn * p3)
     ax_b2.set_xlabel("$t$ / s")
-    ax_b2.set_ylabel("$p_I(t; N=2)$")
-    ax_b2.hist(ipis_N1, bins=50, color=colors.palette[0], density=True, label="$N=2$")
+    ax_b2.set_ylabel("$p_I(t; c_i=c_0)$")
+    ax_b2.hist(ipis_cR, bins=50, color=colors.palette[0], density=True)
     ax_b2.plot(ts, p_ipi, color=colors.palette[5])
+    ax_b2.set_xlim([0, 11])
     ax_b2.set_ylim([0, 0.6])
-    ax_b2.set_xlim([0, 10])
 
     # Subplot 2: IPI density
-    data_N5 = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
-    ipis_N5 = get_ipis(data_N5)
+    data_cT = np.loadtxt(home + folder + "puff_markov_cafix0.50_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
+    ipis_cT = get_ipis(data_cT)
+    cv = np.std(ipis_cT)/np.mean(ipis_cT)
     N = 5
     M = 3
-    ropn = r_opn_single * N
+    ropnmax =  N*r_opn_single*((1. + np.power(0.20, 3))/np.power(0.20, 3))
+    ropn = ropnmax * (np.power(0.5, 3) / (1. + np.power(0.5, 3)))
     rref = r_ref
     mean = (M - 1) / rref + 1 / ropn
     var = (M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2
     dr = rref - ropn
-    ts = np.linspace(0, max(ipis), 100)
+    ts = np.linspace(0, max(ipis_cT), 100)
     p_ipi = []
     for t in ts:
         c3 = np.power(rref / dr, 2) * (1 - np.exp(-dr * t) * (dr * t + 1))
@@ -353,19 +351,19 @@ if __name__ == "__main__":
         p4 = c4 * np.exp(-ropn * t)
         p_ipi.append(ropn * p3)
     ax_b3.set_xlabel("$t$ / s")
-    ax_b3.set_ylabel("$p_I(t; N =5)$")
-    ax_b3.hist(ipis_N5, bins=50, color=colors.palette[0], density=True, label="$N=5$")
+    ax_b3.set_ylabel("$p_I(t; c_i=c_T)$")
+    ax_b3.hist(ipis_cT, bins=50, color=colors.palette[0], density=True)
     ax_b3.plot(ts, p_ipi, color=colors.palette[5])
-    ax_b3.set_ylim([0, 0.6])
-    ax_b3.set_xlim([0, 10])
+    ax_b3.set_ylim([0, 6])
+    ax_b3.set_xlim([0, 1.1])
 
     ts = np.linspace(0, 1, 101)
     Iss = []
     std_Is = []
     mean_Is = []
-    CV_Is = []
+    CV2_Is = []
     for N in Ns:
-        file = f"puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_{N:d}.dat"
+        file = f"puff_markov_cafix0.20_ip1.00_tau1.00e+00_j1.00e+00_K1_{N:d}.dat"
         data_n = np.loadtxt(home + folder + file)
         Is = get_ipis(data_n)
         Iss.append(Is)
@@ -374,24 +372,22 @@ if __name__ == "__main__":
         std = np.sqrt((M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2)
         mean_Is.append(mean)
         std_Is.append(std)
-        CV_Is.append(std / mean)
+        CV2_Is.append(std ** 2 / mean ** 2)
 
+    ax_b4.set_ylim([0, 0.6])
     ax_b4.set_xlabel("$N$")
     ax_b4.set_xticks(Ns)
     ax_b4.set_ylabel(r"$\langle I \rangle^{-1}$ / s$^{-1}$")
     ax_b4.scatter(Ns, [1 / np.mean(Is) for Is in Iss], ec=colors.palette[0], fc="w", s=15, zorder=2)
     ax_b4.plot(Ns, [1 / mean_I for mean_I in mean_Is], c=colors.palette[5], zorder=1)
-    ax_b4.set_yticks([0, 0.5, 1])
-    ax_b4.set_ylim([0, 1.1])
 
     ax_b5.set_xlabel("$N$")
     ax_b5.set_xticks(Ns)
     ax_b5.set_ylabel(r"${CV}_I^2$")
     ax_b5.scatter(Ns, [np.var(Is) / np.mean(Is) ** 2 for Is in Iss], ec=colors.palette[0], fc="w", s=15, zorder=2)
-    ax_b5.plot(Ns, [std_I ** 2 / mean_I ** 2 for std_I, mean_I in zip(std_Is, mean_Is)], c=colors.palette[5],
-               zorder=1)
+    ax_b5.plot(Ns, CV2_Is, c=colors.palette[5], zorder=1)
     ax_b5.set_yticks([0, 0.5, 1])
-    ax_b5.set_ylim([0, 1.1])
+    ax_b5.set_ylim([0, 1.3])
 
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig2b.pdf", transparent=True)
     plt.show()

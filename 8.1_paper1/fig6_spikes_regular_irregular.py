@@ -28,7 +28,7 @@ if __name__ == "__main__":
     ax41 = fig.add_subplot(gs21[0:2])
     ax42 = fig.add_subplot(gs21[2])
     ax5 = fig.add_subplot(gs22[0])
-    axin5 = ax5.inset_axes([0.22, 0.65, 0.35, 0.35])
+    axin5 = ax5.inset_axes([0.65, 0.65, 0.35, 0.35])
     ax6 = fig.add_subplot(gs23[0])
 
 
@@ -45,19 +45,19 @@ if __name__ == "__main__":
     ax6.text(0.05, 0.95, r"B$_{\rm iii}$", fontsize=13, transform=ax6.transAxes, va='top')
     home = os.path.expanduser("~")
     # Plot regular spiketrain
-    taus = [4.47, 1.26]
-    js = [0.0178, 0.0562]
+    taus = [5.62, 1.78]
+    js = [0.0126, 0.0355]
     for k, (tau, j, axis) in enumerate(zip(taus, js, axiss)):
 
         ax11, ax12, ax2, axin2, ax3 = axis
-        ca_r = 0.33
-        ca_t = 1.00
+        ca_r = 0.20
+        ca_t = 0.50
         N = 10
         n = 5
         m = 3
         ip3 = 1.0
-        r_opn_single = 0.2
-        r_ref = 5
+        r_opn_single = 0.1
+        r_ref = 20
 
         # Get Data
         folder = home + "/Data/calcium_spikes_markov/Data_no_adap/"
@@ -65,6 +65,7 @@ if __name__ == "__main__":
         file_spikes = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
         data_calcium = np.loadtxt(folder + file_calcium)
         data_isis = np.loadtxt(folder + file_spikes)
+        print(len(data_isis))
         ts, cas, jpuffs, adaps = np.transpose(data_calcium)
 
         folder_langevin = home + "/Data/calcium_spikes_langevin_strat/Data_no_adap/"
@@ -87,16 +88,13 @@ if __name__ == "__main__":
         r0 = np.loadtxt(file_r0_theory)
         mean_isi_langevin = 1/r0
 
-        file_cv_theory = home + f"/Data/calcium_spikes_theory/coefficient_of_variation/cv_ip1.00_tau{tau:.2e}_j{j:.2e}_K10.dat"
-        cv = np.loadtxt(file_cv_theory)
-        cv_isi_langevin = cv
         if k == 0:
-            plt_color = color.palette[1]
+            plt_color = color.palette[0]
         else:
-            plt_color = color.orange[1]
+            plt_color = color.palette[2]
             
         #Get drift
-        xs = np.linspace(0.3, 1, 100)
+        xs = np.linspace(0.2, 0.5, 100)
         dx = xs[1] - xs[0]
         ca_drifts = []
         for x in xs:
@@ -109,7 +107,7 @@ if __name__ == "__main__":
         max_i = 0
         max_spikes = 5
         while count < max_spikes:
-            if cas[max_i] == 1:
+            if cas[max_i] == 0.5:
                 count += 1
                 spike_times.append(ts[max_i])
             max_i += 1
@@ -122,7 +120,7 @@ if __name__ == "__main__":
         ax2.hist(cas, bins=25, density=True, alpha=0.5, color=plt_color)
         ax2.plot(ca_theory[::100], p0_theory[::100], color=color.palette[5])
         axin2.plot(xs, ca_drifts, color=plt_color)
-        axin2.set_title(r"$g(c_{\rm i})$")
+        axin2.set_title(r"$f(c_{\rm i})$", fontsize=11)
         axin2.set_yticks([0])
         axin2.axhline(0, lw=1, ls=":", color="C7")
         if k == 0:
@@ -134,9 +132,9 @@ if __name__ == "__main__":
         print(mean_isi, cv_isi)
         #print(mean_isi, mean_isi_theory, cv_isi, cv_theory)
         if k == 0:
-            ax3.hist(data_isis, bins=20, color=color.palette[1], density=True, alpha=0.5)
+            ax3.hist(data_isis, bins=20, color=plt_color, density=True, alpha=0.5)
         else:
-            ax3.hist(data_isis, bins=50, color=color.orange[1], density=True, alpha=0.5)
+            ax3.hist(data_isis, bins=50, color=plt_color, density=True, alpha=0.5)
 
 
         ts_inv_gau = np.linspace(1, 200, 1001)
@@ -165,11 +163,11 @@ if __name__ == "__main__":
             x_left = spike_times[i]
             x_right = spike_times[i+1]
             dx = spike_times[i+1] - spike_times[i]
-            ax11.text(x_left + dx/2, 1.20, f"$T_{i+1}$", ha="center", va="center", clip_on=False)
+            ax11.text(x_left + dx/2, 0.60, f"$T_{i+1}$", ha="center", va="center", clip_on=False)
 
-            ax11.arrow(x_left + 0.05*dx, 1.10, 0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
+            ax11.arrow(x_left + 0.05*dx, 0.55, 0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
                     clip_on=False)
-            ax11.arrow(x_right -0.05*dx, 1.10, -0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
+            ax11.arrow(x_right -0.05*dx, 0.55, -0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
                     clip_on=False)
 
         #ax0.set_xlabel("$t$ / s")
@@ -184,13 +182,13 @@ if __name__ == "__main__":
         ax12.set_xlabel("$t$ / s")
         ax12.set_xlim([0, spike_times[max_spikes - 1] + 20])
         ax12.set_ylabel(r"$j_{\rm puff}$")
-        ax12.set_ylim([0,1.5])
+        ax12.set_ylim([0, 0.7])
 
-        ax2.set_ylim([0, 4])
+        ax2.set_ylim([0, 11])
         ax2.set_xlabel(r"$c_{\rm i}$")
         ax2.set_ylabel(r"$p_0(c_{\rm i})$")
 
-        ax2.set_xticks([0.33, 1.0])
+        ax2.set_xticks([ca_r, ca_t])
         ax2.set_xticklabels(["$c_0$", "$c_T$"])
         axin2.set_xticks([ca_r, ca_t])
         axin2.set_xticklabels(["$c_0$", "$c_T$"])
