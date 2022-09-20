@@ -20,7 +20,7 @@ if __name__ == "__main__":
     print(tau, jca)
 
     # Load Data
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/Data_no_adap/"
+    folder = "/Data/calcium_spikes_markov/Data_no_adap/"
     file_ca = "ca_markov_ip1.00_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, jca, N)
     file_spikes = "spike_times_markov_ip1.00_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, jca, N)
     ca_data = np.loadtxt(home + folder + file_ca)

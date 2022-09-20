@@ -18,7 +18,7 @@ if __name__ == "__main__":
     m = 4
     n = 5
     home = os.path.expanduser("~")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/Data_no_adap/"
+    folder = "/Data/calcium_spikes_markov/Data_no_adap/"
     file = f"ca_markov_ip1.00_tau{tau:.2e}_j{jca:.2e}_N10_0.dat"
     file_spike = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{jca:.2e}_N{N:d}_0.dat"
     data = np.loadtxt(home + folder + file)
@@ -117,6 +117,6 @@ if __name__ == "__main__":
     ax.set_ylabel(r"$\mu, \sqrt{2D_N}$")
     ax.set_xlim([0, 1])
     ax.legend()
-    plt.savefig(home + "/Data/Calcium/Plots/puff_current_mean_var_dynamic.pdf", transparent=True)
+    plt.savefig(home + "/Plots/puff_current_mean_var_dynamic.pdf", transparent=True)
 
     plt.show()

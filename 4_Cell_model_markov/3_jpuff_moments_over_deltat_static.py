@@ -15,7 +15,7 @@ if __name__ == "__main__":
     jca = 1
     tau = 1
     home = os.path.expanduser("~")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+    folder = "/Data/calcium_spikes_markov/ca_fix/"
     file = "ca_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix)
     data = np.loadtxt(home + folder + file)
     ts, cas, jpuffs, adaps = np.transpose(data)

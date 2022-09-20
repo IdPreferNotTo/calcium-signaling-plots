@@ -14,7 +14,7 @@ if __name__ == "__main__":
     n_cha = 4
     n_clu = 10
     home = os.path.expanduser("~")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/"
+    folder = "/Data/calcium_spikes_markov/"
     file = f"ca_markov_ip1.00_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     file_spike = f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     data = np.loadtxt(home + folder + file)

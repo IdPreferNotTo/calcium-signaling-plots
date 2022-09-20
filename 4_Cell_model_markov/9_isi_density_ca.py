@@ -17,14 +17,14 @@ if __name__ == "__main__":
     # Parameters
     taus = np.logspace(-1, 2, 50)
     jcas = np.logspace(-3, 0, 50)
-    tau = taus[30]
-    jca = jcas[25]
+    tau = 1.68
+    jca = 0.0596
     m = 4
     n = 5
     N = 10
     print(tau, jca)
     # Load Data
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/Data_no_adap/"
+    folder = "/Data/calcium_spikes_markov/Data_no_adap/"
     file_spikes = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{jca:.2e}_N{N:d}_0.dat"
     isi_data = np.loadtxt(home + folder + file_spikes)
 
@@ -46,11 +46,11 @@ if __name__ == "__main__":
 
 
     ax.plot(ts, inv_gaus, lw=1, c="k", label="Inverse Gaussian")
-    ax.hist(isi_data, bins=50, density=True, alpha=.6, color="C0", label=f"$P(I)$ \n $\mu =$ {mean_isi:.1f} \n $C_V = {cv_isi:.2f}$")
+    ax.hist(isi_data, bins=50, density=True, alpha=.6, color="C0", label=f"$P(I)$ \n $<T> =$ {mean_isi:.1f} \n $CV_T = {cv_isi:.2f}$")
 
     legend = ax.legend(loc=1, fancybox=False, edgecolor="k", framealpha=1.0)
     legend.get_frame().set_linewidth(0.5)
     ax.set_ylabel(r"$P(I)$")
     ax.set_xlabel(r"$I$ [s]")
-    plt.savefig(home + "/Data/Calcium/Plots/ca_isi_probability.pdf", transparent=True)
+    #plt.savefig(home + "/Data/Calcium/Plots/ca_isi_probability.pdf", transparent=True)
     plt.show()

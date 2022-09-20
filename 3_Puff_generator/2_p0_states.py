@@ -25,7 +25,7 @@ if __name__ == "__main__":
     r_ref = 1.3 * np.power(ca / ca_rest, 3) * (1 + ca_rest ** 3) / (1 + ca ** 3)
     r_cls = 50
 
-    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+    folder = home + "/Data/calcium_spikes_markov/ca_fix/"
     data = np.loadtxt(folder + f"puff_markov_cafix{ca:.2f}_ip{ip3:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat")
     data_tmp = []
     for x in data:

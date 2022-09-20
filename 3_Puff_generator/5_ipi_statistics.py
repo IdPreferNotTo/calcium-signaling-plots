@@ -37,8 +37,8 @@ if __name__ == "__main__":
     # Subplot 1: x(t) over t
     ax0.set_xlabel("$t$ / s")
     ax0.set_ylabel("$x(t)$")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
-    data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_5.dat")
+    folder = "/Data/calcium_spikes_markov/ca_fix/"
+    data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
 
     data_no_ref = [(t, x, i) if x>= 0 else (t, 0, i) for (t, x, i) in data]
     data_plot = []
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     Ass = []
     num_chas = np.arange(1, 7)
     for num_cha in num_chas:
-        file = f"puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_{num_cha:d}.dat"
+        file = f"puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_{num_cha:d}.dat"
         data_n = np.loadtxt(home + folder + file)
         ipis = get_ipis(data_n)
         r = 0.1
@@ -128,5 +128,5 @@ if __name__ == "__main__":
     ax2.text(5.2, 1.5, "$m$")
     ts = np.linspace(0, 1, 101)
 
-    plt.savefig(home + "/Data/Calcium/Plots/puff_gen_ipi_statistics.pdf", transparent=True)
+    #plt.savefig(home + "/Data/Calcium/Plots/puff_gen_ipi_statistics.pdf", transparent=True)
     plt.show()

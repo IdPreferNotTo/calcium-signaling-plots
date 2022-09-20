@@ -11,7 +11,7 @@ if __name__ == "__main__":
     j = 0.0146
     N = 10
     home = os.path.expanduser("~")
-    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap"
+    folder = home + "/Data/calcium_spikes_markov/Data_adap"
     with open(home + f"/Data/Calcium/data/markov_adap_parameters_tau{tau:.2e}_j{j:.2e}.dat", "w") as outfile:
         outfile.write("# taua | ampa | T0 | T_infty | tau_eff | n \n")
         for i in range(50):

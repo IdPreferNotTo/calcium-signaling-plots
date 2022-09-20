@@ -22,7 +22,7 @@ if __name__ == "__main__":
     ampa = 0.05
     home = os.path.expanduser("~")
     print("Load Data...")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap_fix_adap_para/"
+    folder = "/Data/calcium_spikes_markov/Data_adap/"
     file = f"ca_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     file_spike =  f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     data = np.loadtxt(home + folder + file)
@@ -85,5 +85,5 @@ if __name__ == "__main__":
     xs_ing, ys_ing = inverse_gaussian(mean_isi, cv_isi)
     ax4.plot(xs_exp, ys_exp)
     ax4.plot(xs_ing, ys_ing)
-    plt.savefig(home + f"/Data/Calcium/Plots/7_markov_ca_adap_timeseries_tau{tau:.2e}j{j:.2e}.pdf", transparent=True)
+    plt.savefig(home + f"/Plots/7_markov_ca_adap_timeseries_tau{tau:.2e}j{j:.2e}.pdf", transparent=True)
     plt.show()

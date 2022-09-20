@@ -20,7 +20,7 @@ if __name__ == "__main__":
     ampa = 0.2
     home = os.path.expanduser("~")
 
-    folder = "/CLionProjects/PhD/calcium_spikes_langevin/out/"
+    folder = "/Data/calcium_spikes_langevin/"
     file = f"ca_langevin_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     file_spike =  f"spike_times_langevin_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     data = np.loadtxt(home + folder + file)

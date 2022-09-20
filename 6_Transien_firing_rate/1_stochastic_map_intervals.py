@@ -33,7 +33,7 @@ if __name__ == "__main__":
     tau = 10.5
     j = 0.0146
     home = os.path.expanduser("~")
-    folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap/"
+    folder = home + "/Data/calcium_spikes_markov/Data_adap/"
     file = f"ca_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau{tau:.2e}_j{j:.2e}_N10_0.dat"
     file_spikes = f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_0.dat"
     data = np.loadtxt(folder + file)

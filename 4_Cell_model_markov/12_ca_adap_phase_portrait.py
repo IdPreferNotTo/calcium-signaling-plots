@@ -3,63 +3,69 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from functions import *
 
+import functions as fc
+import styles as st
 if __name__ == "__main__":
-    tau = 2.81
-    jca = 0.0728
-    taua = 100
-    ampa = 0.2
-    n_cl = 10
+    tau = 0.2
+    jca = 0.501
+    taua = 500
+    ampa = 0.05
+    N = 10
+    n = 5
+    m= 4
+    ip3 = 1.0
 
-    xmin = 0.2
-    ymin = 0.5
-    xs = np.linspace(xmin, 1, 21, endpoint=True)
-    ys = np.linspace(ymin, 1, 21, endpoint=True)
-    dxs = np.zeros((21, 21))
-    dys = np.zeros((21, 21))
-    dvs = np.zeros((21, 21))
-    for i, y in enumerate(ys):
-        for j, x in enumerate(xs):
-            if x == 0:
-                dxs[i, j] = -(x - 0.33)/tau
+    ca_r = 0.33
+    ca_t = 1.00
+    ca_i_min = 0.2
+    ca_er_min = 0.5
+    ca_is = np.linspace(ca_i_min, 1, 51, endpoint=True)
+    ca_ers = np.linspace(ca_er_min, 1, 51, endpoint=True)
+    dxs = np.zeros((51, 51))
+    dys = np.zeros((51, 51))
+    dvs = np.zeros((51, 51))
+    for i, ca_er in enumerate(ca_ers):
+        for j, ca_i in enumerate(ca_is):
+            if ca_i == 0:
+                dxs[i, j] = -(ca_i - ca_r) / tau
             else:
-                dxs[i,j] = -(x - 0.33)/tau + y*jca*n_cl*mean_puff_single(x)
-            dys[i,j] = (1-y)/taua
+                dxs[i,j] = -(ca_i - ca_r) / tau + ca_er * jca * N * fc.mean_puff_single(ca_i, n, m, ip3)
+            dys[i,j] = (1 - ca_er) / taua
             dvs[i,j] = np.sqrt(dxs[i, j]**2 + dys[i, j]**2)
-    #dvs = np.sqrt(dxss ** 2 + dyss ** 2)
 
+    ca_i_fix = tau*jca * N * fc.mean_puff_single(ca_i, n, m, ip3) + ca_r
     x_lc = []
     y_lc = []
-    x = 0.33
-    y = 1.00
+    ca_i = 0.33
+    ca_er = 1.00
     dt = 0.01
     spike_count = 0
     while spike_count < 100:
-        x += -(x - 0.33)/tau + y*jca*n_cl*mean_puff_single(x)
-        y += (1-y)/taua
-        if x > 1.:
-            x = 0.33
-            y -= 0.2*y
+        ca_i += -(ca_i - 0.33) / tau + ca_er * jca * N * fc.mean_puff_single(ca_i, n, m, ip3)
+        ca_er += (1 - ca_er) / taua
+        if ca_i > 1.:
+            ca_i = 0.33
+            ca_er -= ampa * ca_er
             spike_count += 1
     spike_count = 0
     while spike_count < 1:
-        x_lc.append(x)
-        y_lc.append(y)
-        x += -(x - 0.33) / tau + y * jca * n_cl * mean_puff_single(x)
-        y += (1 - y) / taua
-        if x > 1.:
+        x_lc.append(ca_i)
+        y_lc.append(ca_er)
+        ca_i += -(ca_i - 0.33) / tau + ca_er * jca * N * fc.mean_puff_single(ca_i, n, m, ip3)
+        ca_er += (1 - ca_er) / taua
+        if ca_i > 1.:
             x_lc.append(1)
-            y_lc.append(y)
-            y -= 0.2 * y
+            y_lc.append(ca_er)
+            ca_er -= 0.2 * ca_er
             x_lc.append(1)
-            y_lc.append(y)
-            x = 0.33
-            x_lc.append(x)
-            y_lc.append(y)
+            y_lc.append(ca_er)
+            ca_i = 0.33
+            x_lc.append(ca_i)
+            y_lc.append(ca_er)
             spike_count += 1
 
-    set_default_plot_style()
+    st.set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(4, 6 / 2))
     gs = gridspec.GridSpec(1, 1)
     ax = fig.add_subplot(gs[:])
@@ -67,9 +73,9 @@ if __name__ == "__main__":
     ax.set_xlabel(r"[Ca\textsuperscript{2+}]$_{\rm i}$ [a.u.]")
     ax.set_xlim([xmin, 1.05])
     ax.set_ylim([ymin, 1.05])
-    remove_top_right_axis([ax])
+    st.remove_top_right_axis([ax])
     #strm = ax.streamplot(xs, ys, dxs, dys, color=dvs, arrowsize=0.75, linewidth=0.3, cmap="cividis")
-    strm = ax.streamplot(xs, ys, dxs, dys, color="C7", arrowsize=0.75, linewidth=0.3)
+    strm = ax.streamplot(ca_is, ca_ers, dxs, dys, color="C7", arrowsize=0.75, linewidth=0.3)
 
     ax.plot(x_lc, y_lc, lw=1, c="k")
     ax.arrow(1, 0.75, dx=0, dy=-0.05, shape="full", fc="k", lw=0, length_includes_head=True,
@@ -83,5 +89,5 @@ if __name__ == "__main__":
     ax.axvline(0.33, ls=":", lw=1, c="k")
     ax.axvline(1, ls="--", lw=1, c="k")
     home = os.path.expanduser("~")
-    plt.savefig(home + f"/Data/Calcium/Plots/8_markov_ca_adap_phaseportrait_tau{tau:.2e}j{jca:.2e}.pdf", transparent=True)
+    plt.savefig(home + f"/Plots/8_markov_ca_adap_phaseportrait_tau{tau:.2e}j{jca:.2e}.pdf", transparent=True)
     plt.show()

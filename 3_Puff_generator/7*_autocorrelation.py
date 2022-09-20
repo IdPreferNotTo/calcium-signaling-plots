@@ -67,8 +67,8 @@ def plot_correlation_function():
     ca_rest = 0.33
     home = os.path.expanduser("~")
 
-    ca_fix1 = 0.3
-    file = home + "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/puff_markov_cafix{:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix1)
+    ca_fix1 = 0.33
+    file = home + "/Data/calcium_spikes_markov/ca_fix/puff_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K10_5.dat".format(ca_fix1)
     data = np.loadtxt(file)
     t0 = data[0][0]
     data = [[set[0]-t0, set[1], set[2]] for set in data]
@@ -93,7 +93,7 @@ def plot_correlation_function():
     n = 0
     dt = 0.01
     print("Fill Data")
-    for t in np.linspace(0, 2_000, 200_000):
+    for t in np.linspace(0, 900, 90_000):
         if t < data_single_cluster_without_ref[n+1][0]:
             x = data_single_cluster_without_ref[n][1]
             data_single_cluster_filled.append(x)
@@ -110,8 +110,8 @@ def plot_correlation_function():
         integral_corr += corr*dt
     print(integral_corr)
 
-    ca_fix2 = 0.9
-    file = home + "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/puff_markov_cafix{:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix2)
+    ca_fix2 = 0.99
+    file = home + "/Data/calcium_spikes_markov/ca_fix/puff_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K10_5.dat".format(ca_fix2)
     data = np.loadtxt(file)
     t0 = data[0][0]
     data = [[set[0]-t0, set[1], set[2]] for set in data]
@@ -136,7 +136,7 @@ def plot_correlation_function():
     n = 0
     dt = 0.01
     print("Fill Data")
-    for t in np.linspace(0, 2_000, 200_000):
+    for t in np.linspace(0, 900, 90_000):
         if t < data_single_cluster_without_ref[n+1][0]:
             x = data_single_cluster_without_ref[n][1]
             data_single_cluster_filled.append(x)
@@ -168,7 +168,7 @@ def plot_correlation_function():
         D_theory += xs[k] * p0s[k] * sum_over_i
     print(D_theory)
 
-    file_ca = home + "/CLionProjects/PhD/calcium_spikes_markov/out/fixed calcium/ca_markov_cafix{:.2f}_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix1)
+    file_ca = home + "/Data/calcium_spikes_markov/ca_fix/ca_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K10_5.dat".format(ca_fix1)
     data = np.loadtxt(file_ca)
     ts, cas, jpuffs, adaps = np.transpose(data)
     var = 0.1 * np.var(jpuffs) /(2.*10)
@@ -208,7 +208,7 @@ def plot_correlation_function():
     ax2.fill_between(taus, correlations2, 0, facecolor="C0", alpha=0.5, zorder=2)
     ax2.legend()
 
-    plt.savefig(home + "/Data/Calcium/Plots/cluster_correlation_ca{:.2f}_and_ca{:.2f}.pdf".format(ca_fix1, ca_fix2), transparent=True)
+    #plt.savefig(home + "/Data/Calcium/Plots/cluster_correlation_ca{:.2f}_and_ca{:.2f}.pdf".format(ca_fix1, ca_fix2), transparent=True)
     plt.show()
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ if __name__ == "__main__":
     n_clu = 10
     print(tau, j)
     # Load Data
-    folder = "/CLionProjects/PhD/calcium_spikes_langevin/out/"
+    folder = "/Data/calcium_spikes_langevin/"
     file_ca = "ca_langevin_ip1.00_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, j, n_clu)
     file_spikes = "spike_times_langevin_ip1.00_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, j, n_clu)
     ca_data = np.loadtxt(home + folder + file_ca)

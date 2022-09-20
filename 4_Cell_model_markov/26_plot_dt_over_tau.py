@@ -22,5 +22,5 @@ if __name__ == "__main__":
         for j in np.logspace(-3, 0, 31):
             for tau in np.logspace(-1, 2, 31):
                 N += 1
-                file_str = home + "/CLionProjects/PhD/calcium_spikes_markov/out/Data_adap_fix_adap_para/spike_times_markov_ip1.00_taua5.00e+02_ampa5.00e-02_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(
+                file_str = home + "/Data/calcium_spikes_markov/Data_adap_fix_adap_para/spike_times_markov_ip1.00_taua5.00e+02_ampa5.00e-02_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(
                     tau, j, n_clu)

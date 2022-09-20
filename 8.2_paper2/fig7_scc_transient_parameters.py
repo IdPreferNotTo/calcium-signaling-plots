@@ -34,8 +34,8 @@ if __name__ == "__main__":
         ax.axhline(0, ls=":", c="C7")
 
     home = os.path.expanduser("~")
-    folder = home + "/CLionProjects/PhD/calcium_spikes_langevin/out/Data_adap"
-    folder_no_adap = home + "/CLionProjects/PhD/calcium_spikes_langevin/out/Data_no_adap"
+    folder = home + "/Data/calcium_spikes_langevin/Data_adap"
+    folder_no_adap = home + "/Data/calcium_spikes_langevin/Data_no_adap"
     tau = np.logspace(-1, 2, 50)[33]
     jca = np.logspace(-3, 0, 50)[19]
     amp_as = np.logspace(-2, 0, 41)

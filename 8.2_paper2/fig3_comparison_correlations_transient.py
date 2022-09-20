@@ -37,7 +37,7 @@ if __name__ == "__main__":
     home = os.path.expanduser("~")
     isis = []
     for i in range(10):
-        folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/P2F3"
+        folder = home + "/Data/calcium_spikes_markov/paper2_fig3"
         file_isi = f"/spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_{i:d}.dat"
         isis_full = np.loadtxt(folder + file_isi)
         for I in isis_full[100:]:
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     home = os.path.expanduser("~")
     isis = []
     for i in range(10):
-        folder = home + "/CLionProjects/PhD/calcium_spikes_markov/out/P2F3"
+        folder = home + "/Data/calcium_spikes_markov/paper2_fig3"
         file_isi = f"/spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.05e+01_j1.46e-02_N10_{i:d}.dat"
         isis_full = np.loadtxt(folder + file_isi)
         for I in isis_full[100:]:

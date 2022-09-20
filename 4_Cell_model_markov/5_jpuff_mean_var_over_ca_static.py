@@ -29,7 +29,7 @@ if __name__ == "__main__":
         m = 4
         jca = 1
         tau = 1
-        folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+        folder = "/Data/calcium_spikes_markov/ca_fix/"
         file = "ca_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix)
         data = np.loadtxt(home + folder + file)
         ts, cas_sim, jpuffs, adaps = np.transpose(data)
@@ -125,5 +125,5 @@ if __name__ == "__main__":
     legend.get_frame().set_linewidth(0.5)
 
     # Save and show figure
-    plt.savefig(home + "/Data/Calcium/Plots/puff_current_mean_var_static.pdf", transparent=True)
+    plt.savefig(home + "/Plots/puff_current_mean_var_static.pdf", transparent=True)
     plt.show()

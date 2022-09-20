@@ -12,20 +12,20 @@ def print_mean_CV_to_file():
     N = 0
     taua = 100
     ampa = 0.2
-    n_cha = 4
-    n_clu = 10
-    taus = np.logspace(-1, 2, 30)
-    js = np.logspace(-3, 0, 30)
-    with open(home + "/Data/Calcium/data/langevin_ca_mean_CV_nClu{:d}_nCha{:d}_rclose50_no_adap.dat".format(n_clu, n_cha),
+    N = 5
+    K = 10
+    taus = np.logspace(-1, 2, 61)
+    js = np.logspace(-3, 0, 61)
+    with open(home + "/Data/calcium_spikes_theory/langevin_strat_ca_mean_CV_K{:d}_N{:d}_no_adap.dat".format(K, N),
               "w") as outfile:
         outfile.write("# tau | j | 1/T | CV | n \n")
-        for j in js:
-            for tau in taus:
+        for tau in taus:
+            for j in js:
                 print(j, tau)
                 N += 1
 
-                #file_str = home + "/CLionProjects/PhD/calcium_spikes_langevin/out/spike_times_langevin_ip1.00_taua{:.2e}_ampa{:.2e}_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(taua, ampa, tau, j, n_clu)
-                file_str = home + "/CLionProjects/PhD/calcium_spikes_langevin/out/spike_times_langevin_ip1.00_tau{:.2e}_j{:.2e}_N{:d}_0.dat".format(tau, j, n_clu)
+                #ile_str = home + "/Data/calcium_spikes_langevin/spike_times_langevin_ip1.00_taua{:.2e}_ampa{:.2e}_tau{:.2e}_j{:.2e}_K{:d}_5.dat".format(taua, ampa, tau, j, K)
+                file_str = home + "/Data/calcium_spikes_langevin_strat/Data_no_adap/spike_times_langevin_ip1.00_tau{:.2e}_j{:.2e}_K{:d}_0.dat".format(tau, j, K)
 
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")

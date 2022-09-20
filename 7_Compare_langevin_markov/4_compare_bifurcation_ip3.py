@@ -15,8 +15,8 @@ if __name__ == "__main__":
     tau = 5.96
     jca = 0.0596
     for ip3 in ip3s:
-        folder_langevin: str = "/CLionProjects/PhD/calcium_spikes_langevin/out/"
-        folder_markov: str = "/CLionProjects/PhD/calcium_spikes_markov/out/"
+        folder_langevin: str = "/Data/calcium_spikes_langevin/"
+        folder_markov: str = "/Data/calcium_spikes_markov/"
         file_langevin: str = "spike_times_langevin_ip{:.2f}_taua1.00e+02_ampa2.00e-01_tau{:.2e}_j{:.2e}_N10_{:d}.dat".format(ip3, tau, jca, 0)
         file_markov: str =  "spike_times_markov_ip{:.2f}_taua1.00e+02_ampa2.00e-01_tau{:.2e}_j{:.2e}_N10_{:d}.dat".format(ip3, tau, jca, 0)
 

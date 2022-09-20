@@ -17,7 +17,7 @@ if __name__ == "__main__":
         tau = taus[30]
         j = jcas[25]
         print(tau, j)
-        folder = "/CLionProjects/PhD/calcium_spikes_langevin/out/Data_no_adap/"
+        folder = "/Data/calcium_spikes_langevin_strat/Data_no_adap/"
         file_ca = f"ca_langevin_ip1.00_tau{tau:.2e}_j{j:.2e}_N{N:d}_0.dat"
         file_spike = f"spike_times_langevin_ip1.00_tau{tau:.2e}_j{j:.2e}_N{N:d}_0.dat"
         data = np.loadtxt(home + folder + file_ca)

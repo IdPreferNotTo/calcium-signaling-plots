@@ -19,8 +19,8 @@ def get_r0_theory(tau, current):
     n_clu = 10
     for ca in reversed(cas_theory[1:]):
         print(f"{ca:.3f}")
-        h = fc.h_func(ca, tau, current, n_clu)
-        d = fc.d_func(ca, current, n_clu)
+        h = fc.h_func(ca, tau, current, n_clu, 5, 4, 1)
+        d = fc.d_func(ca, current, n_clu, 5, 4, 1)
         if ca == 1:
             integral += 0
         elif ca >= 0.33:
@@ -50,7 +50,7 @@ class GradientDesecent():
 
 if __name__ == "__main__":
     home = os.path.expanduser("~")
-    file_str = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
+    file_str = home + "/Data/calcium_spikes_experimental/Spikes/HEK/HEK2_bapta_ratio.dat"
     data = np.loadtxt(file_str)
     n = len(data[0])
     j = 12

@@ -24,6 +24,110 @@ def theta(a, b):
     else:
         return 1
 
+def equally_spaced_puff_data(data, dt):
+    # data = time, state, idx
+    data = [x if x[1] > 0 else np.asarray([x[0], 0, x[2]]) for x in data]
+    ts = np.arange(0, 4990, step=dt)
+    data_equal = []
+    n = 0
+    for t in ts:
+        if data[n][0] < t:
+            n += 1
+        if n == 0:
+            data_equal.append([t, 0])
+        else:
+            data_equal.append([t, data[n-1][1]])
+    return data_equal
+
+def autocorrelation(data):
+    mean = np.mean(data)
+    data = [x - mean for x in data]
+    corr = 0
+    for x, y in zip(data[:-1], data[1:]):
+        corr += x * y
+    corr /= len(data[1:])
+    return corr
+
+def autocorrelation_function(data, dt):
+    mean = np.mean(data)
+    data = [x - mean for x in data]
+    correlation = []
+    ks = np.arange(0, 100)
+    for k in ks:
+        corr = 0
+        if k == 0:
+            for x, y in zip(data, data):
+                corr += x * y
+            corr /= len(data)
+        else:
+            for x, y in zip(data[:-k], data[k:]):
+                corr += x * y
+            corr /= len(data[k:])
+        correlation.append(corr)
+    return [dt*k for k in ks], correlation
+
+
+def fano_factor_interspike_intervals(isis, dt):
+    spike_time = 0
+    spike_times = []
+    for isi in isis:
+        spike_time += isi
+        spike_times.append(spike_time)
+    maxt = sum(isis)
+
+    bins = int(maxt/dt) + 1
+    counts = np.zeros(bins)
+    for spike_time in spike_times:
+        counts[int(spike_time/dt)] += 1
+    mean_count = np.mean(counts)
+    var_count = np.var(counts)
+    return mean_count, var_count
+
+
+def puff_open_probability(data):
+    data = [ele for ele in data if ele[2]==0]
+    t, state, idx, sums = np.transpose(data)
+    t_open = 0
+    t_closed = 0
+    for t1, t2, s1, s2 in zip(t[:-1], t[1:], state[:-1], state[1:]):
+        if s1 <= 0:
+            t_closed += t2 - t1
+        else:
+            t_open += t2 - t1
+    return t_open/(t_open + t_closed)
+
+
+def puff_tau_closed(data):
+    data = [ele for ele in data if ele[2]==0]
+    ts, ss, idx, sums = np.transpose(data)
+    nr = 0
+    for s in ss:
+        if s == 1:
+            nr += 1
+    t_open = 0
+    t_closed = 0
+    for t1, t2, s1, s2 in zip(ts[:-1], ts[1:], ss[:-1], ss[1:]):
+        if s1 <= 0:
+            t_closed += t2 - t1
+        else:
+            t_open += t2 - t1
+    return t_closed/nr
+
+def puff_tau_open(data):
+    data = [ele for ele in data if ele[2]==0]
+    ts, ss, idx, sums = np.transpose(data)
+    nr = -1
+    for s in ss:
+        if s == 1:
+            nr += 1
+    t_open = 0
+    t_closed = 0
+    for t1, t2, s1, s2 in zip(ts[:-1], ts[1:], ss[:-1], ss[1:]):
+        if s1 <= 0:
+            t_closed += t2 - t1
+        else:
+            t_open += t2 - t1
+    return t_open/nr
 
 def moments(xs, k):
     """
@@ -46,7 +150,7 @@ def gaussian_dist(xs, mean, std):
     return ys
 
 
-def coarse_grain_list(l: List[float], f: float):
+def coarse_grain_list(l: List[float], f: int):
     """
     Create a coarse grained version of the original list where the elements of the new list
     are the mean of the previous list over some window that is determined by f.
@@ -58,6 +162,21 @@ def coarse_grain_list(l: List[float], f: float):
         mean = np.mean(l[f*i:f*(i+1)])
         l_new.append(mean)
     return l_new
+
+def moving_coarse_grain_list(l: List[float], n: int):
+    """
+    Create a coarse grained version of the original list where the elements of the new list
+    are the mean of the previous list over some window that is determined by f.
+    f determines how many elements are averaged l_new[i] = mean(l[f*(i):f*(i+1)])
+    """
+    if n<1:
+        return l
+    else:
+        l_new = []
+        for i in range(n, len(l)-n):
+            mean = np.mean(l[i-n:i+n])
+            l_new.append(mean)
+        return l_new
 
 
 def get_states(n, m):
@@ -75,12 +194,12 @@ def steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m):
     M = np.zeros([n+m, n+m])
     for i in range(n+m):
             if i < m-1:
-                M[i, i] = - n*r_ref
-                M[i+1, i] = n*r_ref
+                M[i, i] = -r_ref
+                M[i+1, i] = r_ref
             elif i == m-1:
-                M[i, i] = -n*r_opn
+                M[i, i] = -r_opn
                 for k in range(i+1, n+m):
-                    M[k, i] = r_opn
+                    M[k, i] = r_opn/n
             else:
                 M[i, i] = -r_cls
                 M[(i+1)%(n+m), i] = r_cls
@@ -97,12 +216,12 @@ def f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m):
     M = np.zeros([n + m, n + m])
     for i in range(n + m):
         if i < m - 1:
-            M[i, i] = - n * r_ref
-            M[i + 1, i] = n * r_ref
+            M[i, i] = - r_ref
+            M[i + 1, i] = r_ref
         elif i == m - 1:
-            M[i, i] = -n * r_opn
+            M[i, i] = -r_opn
             for j in range(i + 1, n + m):
-                M[j, i] = r_opn
+                M[j, i] = r_opn/n
         else:
             M[i, i] = -r_cls
             M[(i + 1) % (n + m), i] = r_cls
@@ -119,9 +238,9 @@ def f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m):
     return f_from_k
 
 
-def mean_puff_single(x, n, m, IP3):
-    r_opn = 0.13 * np.power(x / 0.33, 3) * ((1 + 0.33 ** 3) / (1 + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
-    r_ref = 1.3 * np.power(x / 0.33, 3) * ((1 + 0.33 ** 3) / (1 + x ** 3)) * np.power(IP3 / 1., 3) * ((1 + 1 ** 3) / (1. + IP3 ** 3))
+def mean_puff_single(x, n, m, IP3, r_opn_single, r_ref):
+    r_opn = n * r_opn_single * np.power(x / 0.2, 3) * ((1 + 0.2 ** 3) / (1 + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
+    r_ref = r_ref
     r_cls = 50
 
     p0s = steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
@@ -130,18 +249,9 @@ def mean_puff_single(x, n, m, IP3):
     return mean
 
 
-def means_puff(N, tau, j, n, m, IP3):
-    fs = []
-    cas = np.linspace(0.01, 1.00, 100)
-    for ca in cas:
-        f = -(ca - 0.33)/tau + j*N*mean_puff_single(ca, n, m, IP3)
-        fs.append(f)
-    return fs
-
-
-def intensity_puff_single(x, n, m, IP3):
-    r_opn = 0.13 * np.power(x / 0.33, 3) * ((1. + 0.33 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
-    r_ref = 1.3 * np.power(x / 0.33, 3) * ((1. + 0.33 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
+def intensity_puff_single(x, n, m, IP3, r_opn_single, r_ref):
+    r_opn = n * r_opn_single * np.power(x / 0.20, 3) * ((1. + 0.20 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
+    r_ref = r_ref #* np.power(x / 0.20, 3) * ((1. + 0.20 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
     r_cls = 50
 
     xs = get_states(n, m)
@@ -158,19 +268,19 @@ def intensity_puff_single(x, n, m, IP3):
     return D_theory
 
 
-def d_func(x, j, N, n, m, IP3):
+def d_func(x, j, N, n, m, IP3, r_opn_single, r_ref):
     if x == 0:
         return 0
     else:
-        return np.power(j, 2) * N * intensity_puff_single(x, n, m, IP3)
+        return np.power(j, 2) * N * intensity_puff_single(x, n, m, IP3, r_opn_single, r_ref)
 
 
-def f_func(x, tau, j, N, n, m, IP3):
+def f_func(x, tau, j, N, n, m, IP3, r_opn_single, r_ref):
     if x == 0:
-        return -(x - 0.33) / tau
+        return -(x - 0.20) / tau
     else:
-        f = mean_puff_single(x, n, m, IP3)
-        return -(x - 0.33) / tau + j * N * f
+        f = mean_puff_single(x, n, m, IP3, r_opn_single, r_ref)
+        return -(x - 0.20) / tau + j * N * f
 
 
 def g_func(x, tau, j, N, n, m, IP3):
@@ -182,13 +292,13 @@ def g_func(x, tau, j, N, n, m, IP3):
 def h_func(x, tau, j, N, n, m, IP3):
     #dca = 0.0001
     #h = 0
-    #ca = 0.33
+    #ca = 0.20
     #while(ca <= x):
     #    print(ca)
     #    g = g_func(ca, tau, j, N, n, m, IP3)
     #    h += g*dca
     #    ca += dca
-    h = quad(g_func, 0.33, x, args=(tau, j, N, n, m, IP3))[0]
+    h = quad(g_func, 0.20, x, args=(tau, j, N, n, m, IP3))[0]
     return h
 
 
@@ -204,7 +314,7 @@ def firing_rate_no_adap(tau, j, N, n, m, IP3 = 1):
         d = d_func(ca, j, N, n, m, IP3)
         if ca == 1:
             integral += 0
-        elif ca >= 0.33:
+        elif ca >= 0.20:
             integral += np.exp(-h)*dca
         p0s_theo_ca.append(integral * np.exp(h) / d)
     print(p0s_theo_ca)
@@ -228,15 +338,15 @@ def k_corr(data1, data2, k):
     return k_corr / len(data2[k:])
 
 
-def fourier_transformation_isis(w, isis):
+def fourier_transformation_isis(f, isis):
     t = 0
-    f = 0
+    trafo = 0
     for isi in isis:
         t += isi
-        f += np.exp(1j*w*t)
-    return f
+        trafo += np.exp(1j*2*np.pi*f*t)
+    return trafo
 
-def power_spectrum_isis(ws, isis, Tmax=2000):
+def power_spectrum_isis(fs, isis, Tmax=2000):
     ISIs_chunks = []
     chunks = []
     t = 0
@@ -248,11 +358,11 @@ def power_spectrum_isis(ws, isis, Tmax=2000):
             chunks.clear()
             t = 0
     spectrum = []
-    for w in ws:
+    for f in fs:
         fws_real = []
         fws_img = []
         for isis in ISIs_chunks:
-            fw = fourier_transformation_isis(w, isis)
+            fw = fourier_transformation_isis(f, isis)
             fws_real.append(fw.real)
             fws_img.append(fw.imag)
         spectrum.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))

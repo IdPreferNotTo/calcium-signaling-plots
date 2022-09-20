@@ -4,16 +4,27 @@ import os
 
 if __name__ == "__main__":
     home = os.path.expanduser("~")
-    folder = home + "/Data/Calcium/data"
-    file = "/markov_ca_mean_CV_N10_n5_no_adap.dat"
+    folder = home + "/Data/calcium_spikes_theory"
+    file = "/markov_ca_mean_CV_K10_N5_no_adap.dat"
     data = np.loadtxt(folder + file) #tau, j, T, CV, n
 
     d = 100
     tau0 = 0
     j0 = 0
-    T0 = 35
-    CV0 = 0.3
+    T0 = 35.
+    CV0 = 0.10
 
+    pairs = []
+    parameters_pair = []
+    for set in data:
+        T = set[2]
+        CV = set[3]
+        if 0.18 < CV < 0.22:
+            pairs.append([set[2], set[3]])
+            parameters_pair.append([set[0], set[1]])
+    print(pairs)
+    print(parameters_pair)
+    
     for set in data:
         T = set[2]
         CV = set[3]
@@ -27,4 +38,4 @@ if __name__ == "__main__":
             d = (dT + dCV)/2.
 
     print(T_found, CV_found)
-    print(tau0, j0)
+    print("tau:", tau0, "p:", j0)

@@ -16,7 +16,7 @@ if __name__ == "__main__":
                   0.35, 0.4, 0.4]
 
     home = os.path.expanduser("~")
-    file_str = home + "/Desktop/Ca data/Spikes/HEK/HEK2_bapta_ratio.dat"
+    file_str = home + "/Data/calcium_spikes_experimental/Spikes/HEK/HEK2_bapta_ratio.dat"
     data = np.loadtxt(file_str)
 
 
@@ -65,13 +65,13 @@ if __name__ == "__main__":
         ax1.set_xlabel("$i$")
         ax1.set_ylabel(r"$T_i$ / s")
         ax1.scatter(idx_ISIs, ISIs, s=20, fc="w", ec=st.colors[4])
-        ax1.axvspan(0, 2*popt[2], facecolor="C7", alpha=0.5, zorder=0)
+        ax1.axvspan(0, popt[2], facecolor="C7", alpha=0.5, zorder=0)
         ax1.axhline(popt[0], ls=":", c="C7")
         ax1.axhline(popt[1], ls=":", c="C7")
         legend = ax1.legend(loc=4, fancybox=False, edgecolor="k", framealpha=1.0, prop={'size': 10})
         legend.get_frame().set_linewidth(0.5)
-        plt.savefig(home + "/Desktop/Ca data/Spikes/HEK/Plots2/Adaptation/HEK2_bapta_{:d}_adaptation.png".format(j))
-        #plt.show()
+        plt.savefig(home + "/Data/calcium_spikes_experimental/Spikes/HEK/Plots2/Adaptation/HEK2_bapta_{:d}_adaptation.png".format(j))
+        plt.show()
         plt.close()
 
     st.set_default_plot_style()
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     ax1.scatter(i_effs, rho_1s, s=20, fc="w", ec=st.colors[4])
     ax1.set_xlabel(r"$\iota_{\rm eff}$")
     ax1.set_ylabel(r"$\rho_1$")
-    plt.savefig(home + "/Desktop/Ca data/Spikes/HEK/Plots2/Adaptation/HEK2_bapta_iota_rho.png".format(j))
+    plt.savefig(home + "/Data/calcium_spikes_experimental/Spikes/HEK/Plots2/Adaptation/HEK2_bapta_iota_rho.png".format(j))
     plt.show()
 
 

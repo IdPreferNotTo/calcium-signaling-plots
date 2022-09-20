@@ -17,7 +17,7 @@ if __name__ == "__main__":
     st.remove_top_right_axis([ax])
     n = 5
     m = 4
-    data = np.loadtxt(home + "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat")
+    data = np.loadtxt(home + "/Data/calcium_spikes_markov/ca_fix/puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat")
 
     data_tmp = []
     for set in data:

@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     # Load Data
     home = os.path.expanduser("~")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+    folder = "/Data/calcium_spikes_markov/ca_fix/"
     file = f"ca_markov_cafix{ca:.2f}_ip1.00_tau{tau:.2e}_j{jca:.2e}_N10_0.dat"
     data = np.loadtxt(home + folder + file)
     ts, cas, jpuffs, adaps = np.transpose(data)

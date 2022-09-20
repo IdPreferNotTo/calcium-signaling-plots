@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # Subplot 1: x(t) over t
     ax0.set_xlabel("$t$ / s")
     ax0.set_ylabel("$x(t)$")
-    folder = "/CLionProjects/PhD/calcium_spikes_markov/out/ca_fix/"
+    folder = "/Data/calcium_spikes_markov/ca_fix/"
     data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_5.dat")
     data_tmp = []
 
