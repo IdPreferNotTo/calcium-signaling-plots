@@ -21,10 +21,10 @@ if __name__ == "__main__":
     # axin4 = ax4.inset_axes([0.55, 0.55, 0.45, 0.45])
     st.remove_top_right_axis([ax1, ax2, ax3, ax4])
 
-    ax1.text(0.05, 0.95, r"A$_{\rm i}$", fontsize=13, transform=ax1.transAxes, va='top')
-    ax2.text(0.12, 0.95, r"A$_{\rm ii}$", fontsize=13, transform=ax2.transAxes, va='top')
-    ax3.text(0.05, 0.95, r"B$_{\rm i}$", fontsize=13, transform=ax3.transAxes, va='top')
-    ax4.text(0.12, 0.95, r"B$_{\rm ii}$", fontsize=13, transform=ax4.transAxes, va='top')
+    ax1.text(0.05, 0.95, r"A$_1$", fontsize=13, transform=ax1.transAxes, va='top')
+    ax2.text(0.12, 0.95, r"A$_2$", fontsize=13, transform=ax2.transAxes, va='top')
+    ax3.text(0.05, 0.95, r"B$_1$", fontsize=13, transform=ax3.transAxes, va='top')
+    ax4.text(0.12, 0.95, r"B$_2$", fontsize=13, transform=ax4.transAxes, va='top')
     home = os.path.expanduser("~")
 
 

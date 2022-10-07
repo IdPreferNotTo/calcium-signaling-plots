@@ -157,12 +157,12 @@ if __name__ == "__main__":
     ax1.text(0.55, 0.45, "$s = 1.0$", fontsize=11, transform=ax1.transAxes, va='top')
     ax1.text(0.55, 0.08, "$s = 0.1$", fontsize=11, transform=ax1.transAxes, va='top')
 
-    ax1.set_xlabel("$c_i$")
+    ax1.set_xlabel(r"$c_{\rm i}$")
     ax1.set_xscale("log")
-    ax1.set_ylabel(r"$p_{\rm open}(c_i)$")
+    ax1.set_ylabel(r"$p_{\rm open}(c_{\rm i})$")
     ax1.set_ylim([0, 0.5])
     ax1.set_xticks([0.05, 0.2, 0.5, 5])
-    ax1.set_xticklabels(["$5\cdot 10^{-2}$", "$c_0$", "$c_T = 5 \cdot 10^{-1}$", "$5 \cdot 10^0$"])
+    ax1.set_xticklabels(["$5\cdot 10^{-2}$", "$c_R$", "$c_T = 5 \cdot 10^{-1}$", "$5 \cdot 10^0$"])
     ax1.axvline(0.5, color="C7", alpha=0.7, zorder=1)
 
     ax1.scatter(ca_exp1, p_open_exps[0], s=25, fc="w", ec=colors.palette[0], zorder=3, label="Sim.")
@@ -179,8 +179,8 @@ if __name__ == "__main__":
     ax1.axvspan(0.5, 5, alpha=0.3, color="C7")
     ax1.legend(fancybox=False, fontsize=9, loc=1)
 
-    ax2.set_xlabel("$c_i$")
-    ax2.set_ylabel(r"$\langle \tau_{\rm open}(c_i) \rangle$  / s")
+    ax2.set_xlabel("$c_{\rm i}$")
+    ax2.set_ylabel(r"$\tau_{\rm open}$  / s")
     ax2.set_yscale("log")
     ax2.set_xscale("log")
     ax2.set_ylim([0.01, 0.15])
@@ -190,8 +190,8 @@ if __name__ == "__main__":
     ax2.plot(cas_theo, tau_opns_full, color=colors.palette[5], ls=":")
     ax2.scatter(ca_exp1[1:], tau_opens[1][1:], s=15, fc="w", ec=colors.palette[0], zorder=2)
 
-    ax3.set_xlabel("$c_i$")
-    ax3.set_ylabel(r"$\langle \tau_{\rm closed}(c_i) \rangle$ / s")
+    ax3.set_xlabel(r"$c_{\rm i}$")
+    ax3.set_ylabel(r"$\tau_{\rm closed}$ / s")
     ax3.set_yscale("log")
     ax3.set_xscale("log")
     ax3.axvline(0.5, color="C7", alpha=0.7, zorder=1)

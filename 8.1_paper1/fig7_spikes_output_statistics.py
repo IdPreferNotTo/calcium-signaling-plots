@@ -28,8 +28,8 @@ if __name__ == "__main__":
     color = st.Colors
 
     home = os.path.expanduser("~")
-    taus = [5.62, 1.78]
-    js = [0.0126, 0.0355]
+    taus = [5, 1] #[5.62, 1.78]
+    js = [0.015, 0.06] #[0.0126, 0.0355]
     IP3s = np.linspace(0.50, 1.50, 101)
     IP3s = IP3s[:-1]
 
@@ -41,12 +41,12 @@ if __name__ == "__main__":
             label = "A"
         else:
             label = "B"
-        ax1.text(0.05, 0.95, label + r"$_{\rm i}$", fontsize=13, transform=ax1.transAxes, va='top')
-        ax2.text(0.05, 0.95, label + r"$_{\rm ii}$", fontsize=13, transform=ax2.transAxes, va='top')
-        ax3.text(0.05, 0.95, label + r"$_{\rm iii}$", fontsize=13, transform=ax3.transAxes, va='top')
+        ax1.text(0.05, 0.95, label + r"$_1$", fontsize=13, transform=ax1.transAxes, va='top')
+        ax2.text(0.05, 0.95, label + r"$_2$", fontsize=13, transform=ax2.transAxes, va='top')
+        ax3.text(0.05, 0.95, label + r"$_3$", fontsize=13, transform=ax3.transAxes, va='top')
         st.remove_top_right_axis([ax1, ax3, ax2])
         folder_markov_ip3 = home + "/Data/calcium_spikes_markov/Data_no_adap_ip3/"
-        folder_langevin_ip3 = home + "/Data/calcium_spikes_langevin_strat/Data_no_adap_ip3/"
+        folder_langevin_ip3 = home + "/Data/calcium_spikes_langevin_strat/Data_no_adap/"
 
         print("Load mean, cv over ip3...")
         rates_markov = []
@@ -55,12 +55,12 @@ if __name__ == "__main__":
         data_theory_r0 = np.loadtxt(file_theory_r0)
         ip3s_theory, r0_theory = np.transpose(data_theory_r0)
         r0_theory2 = []
-        for ip3 in ip3s_theory:
-            file_langevin_r0 = folder_langevin_ip3 + f"/spike_times_langevin_ip{ip3:.2f}_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
-            isis_langevin = np.loadtxt(file_langevin_r0)
-            mean_isis_langevin = np.mean(isis_langevin)
-            r0_theory2.append(1/mean_isis_langevin)
-        print(ip3s_theory)
+        #for ip3 in ip3s_theory:
+        #    file_langevin_r0 = folder_langevin_ip3 + f"spike_times_langevin_ip{ip3:.2f}_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
+        #    isis_langevin = np.loadtxt(file_langevin_r0)
+        #    mean_isis_langevin = np.mean(isis_langevin)
+        #    r0_theory2.append(1/mean_isis_langevin)
+        #print(ip3s_theory)
         for IP3 in IP3s:
             file_markov = f"spike_times_markov_ip{IP3:.2f}_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
             warnings.simplefilter("ignore")
@@ -93,9 +93,9 @@ if __name__ == "__main__":
             ax1.set_ylim([0, 0.11])
         else:
             ax1.set_ylim([0., 0.22])
-        ax1.plot(ip3s_theory, r0_theory2, color=color.palette[5], label="Theory")
+        ax1.plot(ip3s_theory, r0_theory, color=color.palette[5], label="Theory")
 
-        cmap_viridis = plt.get_cmap("cividis", 11)
+        cmap_viridis = plt.get_cmap("YlGnBu", 11)
         im1 = ax1.scatter(IP3s[1::2], rates_markov[1::2], s=20, c=cvs_markov[1::2], cmap=cmap_viridis, vmin=-0.05,
                           vmax=1.05, label="Sim.")
         divider = make_axes_locatable(ax1)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         cbar.set_label(r"$CV_T$", loc="center")
 
         if k == 0:
-            ax1.legend(fancybox=False, fontsize=10, loc=1, framealpha=1.0)
+            ax1.legend(fancybox=False, fontsize=9, loc=1, framealpha=1.0)
 
         isis_markovs = []
         print("Load ISI densities...")
@@ -166,7 +166,10 @@ if __name__ == "__main__":
         ax2.set_ylabel("$F(t)$")
         ax2.set_ylim([0, 1.3])
         ax2.text(70, 1.1, r"$\langle T \rangle$")
-        ax2.text(3., 0.1 + cv_isi**2, "$CV_T^2$")
+        if k == 0:
+            ax2.text(3., 0.1 + cv_isi**2, "$CV_T^2$")
+        else:
+            ax2.text(3., -0.2 + cv_isi ** 2, "$CV_T^2$")
 
 plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig7.pdf")
 plt.show()

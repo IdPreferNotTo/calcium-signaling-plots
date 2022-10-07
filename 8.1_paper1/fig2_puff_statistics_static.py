@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-import matplotlib.patches as patches
-from matplotlib.patches import ConnectionPatch
-from matplotlib.patches import Rectangle
+import scipy.special as sci
 import os
 
 import styles as st
@@ -87,17 +85,17 @@ if __name__ == "__main__":
     colors = st.Colors()
     home = os.path.expanduser("~")
 
-    ax_a1.text(0.05, 1.00, r"A$_{\rm i}$", fontsize=13, transform=ax_a1.transAxes, va='top')
-    ax_a2.text(0.15, 1.00, r"A$_{\rm ii}$", fontsize=13, transform=ax_a2.transAxes, va='top')
-    ax_a3.text(0.15, 1.00, r"A$_{\rm iii}$", fontsize=13, transform=ax_a3.transAxes, va='top')
-    ax_a4.text(0.15, 1.00, r"A$_{\rm iv}$", fontsize=13, transform=ax_a4.transAxes, va='top')
-    ax_a5.text(0.15, 1.00, r"A$_{\rm v}$", fontsize=13, transform=ax_a5.transAxes, va='top')
+    ax_a1.text(0.05, 1.00, r"A$_1$", fontsize=13, transform=ax_a1.transAxes, va='top')
+    ax_a2.text(0.15, 1.00, r"A$_2$", fontsize=13, transform=ax_a2.transAxes, va='top')
+    ax_a3.text(0.15, 1.00, r"A$_3$", fontsize=13, transform=ax_a3.transAxes, va='top')
+    ax_a4.text(0.15, 1.00, r"A$_4$", fontsize=13, transform=ax_a4.transAxes, va='top')
+    ax_a5.text(0.15, 1.00, r"A$_5$", fontsize=13, transform=ax_a5.transAxes, va='top')
 
-    ax_b1.text(0.085, 1.00, r"B$_{\rm i}$", fontsize=13, transform=ax_b1.transAxes, va='top')
-    ax_b2.text(0.15, 1.00, r"B$_{\rm ii}$", fontsize=13, transform=ax_b2.transAxes, va='top')
-    ax_b3.text(0.15, 1.00, r"B$_{\rm iii}$", fontsize=13, transform=ax_b3.transAxes, va='top')
-    ax_b4.text(0.15, 1.00, r"B$_{\rm iv}$", fontsize=13, transform=ax_b4.transAxes, va='top')
-    ax_b5.text(0.15, 1.00, r"B$_{\rm v}$", fontsize=13, transform=ax_b5.transAxes, va='top')
+    ax_b1.text(0.085, 1.00, r"B$_1$", fontsize=13, transform=ax_b1.transAxes, va='top')
+    ax_b2.text(0.15, 1.00, r"B$_2$", fontsize=13, transform=ax_b2.transAxes, va='top')
+    ax_b3.text(0.15, 1.00, r"B$_3$", fontsize=13, transform=ax_b3.transAxes, va='top')
+    ax_b4.text(0.15, 1.00, r"B$_4$", fontsize=13, transform=ax_b4.transAxes, va='top')
+    ax_b5.text(0.15, 1.00, r"B$_5$", fontsize=13, transform=ax_b5.transAxes, va='top')
 
     # Subplot 1: x(t) over t
     ax_a1.set_xlabel("$t$ / s")
@@ -126,9 +124,9 @@ if __name__ == "__main__":
             t_ipi_stop = elem[0]
             stops_ipi.append(t_ipi_stop)
 
-    t_start = 70
-    t_stop = 120
-    puff_index1 = 39
+    t_start = 80
+    t_stop = 130
+    puff_index1 = 43
     puff_index2 = puff_index1 + 1
     t_left = starts_ipi[puff_index1] - t_start
     t_right = stops_ipi[puff_index2] - t_start
@@ -168,7 +166,7 @@ if __name__ == "__main__":
 
     ax_a2.set_ylim([0, 1 / 5 + 0.15])
     ax_a2.set_xlabel(r"$n_{0}$")
-    ax_a2.set_ylabel(r"$p(n_{0} | N)$")
+    ax_a2.set_ylabel(r"$p(n_{0})$")
     ns_open = get_ns_open(data)
     ns_over_i = [0] * 5
     for n in ns_open:
@@ -248,8 +246,8 @@ if __name__ == "__main__":
         cv2s.append(cv2)
     # ax_a5.plot(num_chas, [np.sqrt(MeanVarA + VarMeanA) for MeanVarA, VarMeanA in zip(Mean_of_VarA_over_n_theo, Var_of_MeanA_over_n_theo)], c=colors.palette[5], zorder=1)
     ax_a5.plot(Ns, cv2s, c=colors.palette[5], zorder=1)
-    ax_a5.plot(Ns, mean_vars, c=colors.palette[5], ls=":")
-    ax_a5.plot(Ns, var_means, c=colors.palette[5], ls="--")
+    ax_a5.plot(Ns, mean_vars, c="C7", ls=":")
+    ax_a5.plot(Ns, var_means, c="C7", ls="--")
     ax_a5.set_xticks(Ns)
     ax_a5.set_yticks([0.0, 0.5, 1.0])
     ax_a5.set_ylim([0, 1.5])
@@ -284,16 +282,16 @@ if __name__ == "__main__":
         t_right = stops_ipi[puff_index1 +j] - t_start
         dt = t_right - t_left
         if j == -2:
-            height = 1.5
+            height = 0.5
             ax_b1.text((t_left + t_right) / 2, height + 1, "$...$", va="center", ha="center")
         elif j == -1:
-            height = 1.5
+            height = 0.5
             ax_b1.text((t_left + t_right) / 2, height + 1, "$I_{i-1}$", va="center", ha="center")
         elif j == 0:
-            height = 2.5
+            height = 3.0
             ax_b1.text((t_left + t_right) / 2, height + 3, "$I_{i}$", va="center", ha="center")
         else:
-            height = 1.5
+            height = 3.0
             ax_b1.text((t_left + t_right) / 2, height +1, "$...$", va="center", ha="center")
         ax_b1.arrow(t_left, height, dt, 0, fc="k", length_includes_head=True, head_width=0.25, head_length=0.5,
                     lw=1.0, clip_on=False)
@@ -315,16 +313,14 @@ if __name__ == "__main__":
     mean = (M - 1) / rref + 1 / ropn
     var = (M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2
     dr = rref - ropn
+
+
     ts = np.linspace(0, max(ipis_cR), 100)
     p_ipi = []
     for t in ts:
-        c3 = np.power(rref / dr, 2) * (1 - np.exp(-dr * t) * (dr * t + 1))
-        p3 = c3 * np.exp(-ropn * t)
-        c4 = (1 / 2) * np.power(rref, 3) * (np.exp(-dr * t) * (-dr * t * (dr * t + 2) - 2) + 2) / np.power(dr, 3)
-        p4 = c4 * np.exp(-ropn * t)
-        p_ipi.append(ropn * p3)
+        p_ipi.append(ropn*np.power(r_ref/(r_ref - ropn), M-1)*sci.gammainc(M-1, dr*t)*np.exp(-ropn*t))
     ax_b2.set_xlabel("$t$ / s")
-    ax_b2.set_ylabel("$p_I(t; c_i=c_0)$")
+    ax_b2.set_ylabel(r"$p_{\rm IPI}(t; c_i=c_0)$")
     ax_b2.hist(ipis_cR, bins=50, color=colors.palette[0], density=True)
     ax_b2.plot(ts, p_ipi, color=colors.palette[5])
     ax_b2.set_xlim([0, 11])
@@ -336,58 +332,79 @@ if __name__ == "__main__":
     cv = np.std(ipis_cT)/np.mean(ipis_cT)
     N = 5
     M = 3
-    ropnmax =  N*r_opn_single*((1. + np.power(0.20, 3))/np.power(0.20, 3))
-    ropn = ropnmax * (np.power(0.5, 3) / (1. + np.power(0.5, 3)))
+    ropnmax =  r_opn_single*((1. + np.power(0.20, 3))/np.power(0.20, 3))
+    ropn = N * ropnmax * (np.power(0.5, 3) / (1. + np.power(0.5, 3)))
     rref = r_ref
-    mean = (M - 1) / rref + 1 / ropn
-    var = (M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2
     dr = rref - ropn
     ts = np.linspace(0, max(ipis_cT), 100)
     p_ipi = []
     for t in ts:
-        c3 = np.power(rref / dr, 2) * (1 - np.exp(-dr * t) * (dr * t + 1))
-        p3 = c3 * np.exp(-ropn * t)
-        c4 = (1 / 2) * np.power(rref, 3) * (np.exp(-dr * t) * (-dr * t * (dr * t + 2) - 2) + 2) / np.power(dr, 3)
-        p4 = c4 * np.exp(-ropn * t)
-        p_ipi.append(ropn * p3)
+        p_ipi.append(ropn*np.power(r_ref/(r_ref - ropn), M-1)*sci.gammainc(M-1, dr*t)*np.exp(-ropn*t))
     ax_b3.set_xlabel("$t$ / s")
-    ax_b3.set_ylabel("$p_I(t; c_i=c_T)$")
+    ax_b3.set_ylabel(r"$p_{\rm IPI}(t; c_i=c_T)$")
     ax_b3.hist(ipis_cT, bins=50, color=colors.palette[0], density=True)
-    ax_b3.plot(ts, p_ipi, color=colors.palette[5])
+    ax_b3.plot(ts, p_ipi, ls="--", color=colors.palette[5])
     ax_b3.set_ylim([0, 6])
     ax_b3.set_xlim([0, 1.1])
 
     ts = np.linspace(0, 1, 101)
-    Iss = []
-    std_Is = []
-    mean_Is = []
-    CV2_Is = []
+    Iss_cr = []
+    std_Is_cr = []
+    mean_Is_cr = []
+    CV2_Is_cr = []
+
     for N in Ns:
         file = f"puff_markov_cafix0.20_ip1.00_tau1.00e+00_j1.00e+00_K1_{N:d}.dat"
         data_n = np.loadtxt(home + folder + file)
         Is = get_ipis(data_n)
-        Iss.append(Is)
-        ropn = N * r_opn_single
+        Iss_cr.append(Is)
+        ropn = N * ropnmax * (np.power(0.2, 3) / (1. + np.power(0.2, 3)))
         mean = (M - 1) / rref + 1 / ropn
         std = np.sqrt((M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2)
-        mean_Is.append(mean)
-        std_Is.append(std)
-        CV2_Is.append(std ** 2 / mean ** 2)
+        mean_Is_cr.append(mean)
+        std_Is_cr.append(std)
+        CV2_Is_cr.append(std ** 2 / mean ** 2)
 
-    ax_b4.set_ylim([0, 0.6])
+    Iss_ct = []
+    std_Is_ct = []
+    mean_Is_ct = []
+    CV2_Is_ct = []
+    for N in Ns:
+        file = f"puff_markov_cafix0.50_ip1.00_tau1.00e+00_j1.00e+00_K1_{N:d}.dat"
+        data_n = np.loadtxt(home + folder + file)
+        Is = get_ipis(data_n)
+        Iss_ct.append(Is)
+        ropn = N * ropnmax * (np.power(0.5, 3) / (1. + np.power(0.5, 3)))
+        mean = (M - 1) / rref + 1 / ropn
+        std = np.sqrt((M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2)
+        mean_Is_ct.append(mean)
+        std_Is_ct.append(std)
+        CV2_Is_ct.append(std ** 2 / mean ** 2)
+
+    ax_b4.scatter(Ns, [1 / np.mean(Is) for Is in Iss_cr], ec=colors.palette[0], fc="w", s=15, zorder=2)
+    ax_b4.plot(Ns, [1 / mean_I for mean_I in mean_Is_cr], c=colors.palette[5], zorder=1, label=r"$c_0$")
+
+    ax_b4.scatter(Ns, [1 / np.mean(Is) for Is in Iss_ct], ec=colors.palette[0], fc="w", s=15, zorder=2)
+    ax_b4.plot(Ns, [1 / mean_I for mean_I in mean_Is_ct], ls="--", c=colors.palette[5], zorder=1, label=r"$c_T$")
+
+    ax_b5.scatter(Ns, [np.var(Is) / np.mean(Is) ** 2 for Is in Iss_cr], ec=colors.palette[0], fc="w", s=15, zorder=2)
+    ax_b5.plot(Ns, CV2_Is_cr, c=colors.palette[5], zorder=1, label=r"$c_0$")
+
+    ax_b5.scatter(Ns, [np.var(Is) / np.mean(Is) ** 2 for Is in Iss_ct], ec=colors.palette[0], fc="w", s=15, zorder=2)
+    ax_b5.plot(Ns, CV2_Is_ct, ls="--", c=colors.palette[5], zorder=1, label=r"$c_T$")
+
+    #ax_b4.set_ylim([0, 5.0])
     ax_b4.set_xlabel("$N$")
     ax_b4.set_xticks(Ns)
     ax_b4.set_ylabel(r"$\langle I \rangle^{-1}$ / s$^{-1}$")
-    ax_b4.scatter(Ns, [1 / np.mean(Is) for Is in Iss], ec=colors.palette[0], fc="w", s=15, zorder=2)
-    ax_b4.plot(Ns, [1 / mean_I for mean_I in mean_Is], c=colors.palette[5], zorder=1)
 
+    ax_b5.set_ylabel(r"${CV}_I^2$")
     ax_b5.set_xlabel("$N$")
     ax_b5.set_xticks(Ns)
-    ax_b5.set_ylabel(r"${CV}_I^2$")
-    ax_b5.scatter(Ns, [np.var(Is) / np.mean(Is) ** 2 for Is in Iss], ec=colors.palette[0], fc="w", s=15, zorder=2)
-    ax_b5.plot(Ns, CV2_Is, c=colors.palette[5], zorder=1)
     ax_b5.set_yticks([0, 0.5, 1])
     ax_b5.set_ylim([0, 1.3])
+    legend = ax_b4.legend(fancybox=False, framealpha=1., edgecolor="k", fontsize=8)
+    legend.get_frame().set_linewidth(0.5)
 
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig2b.pdf", transparent=True)
     plt.show()

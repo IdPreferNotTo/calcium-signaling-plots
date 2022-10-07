@@ -18,16 +18,16 @@ if __name__ == "__main__":
 
     st.remove_top_right_axis([ax1, ax2, ax3, ax4])
 
-    ax1.text(0.20, 0.95, r"A$_{\rm i}$", fontsize=13, transform=ax1.transAxes, va='top')
-    ax2.text(0.20, 0.95, r"B$_{\rm i}$", fontsize=13, transform=ax2.transAxes, va='top')
-    ax3.text(0.10, 0.95, r"A$_{\rm ii}$", fontsize=13, transform=ax3.transAxes, va='top')
-    ax4.text(0.10, 0.95, r"B$_{\rm ii}$", fontsize=13, transform=ax4.transAxes, va='top')
+    ax1.text(0.20, 0.95, r"A$_1$", fontsize=13, transform=ax1.transAxes, va='top')
+    ax2.text(0.20, 0.95, r"B$_1$", fontsize=13, transform=ax2.transAxes, va='top')
+    ax3.text(0.10, 0.95, r"A$_2$", fontsize=13, transform=ax3.transAxes, va='top')
+    ax4.text(0.10, 0.95, r"B$_2$", fontsize=13, transform=ax4.transAxes, va='top')
 
     home = os.path.expanduser("~")
 
     ax1.set_ylabel(r"$\langle T \rangle$")
     ax1.set_xlabel(r"$\lambda_{\rm ref}$")
-    ax1.set_xlim([10, 1000])
+    ax1.set_xlim([10, 100])
     ax1.set_ylim([0, 100])
     ax1.set_xscale("log")
     ax1.axvspan(10, 20, alpha=0.3, color="C7")
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     ax2.set_ylabel(r"$CV_T$")
     ax2.set_xlabel(r"$\lambda_{\rm ref}$")
     ax2.set_xscale("log")
-    ax2.set_xlim([10, 1000])
+    ax2.set_xlim([10, 100])
     ax2.set_ylim([0, 1])
     ax2.axvspan(10, 20, alpha=0.3, color="C7")
     ax2.axvline(20, lw=1, color="C7", zorder=1)

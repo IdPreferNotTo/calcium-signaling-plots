@@ -30,10 +30,10 @@ if __name__ == "__main__":
 
     axm1.text(0.1, 0.95, r"A", fontsize=13, transform=axm1.transAxes, va='top')
     axm2.text(0.1, 0.95, r"B", fontsize=13, transform=axm2.transAxes, va='top')
-    ax1.text(0.1, 0.95, r"C$_{\rm i}$", fontsize=13, transform=ax1.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
-    ax3.text(0.1, 0.95, r"C$_{\rm ii}$", fontsize=13, transform=ax3.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
-    ax5.text(0.1, 0.95, r"D$_{\rm i}$", fontsize=13, transform=ax5.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
-    ax7.text(0.1, 0.95, r"D$_{\rm ii}$", fontsize=13, transform=ax7.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax1.text(0.1, 0.95, r"C$_1$", fontsize=13, transform=ax1.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax3.text(0.1, 0.95, r"C$_2$", fontsize=13, transform=ax3.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax5.text(0.1, 0.95, r"D$_1$", fontsize=13, transform=ax5.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax7.text(0.1, 0.95, r"D$_2$", fontsize=13, transform=ax7.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
 
     for ax in [ax1, ax5]:
         ax.set_ylabel(rf"$Y_t(\Delta t = 0.1)$")
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     axm1.set_yticks([0.01, 0.1, 1, 10, 100, 1000])
     axm1.set_xlim([0.01, 1])
     axm1.plot([0.01, 1], [0.01, 1], ls=":", color="k")
-    axm1.text(0.1, 2, r"$\tau$", fontsize=13, va="center", ha="center")
+    axm1.text(0.1, np.sqrt(10), r"$\tau$", fontsize=13, va="center", ha="center")
     axm1.text(0.1, 10 * np.sqrt(10), r"$\langle T \rangle$", fontsize=13, va='center', ha="center")
     axm1.text(0.1, 0.04, r"$\tau_Y$", fontsize=13, va="center", ha="center")
-    axm1.fill_between([0.01, 1], [1, 1], [5, 5], hatch="///", edgecolor=color.green[1], facecolor="none")
+    axm1.fill_between([0.01, 1], [1, 1], [10, 10], hatch="///", edgecolor=color.green[1], facecolor="none")
     axm1.fill_between([0.01, 1], [10, 10], [100, 100], hatch="///", edgecolor=color.green[1], facecolor="none")
     #axm1.arrow(0.02, 0.02, 0, 1 - 0.02, fc="k", lw=0.25, zorder=1)
 
@@ -159,9 +159,9 @@ if __name__ == "__main__":
         axm2.set_ylim([0, 3])
         axm2.set_xlim([0.01, 1])
         if ca == ca1:
-            label=r"$c_{\rm i} = c_0$"
+            label=r"$c_R$"
         else:
-            label=r"$c_{\rm i} = c_T$"
+            label=r"$c_T$"
         axm2.plot([delta_t*f for f in fs], moment3s, c=plt_color, label=label)
         #axm2.fill_between([delta_t*f for f in fs], [x + s/np.sqrt(10) for (x, s) in zip(moment3s, std_moment3s)], [x - s/np.sqrt(10) for (x, s) in zip(moment3s, std_moment3s)], color=color.palette[i], alpha=0.5)
 
