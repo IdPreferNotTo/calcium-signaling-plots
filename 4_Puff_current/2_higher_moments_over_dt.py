@@ -6,18 +6,18 @@ import os
 
 import functions as fc
 import styles as st
+import default_parameters as df
 
 if __name__ == "__main__":
-    ca_fix = 0.33
-    ca_res = 0.33
-    N = 10
-    n = 5
-    jca = 1
+    ci = 0.20
+    cT = 0.5
+    cR = 0.20
+    K = 10
+    N = 5
+    p = 1
     tau = 1
     home = os.path.expanduser("~")
-    folder = "/Data/calcium_spikes_markov/ca_fix/"
-    file = "ca_markov_cafix{:.2f}_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat".format(ca_fix)
-    data = np.loadtxt(home + folder + file)
+    data = df.load_traces_fixed_ci_markov(tau, p, ci)
     ts, cas, jpuffs, adaps = np.transpose(data)
 
     ts_clear = []
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     jpuffs_clear = []
     mean_jpuffs_clear = []
     for t, ca, jpuff in zip(ts, cas, jpuffs):
-        if ca != 1:
+        if ca != cT:
             ts_clear.append(t)
             cas_clear.append(ca)
             jpuffs_clear.append(jpuff)
@@ -64,5 +64,6 @@ if __name__ == "__main__":
     ax0.set_yscale("log")
     ax0.set_xlabel("$\Delta t$")
     ax0.set_xscale("log")
-    #plt.savefig(home + "/Data/Calcium/Plots/puff_current.pdf".format(ca_fix, tau, jca), transparent=True)
+
+
     plt.show()
