@@ -76,8 +76,6 @@ if __name__ == "__main__":
     ax_cv_markov.set_ylim([pmin, pmax])
 
     cs_cv_markov = ax_cv_markov.pcolormesh(taus, js, CV_markov, linewidth=0, rasterized=True, shading='gouraud', vmin=0., vmax=1.0, cmap=cmap_cividis)
-    #ax_cv_markov.contour(taus, js, CV_markov, linewidths=1, levels=[0.15], colors="k")
-
     divider = make_axes_locatable(ax_cv_markov)
     cax_cv_markov = divider.append_axes('right', size='5%', pad=0.05)
     cbar_cv_markov = fig.colorbar(cs_cv_markov, cax=cax_cv_markov, orientation='vertical')
@@ -103,7 +101,7 @@ if __name__ == "__main__":
     ax_mean_markov.plot(taus, ps_bif, ls="--", c=colors.palette[5])
     ax_cv_markov.plot(taus, ps_bif, ls="--", c=colors.palette[5])
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig6a.pdf", transparent=True)
+    #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig6a.pdf", transparent=True)
     plt.show()
 
 

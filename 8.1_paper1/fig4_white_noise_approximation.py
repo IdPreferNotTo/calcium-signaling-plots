@@ -12,12 +12,12 @@ if __name__ == "__main__":
     st.set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(9, 4))
     gs = gridspec.GridSpec(nrows=2, ncols=3)
-    axm1 = fig.add_subplot(gs[0, 0])
-    axm2 = fig.add_subplot(gs[1, 0])
-    gs11 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[0, 1], wspace=0.1)
-    gs12 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[0, 2], wspace=0.1)
-    gs21 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[1, 1], wspace=0.1)
-    gs22 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[1, 2], wspace=0.1)
+    axm1 = fig.add_subplot(gs[1, 2])
+    axm2 = fig.add_subplot(gs[0, 2])
+    gs11 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[0, 0], wspace=0.1)
+    gs12 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[0, 1], wspace=0.1)
+    gs21 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[1, 0], wspace=0.1)
+    gs22 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[1, 1], wspace=0.1)
     ax1 = fig.add_subplot(gs11[0:2])
     ax2 = fig.add_subplot(gs11[2])
     ax3 = fig.add_subplot(gs12[0:2])
@@ -28,19 +28,19 @@ if __name__ == "__main__":
     ax8 = fig.add_subplot(gs22[2])
     st.remove_top_right_axis([axm1, axm2, ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8])
 
-    axm1.text(0.1, 0.95, r"A", fontsize=13, transform=axm1.transAxes, va='top')
-    axm2.text(0.1, 0.95, r"B", fontsize=13, transform=axm2.transAxes, va='top')
-    ax1.text(0.1, 0.95, r"C$_1$", fontsize=13, transform=ax1.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
-    ax3.text(0.1, 0.95, r"C$_2$", fontsize=13, transform=ax3.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
-    ax5.text(0.1, 0.95, r"D$_1$", fontsize=13, transform=ax5.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
-    ax7.text(0.1, 0.95, r"D$_2$", fontsize=13, transform=ax7.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    axm1.text(0.1, 0.95, r"D", fontsize=13, transform=axm1.transAxes, va='top')
+    axm2.text(0.1, 0.95, r"C", fontsize=13, transform=axm2.transAxes, va='top')
+    ax1.text(0.1, 0.95, r"A$_1$", fontsize=13, transform=ax1.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax3.text(0.1, 0.95, r"A$_2$", fontsize=13, transform=ax3.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax5.text(0.1, 0.95, r"B$_1$", fontsize=13, transform=ax5.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
+    ax7.text(0.1, 0.95, r"B$_2$", fontsize=13, transform=ax7.transAxes, va='top', bbox=dict(facecolor='w', edgecolor='none'))
 
     for ax in [ax1, ax5]:
-        ax.set_ylabel(rf"$Y_t(\Delta t = 0.1)$")
+        ax.set_ylabel(rf"$Y(t; \Delta t = 0.1)$")
     for ax in [ax3, ax7]:
-        ax.set_ylabel(rf"$Y_t(\Delta t = 1.0)$")
+        ax.set_ylabel(rf"$Y(t; \Delta t = 1.0)$")
     for ax in [ax2, ax4, ax6, ax8]:
-        ax.set_xlabel("$P_{\Delta t}(Y)$")
+        ax.set_xlabel("$P(Y)$")
         ax.set_yticks([])
         ax.set_xticks([])
     for ax in [ax1, ax3, ax5, ax7]:
@@ -166,18 +166,18 @@ if __name__ == "__main__":
         #axm2.fill_between([delta_t*f for f in fs], [x + s/np.sqrt(10) for (x, s) in zip(moment3s, std_moment3s)], [x - s/np.sqrt(10) for (x, s) in zip(moment3s, std_moment3s)], color=color.palette[i], alpha=0.5)
 
         if ca == ca1:
-            mean_jpuff = K*fc.mean_puff_single(ca1, N, M, 1, r_opn_s, r_ref)
-            d_jpuff = K*fc.intensity_puff_single(ca1, N, M, 1, r_opn_s, r_ref)
+            mean_jpuff = K*fc.mean_jp_single_theory(ca1, N, M, 1, r_opn_s, r_ref)
+            d_jpuff = K*fc.noise_intensity_jp_single_theory(ca1, N, M, 1, r_opn_s, r_ref)
             std_jpuff_f1 = np.sqrt(2*d_jpuff/dt1)
             std_jpuff_f2 = np.sqrt(2*d_jpuff/dt2)
             if n1==0:
                 ax1.plot(ts, jpuffs_f1, c=plt_color)
             else:
                 ax1.plot(ts[n1:-n1], jpuffs_f1, c=plt_color)
-            ax1.axhline(mean_jpuff, color=color.palette[5])
+            #ax1.axhline(mean_jpuff, ls="--", color=color.palette[5])
 
             ax3.plot(ts[n2:-n2], jpuffs_f2, c=plt_color)
-            ax3.axhline(mean_jpuff, color=color.palette[5])
+            #ax3.axhline(mean_jpuff, ls="--", color=color.palette[5])
 
             ax2.plot(fc.gaussian_dist(gaus1, mean_jpuff, std_jpuff_f1), gaus1, c=color.palette[5], lw=1.)
             ax2.hist(jpuffs_f1, bins=25, alpha=0.5, color=plt_color, density=True, orientation="horizontal")
@@ -186,9 +186,9 @@ if __name__ == "__main__":
             ax4.hist(jpuffs_f2, bins=50, alpha=0.5, color=plt_color, density=True, orientation="horizontal")
 
         if ca == ca2:
-            mean_jpuff = K*fc.mean_puff_single(ca2, N, M, 1, r_opn_s, r_ref)
+            mean_jpuff = K*fc.mean_jp_single_theory(ca2, N, M, 1, r_opn_s, r_ref)
             print("Calculate intensity...")
-            d_jpuff = K*fc.intensity_puff_single(ca2, N, M, 1, r_opn_s, r_ref)
+            d_jpuff = K*fc.noise_intensity_jp_single_theory(ca2, N, M, 1, r_opn_s, r_ref)
             print("...done")
             std_jpuff_f1 = np.sqrt(2*d_jpuff/dt1)
             std_jpuff_f2 = np.sqrt(2*d_jpuff/dt2)
@@ -196,10 +196,10 @@ if __name__ == "__main__":
                 ax5.plot(ts, jpuffs_f1, c=plt_color)
             else:
                 ax5.plot(ts[n1:-n1], jpuffs_f1, c=plt_color)
-            ax5.axhline(mean_jpuff, color=color.palette[5])
+            #ax5.axhline(mean_jpuff, ls="--", color=color.palette[5])
 
             ax7.plot(ts[n2:-n2], jpuffs_f2, c=plt_color)
-            ax7.axhline(mean_jpuff, color=color.palette[5])
+            #ax7.axhline(mean_jpuff, ls="--", color=color.palette[5])
 
             ax6.plot(fc.gaussian_dist(gaus1, mean_jpuff, std_jpuff_f1), gaus1, c=color.palette[5], lw=1.)
             ax6.hist(jpuffs_f1, bins=25, alpha=0.5, color=plt_color, density=True, orientation="horizontal")

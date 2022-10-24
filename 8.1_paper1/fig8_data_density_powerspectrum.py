@@ -118,8 +118,8 @@ if __name__ == "__main__":
 
     ax2.set_xlim([0, 2])
     ax2.set_ylim([0, 4])
-    ax2.set_xlabel(r"$\tilde{T}$")
-    ax2.set_ylabel(r"$p_{\rm ISI}(\tilde{T})$")
+    ax2.set_xlabel(r"$T$")
+    ax2.set_ylabel(r"$p_{\rm ISI}(T)$")
 
     mean = np.mean(ISIs_flat)
     std = np.std(ISIs_flat)
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     ax3.plot(dts, fanos_count, c=st.colors[4], label="Data")
     ax3.axvline(mean, ls=":", c="C7")
     ax3.set_xscale("log")
-    ax3.set_xlabel("$t$ / s")
+    ax3.set_xlabel("$t$")
     ax3.set_ylabel("$F(t)$")
     ax3.axhline(cv2, ls=":", c="C7")
     ax3.text(0.2, 0.08, "$CV_T^2$")
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             fws_img.append(fw.imag)
         spectrum_data.append((1. / Tmax) * (np.var(fws_real) + np.var(fws_img)))
 
-    spectrum_data = fc.power_spectrum_isis(fs, ISIs_flat, Tmax=25)
+    spectrum_data = fc.power_spectrum_isis(fs, ISIs_flat, Tmax=10)
     Ps_fourier = []
     Fs = []
     dt = ts_inv_gau[1] - ts_inv_gau[0]
@@ -220,22 +220,23 @@ if __name__ == "__main__":
     ax4.text(2, 1.3 * cv ** 2, "$r_0 CV_T^2$")
     #ax3.plot(fs, spectrum_theory, lw=1, c="k")
     ax4.plot(fs, spectrum_data, c=st.colors[4])
-    ax4.set_xlabel("$f$ / s$^{-1}$")
+    ax4.set_xlabel("$f$")
     ax4.set_ylabel("$S(f)$")
     ax4.set_xscale("log")
     ax4.set_yscale("log")
 
-    tau = 13.1
-    p = 0.00523
+    tau = 14.446540880503141
+    p = 0.004765556953179596
     ax1.scatter(tau/5, p/0.03, zorder=3, s=50, ec="k", fc=colors.palette[5])
     folder = home + "/Data/calcium_spikes_markov/Data_no_adap_zoom/"
-    file_spikes = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{p:.2e}_K10_5.dat"
+    file_spikes = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{p:.2e}_K10_0.dat"
     isis_model = np.loadtxt(folder + file_spikes)
     mean_isi = np.mean(isis_model)
     cv_isi = np.std(isis_model)/mean_isi
+    print(mean_isi, cv_isi)
     isis_model = [isi/mean_isi for isi in isis_model]
     fs = np.logspace(-1, 1, 100)
-    spectrum_data = fc.power_spectrum_isis(fs, isis_model, Tmax=25)
+    spectrum_data = fc.power_spectrum_isis(fs, isis_model, Tmax=10)
 
     dts = np.logspace(-1, 1, 1000)
     fano = []

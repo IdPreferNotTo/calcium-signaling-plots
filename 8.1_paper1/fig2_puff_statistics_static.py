@@ -313,8 +313,6 @@ if __name__ == "__main__":
     mean = (M - 1) / rref + 1 / ropn
     var = (M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2
     dr = rref - ropn
-
-
     ts = np.linspace(0, max(ipis_cR), 100)
     p_ipi = []
     for t in ts:

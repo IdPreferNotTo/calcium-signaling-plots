@@ -65,13 +65,13 @@ if __name__ == "__main__":
     st.remove_top_right_axis([ax1, ax2, ax3, ax4, ax5, ax6])
 
     ax1.text(0.1, 0.95, r"A$_1$", fontsize=13, transform=ax1.transAxes, va='top')
-    ax2.text(0.075, 0.95, r"A$_2$", fontsize=13, transform=ax2.transAxes, va='top')
+    ax2.text(0.05, 0.95, r"A$_2$", fontsize=13, transform=ax2.transAxes, va='top')
     ax3.text(0.1, 0.95, r"B$_1$", fontsize=13, transform=ax3.transAxes, va='top')
-    ax4.text(0.075, 0.95, r"B$_2$", fontsize=13, transform=ax4.transAxes, va='top')
+    ax4.text(0.05, 0.95, r"B$_2$", fontsize=13, transform=ax4.transAxes, va='top')
     ax5.text(0.1, 0.95, r"C$_1$", fontsize=13, transform=ax5.transAxes, va='top')
-    ax6.text(0.075, 0.95, r"C$_2$", fontsize=13, transform=ax6.transAxes, va='top')
+    ax6.text(0.05, 0.95, r"C$_2$", fontsize=13, transform=ax6.transAxes, va='top')
 
-    ax1.text(0.6, 1.00, "Data", fontsize=15, transform=ax1.transAxes, ha="center", va='top')
+    ax1.text(0.6, 1.00, "HEK", fontsize=15, transform=ax1.transAxes, ha="center", va='top')
     ax5.text(0.6, 1.00, "Cumulative \n refractory period", fontsize=15, transform=ax5.transAxes, ha="center", va='top')
     ax3.text(0.6, 1.00, "Renewal", fontsize=15, transform=ax3.transAxes, ha="center", va='top')
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     ax2.set_ylabel("$T_i$ / s")
     ax2.scatter(index_ISIs, ISIs, fc="w", ec=st.colors[4], s=20, zorder=3)
     ax2.plot(i_ISI_fit, ISI_fit, lw=1, c="k", zorder=2)
-    ax2.fill_between([0, 10], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
+    ax2.fill_between([0, popt[2]], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
     ax2.axhline(popt[0], ls=":", lw=1, c="k")
     ax2.axhline(popt[1], ls=":", lw=1, c="k")
     ax2.text(nr_ISIs/2, popt[0]*1.2, "$T_0$", ha="center")
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     taua = 681
     ampa = 0.043
     home = os.path.expanduser("~")
-    folder = home + "/Data/calcium_spikes_markov/Data_adap/"
+    folder = home + f"/Data/calcium_spikes_markov/Data_adap/tau1.41e+01_j7.94e-03/"
     file = f"ca_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.41e+01_j7.94e-03_K10_5.dat"
     file_spikes = f"spike_times_markov_ip1.00_taua{taua:.2e}_ampa{ampa:.2e}_tau1.41e+01_j7.94e-03_K10_5.dat"
     data = np.loadtxt(folder + file)
@@ -138,10 +138,11 @@ if __name__ == "__main__":
     ax6.set_ylim([0, 1.5 * popt[1]])
     ax6.set_ylabel("$T_i$ / s")
     ax6.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[0], s=20, zorder=3)
-    ax6.fill_between([0, 10], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
+    ax6.fill_between([0, popt[2]], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
     index_ISIs = np.arange(len(ISIs))
     popt, pcov = curve_fit(transient_func, index_ISIs, ISIs, p0=(100, 150, 2))
     print(popt)
+    print(np.mean(ISIs), np.std(ISIs)/np.mean(ISIs))
     ISI_fit = popt[0] * np.exp(-index_ISIs / popt[2]) + popt[1] * (1. - np.exp(-index_ISIs / popt[2]))
     ax6.plot(index_ISIs, ISI_fit, lw=1, c="k")
     ax6.axhline(popt[0], ls=":", lw=1, c="k")
@@ -185,7 +186,7 @@ if __name__ == "__main__":
     ax4.set_ylim([0, 1.5 * popt[1]])
     ax4.set_ylabel("$T_i$ / s")
     ax4.scatter(np.arange(0, nr_ISIs), ISIs[0:nr_ISIs], fc="w", ec=st.colors[0], s=20, zorder=3)
-    print(np.mean(ISIs))
+    print(np.mean(ISIs) )
     ax4.axhline(np.mean(ISIs), ls=":", lw=1, c="k")
     ax4.text(nr_ISIs / 2, popt[1] * 1.2, "$T_0 = T_\infty$", ha="center")
 

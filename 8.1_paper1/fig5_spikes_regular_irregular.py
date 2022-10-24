@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from  matplotlib import gridspec
 import scipy.stats as stats
+import scipy.special as special
 import os
 
 import styles as st
@@ -100,7 +101,7 @@ if __name__ == "__main__":
         dx = xs[1] - xs[0]
         ca_drifts = []
         for x in xs:
-            ca_drift = -(x- ca_r)/tau + j*N*fc.mean_puff_single(x, n, m, ip3, r_opn_single, r_ref)
+            ca_drift = -(x- ca_r)/tau + j*N*fc.mean_jp_single_theory(x, n, m, ip3, r_opn_single, r_ref)
             if ca_drift < 0 and ca_drift_tmp > 0:
                 ca_fix = x
             ca_drift_tmp = ca_drift
@@ -139,15 +140,21 @@ if __name__ == "__main__":
         if k == 0:
             ax3a.hist(data_isis, bins=20, color=plt_color, density=True, alpha=0.5)
             ax3b.hist(data_isis, bins=20, color=plt_color, density=True, alpha=0.5)
+            ax3a.text(0.7, 0.7, r"inv.\ Gaus.", fontsize=9, color=color.palette[5], transform=ax3a.transAxes,
+                      va='center', ha='center')
+            ax3b.text(0.7, 0.7, r"Gamma", fontsize=9, color=color.palette[5], transform=ax3b.transAxes, va='center',
+                      ha='center')
         else:
             ax3a.hist(data_isis, bins=50, color=plt_color, density=True, alpha=0.5)
             ax3b.hist(data_isis, bins=50, color=plt_color, density=True, alpha=0.5)
-
+            ax3a.text(0.7, 0.5, r"inv.\ Gaus.", fontsize=9, color=color.palette[5], transform=ax3a.transAxes,
+                      va='center', ha='center')
+            ax3b.text(0.7, 0.5, r"Gamma", fontsize=9, color=color.palette[5], transform=ax3b.transAxes, va='center',
+                      ha='center')
 
         ts_dist = np.linspace(1, 150, 1001)
         inv_gaus_dist_markov = []
         inv_gaus_dist_langevin =[]
-        exp_dis = []
         for t in ts_dist:
             p_markov = np.sqrt(mean_isi / (2 * np.pi * np.power(cv_isi, 2) * (t ** 3))) * np.exp(
                 -(t - mean_isi) ** 2 / (2 * mean_isi * np.power(cv_isi, 2) * t))
@@ -161,13 +168,22 @@ if __name__ == "__main__":
 
 
         ts_dist = np.linspace(1, 150, 1001)
-        inv_gaus_dis = []
+        gamma_dist_markov = []
+        gamma_dist_langevin =[]
         alpha_markov = 1/np.power(cv_isi,2)
         beta_markov  = 1/(mean_isi*np.power(cv_isi,2))
         alpha_langevin = 1/np.power(cv_isi_langevin, 2)
         beta_langevin = 1/(mean_isi_langevin*np.power(cv_isi_langevin,2))
-        gamma_dist_markov = stats.gamma.pdf(ts_dist, a=alpha_markov, scale=1 / beta_markov)
-        gamma_dist_langevin = stats.gamma.pdf(ts_dist, a = alpha_langevin, scale = 1/ beta_langevin)
+
+        for t in ts_dist:
+            tscale = t / (mean_isi * np.power(cv_isi, 2))
+            tsclae_langevin = t /(mean_isi_langevin * np.power(cv_isi_langevin, 2))
+            p_markov = np.power(tscale, 1/cv_isi**2) * np.exp(-tscale)/(t * special.gamma(1/cv_isi**2))
+            p_langevin = np.power(tsclae_langevin, 1/cv_isi_langevin**2) * np.exp(-tsclae_langevin)/(t * special.gamma(1/cv_isi_langevin**2))
+            gamma_dist_markov.append(p_markov)
+            gamma_dist_langevin.append(p_langevin)
+        #gamma_dist_markov = stats.gamma.pdf(ts_dist, a=alpha_markov, scale=1 / beta_markov)
+        #gamma_dist_langevin = stats.gamma.pdf(ts_dist, a = alpha_langevin, scale = 1/ beta_langevin)
 
         ax3b.plot(ts_dist, gamma_dist_markov, color=color.palette[5], ls="--", label="Gamma")
         ax3b.plot(ts_dist, gamma_dist_langevin, color=color.palette[5], ls=":")
@@ -234,5 +250,5 @@ if __name__ == "__main__":
             ax3a.set_xticklabels([])
 
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig5.pdf",transparent=True)
+    #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig5.pdf",transparent=True)
     plt.show()

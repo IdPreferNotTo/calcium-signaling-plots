@@ -2,8 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from  matplotlib import gridspec
 import os
-from scipy.stats import moment
-from scipy.optimize import curve_fit
 
 import styles as st
 import functions as fc
@@ -45,8 +43,10 @@ if __name__ == "__main__":
         ax_cv.set_ylabel(r"$CV_T$")
         ax_cv.set_xlabel(r"$b_T$")
         means = []
+        means_langevin = []
         err_means = []
         cvs = []
+        cvs_langevin = []
         err_cvs = []
         folder = home + "/CLionProjects/PhD/calcium/calcium_spikes_markov_buffer/out/"
         file_spikes = f"spike_times_markov_buffer_bt0.00_ip1.00_tau{tau:.2e}_j{j:.2e}_K10_5.dat"
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         print(cv0)
         mean_bT = []
         for bt in bTs:
-            beta = 1 + 5*bt/np.power(5 + 0.35, 2)
+            beta = 1 + 5*bt/np.power(5, 2)
             mean_bT.append(mean0 * beta)
 
         for bT in bTs:
@@ -70,37 +70,33 @@ if __name__ == "__main__":
             means.append(mean)
             cvs.append(cv)
 
-            cvs_tmp = []
-            means_tmp = []
-            n = 100
-            for isi_sample in [data_isis[i:i + n] for i in range(0, len(data_isis), n)]:
-                mean_tmp = np.mean(isi_sample)
-                cv_tmp = np.std(isi_sample) / mean_tmp
-                means_tmp.append(mean_tmp)
-                cvs_tmp.append(cv_tmp)
-            #err_mean = np.sqrt(var/N)
-            #err_cv = np.sqrt((moment(data_isis, moment=4) - var**2)/N)
-            #err_means.append(err_mean)
-            #err_cvs.append(err_cv)
-            err_means.append(np.std(means_tmp))
-            err_cvs.append(np.std(cvs_tmp))
-        ax_mean.plot(bTs, mean_bT, color=colors.palette[5], label="Theory")
-        ax_mean.errorbar(bTs, means, yerr=err_means, linestyle="none", marker="o", ms=4.5, mfc="w", mec=st.colors[0], zorder=2, label="Two-component \n + fast buffer")
-        ax_cv.errorbar(bTs, cvs, yerr=err_cvs, linestyle="none", marker="o", ms=4.5, mfc="w", mec=st.colors[0], zorder=2, label="Two-component \n + fast buffer")
+            folder_langevin = home + "/CLionProjects/PhD/calcium/calcium_spikes_langevin_buffer/out/"
+            file_spikes_langevin = f"spike_times_langevin_buffer_bt{bT:.2f}_ip1.00_tau{tau:.2e}_j{j:.2e}_K10_0.dat"
+            data_isis_langevin = np.loadtxt(folder_langevin + file_spikes_langevin)
+            N_langevin = np.size(data_isis_langevin)
+            mean_langevin = np.mean(data_isis_langevin)
+            var_langevin = np.var(data_isis_langevin)
+            cv_langevin = np.std(data_isis_langevin) / mean_langevin
+            means_langevin.append(mean_langevin)
+            cvs_langevin.append(cv_langevin)
+
+        ax_mean.scatter(bTs, means, s=20, fc="w", ec=st.colors[0], zorder=2)
+        ax_mean.plot(bTs, means_langevin, color=colors.palette[0], zorder=1, label="Langevin + buffer")
+        ax_mean.plot(bTs, mean_bT, color=colors.palette[5], zorder=0, label="Theory")
+        ax_cv.scatter(bTs, cvs, s=20, fc="w", ec=st.colors[0], zorder=2, label="Two-component \n + buffer")
+        ax_cv.plot(bTs, cvs_langevin, color=colors.palette[0], zorder=1, label="Langevin \n + buffer")
         if tau == 5.0:
             ax_mean.set_ylim([0, 250])
             ax_cv.set_ylim([0, 0.35])
             cv_theory = []
             for bT in np.linspace(0, 100, 100):
-                cv_theory.append(0.176768/np.sqrt(1 + 0.175*bT))
-            ax_cv.plot(np.linspace(0, 100, 100), cv_theory, color=colors.palette[5], label="Theory", zorder=1)
+                cv_theory.append(0.176768/np.sqrt(1 + 5*bT/np.power(5, 2)))
+            ax_cv.plot(np.linspace(0, 100, 100), cv_theory, color=colors.palette[5], label="Theory", zorder=0)
         if tau == 1.0:
-            ax_mean.set_ylim([0, 700])
-            ax_cv.set_ylim([0, 0.7])
-            cv_theory = []
-            for bT in np.linspace(0, 100, 100):
-                cv_theory.append(cv0 / np.sqrt(1 + 0.175 * bT))
-            ax_cv.plot(np.linspace(0, 100, 100), cv_theory, color=colors.palette[5], label="Theory", zorder=1)
-    ax2.legend(fancybox=False, fontsize=9, loc=1)
+            ax_cv.set_ylim([0, 0.8])
+
+    handles, labels = ax2.get_legend_handles_labels()
+    order = [0, 1, 2]
+    ax2.legend([handles[idx] for idx in order], [labels[idx] for idx in order], fancybox=False, fontsize=9, loc=1)
     plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig11.pdf", transparent=True)
     plt.show()
