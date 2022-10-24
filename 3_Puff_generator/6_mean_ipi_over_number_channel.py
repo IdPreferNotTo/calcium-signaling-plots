@@ -26,11 +26,12 @@ if __name__ == "__main__":
     home = os.path.expanduser("~")
     N = 10
     Ns = range(1, N)
+    cafix = 0.2
     means = []
     for i in Ns:
         print(i)
         folder = home + "/Data/calcium_spikes_markov/ca_fix/"
-        data = np.loadtxt(folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_{:d}.dat".format(i))
+        data = np.loadtxt(folder + f"puff_markov_cafix{cafix:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K1_{i:d}.dat")
         data_tmp = []
         for set in data:
             if set[2] == 0:

@@ -1,13 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-import matplotlib.patches as patches
 import os
 
-from matplotlib.collections import PatchCollection
-
 import styles as st
-import functions as fc
+
 
 def get_ns_open(data):
     ns_opn = []
@@ -44,13 +41,14 @@ if __name__ == "__main__":
     home = os.path.expanduser("~")
 
     # Subplot 1: x(t) over t
+    cafix = 0.2
     ax0.set_xlabel("$t$ / s")
     ax0.set_ylabel("$x(t)$")
     folder = "/Data/calcium_spikes_markov/ca_fix/"
-    data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_5.dat")
+    data = np.loadtxt(home + folder + f"puff_markov_cafix{cafix:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
     data_tmp = []
 
-    data_no_ref = [(t, x, i) if x>= 0 else (t, 0, i) for (t, x, i) in data]
+    data_no_ref = [(t, x, i) if x>= 0 else (t, 0, i) for (t, x, i, sx) in data]
     data2 = []
     for set1, set2 in zip(data_no_ref[:-1], data_no_ref[1:]):
         data2.append(set1)
@@ -78,8 +76,8 @@ if __name__ == "__main__":
     ax0.fill_between(ts[:500] - ts[0], xs[:500], color=st.colors[0], alpha=0.5)
 
     ax1.set_ylim([0, 1/5 + 0.15])
-    ax1.set_xlabel(r"$n_{\rm opn}$")
-    ax1.set_ylabel(r"$P(n_{\rm opn})$")
+    ax1.set_xlabel(r"$n_0$")
+    ax1.set_ylabel(r"$p(n_0)$")
     ns_open = get_ns_open(data)
     ns_over_i = [0]*5
     for n in ns_open:
@@ -91,7 +89,7 @@ if __name__ == "__main__":
     #ax1.plot([0, 1, 1, 2, 3, 4, 5, 5, 6], [0, 0, 0.2, 0.2, 0.2, 0.2, 0.2, 0, 0], lw=1, color=st.colors[2])
 
     ax2.set_xlabel("$A$")
-    ax2.set_ylabel("$P(A)$")
+    ax2.set_ylabel("$p(A)$")
     As = get_As(data_no_ref)
     ax2.hist(As, bins=25, color=st.colors[0], density=True)
 
@@ -99,18 +97,15 @@ if __name__ == "__main__":
     Ass = []
     num_chas = np.arange(1, 7)
     for num_cha in num_chas:
-        file = f"puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N1_{num_cha:d}.dat"
+        file = f"puff_markov_cafix{cafix:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K1_{num_cha:d}.dat"
         data_n = np.loadtxt(home + folder + file)
         As = get_As(data_n)
         Ass.append(As)
 
-    ax3.set_xlabel("$n$")
+    ax3.set_xlabel("$N$")
     ax3.set_ylabel(r"$\langle A \rangle$")
     ax3.scatter(num_chas, [np.mean(As) for As in Ass], ec=st.colors[0], fc="w", s=15, zorder=2)
     Ass_theo = [(1/50)*(n +1)*(n+2)/6 for n in num_chas]
     ax3.plot(num_chas, Ass_theo, lw=1, c=st.colors[2], zorder=1)
     ax3.set_xticks([1, 2, 3, 4, 5, 6])
-    plt.savefig(home + "/Data/Calcium/Plots/puff_gen_A_statistics.pdf", transparent=True)
-
-
     plt.show()

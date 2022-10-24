@@ -17,7 +17,8 @@ if __name__ == "__main__":
     st.remove_top_right_axis([ax])
     n = 5
     m = 4
-    data = np.loadtxt(home + "/Data/calcium_spikes_markov/ca_fix/puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_N10_0.dat")
+    cafix = 0.2
+    data = np.loadtxt(home + f"/Data/calcium_spikes_markov/ca_fix/puff_markov_cafix{cafix:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K10_5.dat")
 
     data_tmp = []
     for set in data:
@@ -26,13 +27,15 @@ if __name__ == "__main__":
     data = data_tmp
     data2 = []
     for set1, set2 in zip(data[:-1], data[1:]):
-        data2.append(set1)
+        data2.append(set1[0:3])
         data2.append([set2[0], set1[1], set1[2]])
 
     ts, xs, idxs = np.transpose(data2)
-    axin.plot(ts, xs)
+    axin.plot(ts, xs, color=st.colors[0])
     axin.set_xlim([55, 60])
     axin.tick_params(direction="in")
+    axin.set_ylabel("$\omega(t)$")
+    axin.set_xlabel("$t$")
     axin.set_xticklabels([])
     axin.set_yticklabels([])
 
@@ -42,13 +45,12 @@ if __name__ == "__main__":
             ys.append(x)
         else:
             ys.append(0)
-    ax.plot(ts, ys)
+    ax.plot(ts, ys, color=st.colors[0])
     rect = patches.Rectangle((55, -0.1), 5, 4.2, linewidth=1, edgecolor='k', facecolor='none')
     ax.add_patch(rect)
 
     ax.set_ylim([-0.2, 5])
     ax.set_xlim([50, 100])
-    ax.set_xlabel("time $t$")
+    ax.set_xlabel("$t$")
     ax.set_ylabel("$x(t)$")
-    plt.savefig(home + "/Data/Calcium/Plots/cluster_timeseries.pdf", transparent=True)
     plt.show()

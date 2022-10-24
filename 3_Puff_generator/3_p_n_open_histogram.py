@@ -28,9 +28,8 @@ if __name__ == "__main__":
         axis.append(ax)
 
     st.remove_top_right_axis(axis)
-    axis[int(nmax_channel/2)].set_ylabel(r"$P(n_{\rm opn})$")
+    axis[int(nmax_channel/2)].set_ylabel(r"$p(n_0)$")
     axis[-1].set_xticklabels(range(1, nmax_channel+1))
-    axis[-1].set_xlabel(r"$n_{\rm opn}$")
+    axis[-1].set_xlabel(r"$n_0$")
     home = os.path.expanduser("~")
-    plt.savefig(home + "/Data/Calcium/Plots/puff_gen_prob_nopen.pdf", transparent=True)
     plt.show()

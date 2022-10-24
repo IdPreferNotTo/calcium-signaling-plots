@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import matplotlib.patches as patches
+import scipy.special as sci
 import os
 
 import styles as st
@@ -21,8 +22,6 @@ def get_ipis(data):
     return ipis
 
 
-
-
 if __name__ == "__main__":
     st.set_default_plot_style()
     fig = plt.figure(tight_layout=True, figsize=(4.5, 3))
@@ -34,13 +33,14 @@ if __name__ == "__main__":
     st.remove_top_right_axis(axis)
     home = os.path.expanduser("~")
 
+    cafix = 0.2
     # Subplot 1: x(t) over t
     ax0.set_xlabel("$t$ / s")
     ax0.set_ylabel("$x(t)$")
     folder = "/Data/calcium_spikes_markov/ca_fix/"
-    data = np.loadtxt(home + folder + "puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
+    data = np.loadtxt(home + folder + f"puff_markov_cafix{cafix:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
 
-    data_no_ref = [(t, x, i) if x>= 0 else (t, 0, i) for (t, x, i) in data]
+    data_no_ref = [(t, x, i) if x>= 0 else (t, 0, i) for (t, x, i, sx) in data]
     data_plot = []
     for set1, set2 in zip(data_no_ref[:-1], data_no_ref[1:]):
         data_plot.append(set1)
@@ -75,21 +75,26 @@ if __name__ == "__main__":
 
 
     # Subplot 2: IPI density
-    num_cha = 5
-    num_cls = 4
-    mean_ibi = 10
-    ratio = 0.1
-    ropn = num_cha*(1. + ratio * (num_cls - 1.)) / mean_ibi
-    rref = num_cha*(1. + ratio * (num_cls - 1.)) / (ratio * mean_ibi)
-    mean = (num_cls-1)/rref + 1/ropn
-    var = (num_cls-1)*(1/rref)**2 + (1/ropn)**2
+    data_cR = np.loadtxt(home + folder + "puff_markov_cafix0.20_ip1.00_tau1.00e+00_j1.00e+00_K1_5.dat")
+    ipis_cR = get_ipis(data_cR)
+    cv = np.std(ipis_cR)/np.mean(ipis_cR)
+
+    r_ref = 20
+    r_opn_single = 0.1
+    cv = np.std(ipis_cR)/np.mean(ipis_cR)
+    N = 5
+    M = 3
+    ropn = r_opn_single * N
+    rref = r_ref
+    mean = (M - 1) / rref + 1 / ropn
+    var = (M - 1) * (1 / rref) ** 2 + (1 / ropn) ** 2
     dr = rref - ropn
-    ts = np.linspace(0, max(ipis), 100)
-    p_ipi =[]
+
+
+    ts = np.linspace(0, max(ipis_cR), 100)
+    p_ipi = []
     for t in ts:
-        c4 = (1 / 2) * np.power(rref, 3) * (np.exp(-dr * t) * (-dr * t * (dr * t + 2) - 2) + 2) / np.power(dr, 3)
-        p4 = c4 * np.exp(-ropn * t)
-        p_ipi.append(ropn * p4)
+        p_ipi.append(ropn*np.power(r_ref/(r_ref - ropn), M-1)*sci.gammainc(M-1, dr*t)*np.exp(-ropn*t))
 
     print(np.mean(ipis), mean)
     ax1.set_xlabel("$I$ / s")
@@ -103,11 +108,11 @@ if __name__ == "__main__":
     Ass = []
     num_chas = np.arange(1, 7)
     for num_cha in num_chas:
-        file = f"puff_markov_cafix0.33_ip1.00_tau1.00e+00_j1.00e+00_K1_{num_cha:d}.dat"
+        file = f"puff_markov_cafix{cafix:.2f}_ip1.00_tau1.00e+00_j1.00e+00_K1_{num_cha:d}.dat"
         data_n = np.loadtxt(home + folder + file)
         ipis = get_ipis(data_n)
         r = 0.1
-        CV2 = (1. + (num_cls-1) * r**2)/(1. + (num_cls-1)*r)**2
+        CV2 = (1. + (M-1) * r**2)/(1. + (M-1)*r)**2
         CV = np.sqrt(CV2)
         xs = np.linspace(0, 6, 100)
         ax2.plot(xs, [CV*x for x in xs], lw=1, c=st.colors[2], zorder=1)
@@ -127,6 +132,4 @@ if __name__ == "__main__":
     ax2.add_patch(arrow)
     ax2.text(5.2, 1.5, "$m$")
     ts = np.linspace(0, 1, 101)
-
-    #plt.savefig(home + "/Data/Calcium/Plots/puff_gen_ipi_statistics.pdf", transparent=True)
     plt.show()
