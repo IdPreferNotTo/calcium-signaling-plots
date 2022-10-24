@@ -7,8 +7,8 @@ import styles as st
 import default_parameters as df
 
 if __name__ == "__main__":
-    tau = 5.
-    p = 0.015
+    tau = 1. # 5
+    p = 0.060 # 0.015
     ip3 = 1.0
     cR = 0.2
     K = 10
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     cas = np.linspace(0.0, 1, 100)
     ax.plot(cas, mean_jpuff_over_ca)
     ax.fill_between(cas, std_upper_sim, std_lower_sim, color="C0", alpha=0.55,
-                    label=r"$\sigma_J \Delta t$")
+                    label=r"$\sigma_J \sqrt{\Delta t}$")
 
     # Plot Theory
     means_theory = []
