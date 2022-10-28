@@ -34,15 +34,15 @@ if __name__ == "__main__":
     ax3.set_xlabel(r"$\tau_{er}$")
 
     ax4.set_ylabel(r"$\langle T \rangle$")
-    ax4.set_xlabel(r"$\epsilon_{er}$")
+    ax4.set_xlabel(r"$\varepsilon_{er}$")
     #ax3.set_xscale("log")
 
     ax5.set_ylabel(r"$CV_T$")
-    ax5.set_xlabel(r"$\epsilon_{er}$")
+    ax5.set_xlabel(r"$\varepsilon_{er}$")
     #ax4.set_xscale("log")
 
     ax6.set_ylabel(r"$\rho_1$")
-    ax6.set_xlabel(r"$\epsilon_{er}$")
+    ax6.set_xlabel(r"$\varepsilon_{er}$")
 
     # Parameters
     taus = [5.0, 1.0]
@@ -86,5 +86,5 @@ if __name__ == "__main__":
             p1s.append(p1)
         ax4.scatter(eps_ers, means, fc="w", ec=st.colors[i], s=20, zorder=3)
         ax5.scatter(eps_ers, cvs, fc="w", ec=st.colors[i], s=20, zorder=3)
-        ax6.scatter(tau_ers, p1s, fc="w", ec=st.colors[i], s=20, zorder=3)
+        ax6.scatter(eps_ers, p1s, fc="w", ec=st.colors[i], s=20, zorder=3)
     plt.show()

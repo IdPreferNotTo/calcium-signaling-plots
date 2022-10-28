@@ -22,15 +22,19 @@ if __name__ == "__main__":
 
     ax1.set_ylabel(r"$n_{\rm tr}$")
     ax1.set_xlabel(r"$\tau_{er}$")
+    ax1.set_xscale("log")
 
     ax2.set_ylabel(r"$\Delta T$")
     ax2.set_xlabel(r"$\tau_{er}$")
+    ax2.set_xscale("log")
 
     ax3.set_ylabel(r"$n_{\rm tr}$")
-    ax3.set_xlabel(r"$\vareps_{er}$")
+    ax3.set_xlabel(r"$\varepsilon_{er}$")
+    ax3.set_xscale("log")
 
     ax4.set_ylabel(r"$\Delta T$")
-    ax4.set_xlabel(r"$\vareps_{er}$")
+    ax4.set_xlabel(r"$\varepsilon_{er}$")
+    ax4.set_xscale("log")
     # Parameters
     taus = [5.0, 1.0]
     ps = [0.015, 0.06]
@@ -39,9 +43,10 @@ if __name__ == "__main__":
     tau_ers = np.logspace(1, 3, 21)
     eps_ers = np.logspace(-2, 0, 21)
 
-    for tau, p, axs in zip(taus, ps):
+    for tau, p, in zip(taus, ps):
         dTs = []
         n_trs = []
+        n_trs_theory = []
         for tau_er in tau_ers:
             data_isi = df.load_spike_times_markov_transient(tau, p, tau_er, eps_er_fix)
             rows, cols = data_isi.shape
@@ -54,12 +59,17 @@ if __name__ == "__main__":
             n_tr = popt[2]
             dTs.append(T8 - T0)
             n_trs.append(n_tr)
+            n_trs_theory.append(-1/np.log((1-eps_er_fix)*np.exp(-T8/tau_er)))
         ax1.scatter(tau_ers, n_trs, fc="w", ec=st.colors[0], alpha=0.5, s=20, zorder=3)
         ax2.scatter(tau_ers, dTs, fc="w", ec=st.colors[0], alpha=0.5, s=20, zorder=3)
+        ax1.plot(tau_ers, n_trs_theory, c=st.colors[5])
 
         dTs = []
         n_trs = []
+        n_trs_theory = []
+        dTs_theory = []
         for eps_er in eps_ers:
+            print(eps_er)
             data_isi = df.load_spike_times_markov_transient(tau, p, tau_er_fix, eps_er)
             rows, cols = data_isi.shape
             idx_max = cols
@@ -71,7 +81,9 @@ if __name__ == "__main__":
             n_tr = popt[2]
             dTs.append(T8 - T0)
             n_trs.append(n_tr)
-            n_trs.append(n_tr)
+            n_trs_theory.append(-1 / np.log((1 - eps_er) * np.exp(-T8 / tau_er_fix)))
         ax3.scatter(eps_ers, n_trs, fc="w", ec=st.colors[0], alpha=0.5, s=20, zorder=3)
         ax4.scatter(eps_ers, dTs, fc="w", ec=st.colors[0], alpha=0.5, s=20, zorder=3)
+
+        ax3.plot(eps_ers, n_trs_theory, c=st.colors[5])
     plt.show()

@@ -9,8 +9,8 @@ import default_parameters as df
 def print_mean_CV_with_adap_to_file():
     K = 10
     N = 5
-    tau = 1
-    p = 0.06
+    tau = 5
+    p = 0.015
     tau_ers = np.logspace(1, 3, 41)
     eps_ers = np.logspace(-2, 0, 41)
 
@@ -30,6 +30,9 @@ def print_mean_CV_with_adap_to_file():
                     mean = np.mean(data_isi[50:])
                     std = np.std(data_isi[50:])
                     cv = std/mean
+                    n = data_isi.size
                     I += 1
                 print(I)
-            outfile.write(f"{tau_er:.2e} {eps_er:.2e} {mean:.2e} {cv:.2e} {n:d} \n")
+                outfile.write(f"{tau_er:.2e} {eps_er:.2e} {mean:.2e} {cv:.2e} {n:d} \n")
+
+print_mean_CV_with_adap_to_file()
