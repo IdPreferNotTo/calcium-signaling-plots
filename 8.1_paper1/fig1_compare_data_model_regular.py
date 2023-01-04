@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from scipy.optimize import curve_fit
+import matplotlib.patches as patches
 import os
 
 import styles as st
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     print(f"CV: {Cv:.2f}")
 
     st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(6, 6))
+    fig = plt.figure(tight_layout=True, figsize=(1.25*3.25, 1.25*4))
     gs = gridspec.GridSpec(3, 2)
     ax1 = fig.add_subplot(gs[0,0])
     ax2 = fig.add_subplot(gs[0,1])
@@ -64,20 +65,20 @@ if __name__ == "__main__":
     ax6 = fig.add_subplot(gs[2, 1])
     st.remove_top_right_axis([ax1, ax2, ax3, ax4, ax5, ax6])
 
-    ax1.text(0.1, 0.95, r"A$_1$", fontsize=13, transform=ax1.transAxes, va='top')
-    ax2.text(0.05, 0.95, r"A$_2$", fontsize=13, transform=ax2.transAxes, va='top')
-    ax3.text(0.1, 0.95, r"B$_1$", fontsize=13, transform=ax3.transAxes, va='top')
-    ax4.text(0.05, 0.95, r"B$_2$", fontsize=13, transform=ax4.transAxes, va='top')
-    ax5.text(0.1, 0.95, r"C$_1$", fontsize=13, transform=ax5.transAxes, va='top')
-    ax6.text(0.05, 0.95, r"C$_2$", fontsize=13, transform=ax6.transAxes, va='top')
+    ax1.text(0.05, 0.95, r"A$_1$", fontsize=11, transform=ax1.transAxes, va='top')
+    ax2.text(0.05, 0.95, r"A$_2$", fontsize=11, transform=ax2.transAxes, va='top')
+    ax3.text(0.05, 0.95, r"B$_1$", fontsize=11, transform=ax3.transAxes, va='top')
+    ax4.text(0.05, 0.95, r"B$_2$", fontsize=11, transform=ax4.transAxes, va='top')
+    ax5.text(0.05, 0.95, r"C$_1$", fontsize=11, transform=ax5.transAxes, va='top')
+    ax6.text(0.05, 0.95, r"C$_2$", fontsize=11, transform=ax6.transAxes, va='top')
 
-    ax1.text(0.6, 1.00, "HEK", fontsize=15, transform=ax1.transAxes, ha="center", va='top')
-    ax5.text(0.6, 1.00, "Cumulative \n refractory period", fontsize=15, transform=ax5.transAxes, ha="center", va='top')
-    ax3.text(0.6, 1.00, "Renewal", fontsize=15, transform=ax3.transAxes, ha="center", va='top')
+    ax1.text(0.6, 1.00, "HEK", fontsize=11, transform=ax1.transAxes, ha="center", va='top')
+    ax5.text(0.6, 1.00, "Cumulative \n ref. period", fontsize=11, transform=ax5.transAxes, ha="center", va='top')
+    ax3.text(0.6, 1.00, "Renewal", fontsize=11, transform=ax3.transAxes, ha="center", va='top')
 
     ax1.set_xlabel("$t$ / s")
     ax1.set_xlim([0, 1000])
-    ax1.plot(t_plot, ca_plot, c=st.colors[4])
+    ax1.plot(t_plot, ca_plot, c=st.colors[5])
     ax1.axhline(0.4, lw=1, ls=":", color="C7")
     ax1.set_ylabel("$\Delta$F / a.u.")
 
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     ax2.set_xlabel("$i$")
     ax2.set_ylim([0, 1.5*popt[1]])
     ax2.set_ylabel("$T_i$ / s")
-    ax2.scatter(index_ISIs, ISIs, fc="w", ec=st.colors[4], s=20, zorder=3)
+    ax2.scatter(index_ISIs, ISIs, fc="w", ec=st.colors[5], s=20, zorder=3)
     ax2.plot(i_ISI_fit, ISI_fit, lw=1, c="k", zorder=2)
     ax2.fill_between([0, popt[2]], [0, 0], [200, 200], color="C7", alpha=0.5, zorder=1)
     ax2.axhline(popt[0], ls=":", lw=1, c="k")
@@ -124,13 +125,13 @@ if __name__ == "__main__":
            cas_plot.append(0.2)
            n_spikes += 1
 
-    ax5.axhline(1, lw=1, ls=":", color="C7")
+    ax5.axhline(0.5, lw=1, ls=":", color="C7")
     ax5.set_xlim([0, 1000])
     ax5.set_xlabel("$t$ / s")
     ax5.set_ylim([0.15, 2])
     ax5.set_yticks([0.2, 0.5])
     ax5.set_yticklabels(["$c_R$", "$c_T$"])
-    ax5.set_ylabel("$c_i$ / a.u.")
+    ax5.set_ylabel(r"$c_{\rm i}$ / a.u.")
     ax5.plot(ts_plot, cas_plot, lw=1, color=st.colors[0])
 
     ax6.set_xlim([0, nr_ISIs])
@@ -178,7 +179,7 @@ if __name__ == "__main__":
     ax3.set_ylim([0.15, 2])
     ax3.set_yticks([0.2, 0.5])
     ax3.set_yticklabels(["$c_R$", "$c_T$"])
-    ax3.set_ylabel("$c_i$ / a.u.")
+    ax3.set_ylabel(r"$c_{\rm i}$ / a.u.")
     ax3.plot(ts_plot, cas_plot, lw=1, color=st.colors[0])
 
     ax4.set_xlim([0, nr_ISIs])
@@ -190,6 +191,6 @@ if __name__ == "__main__":
     ax4.axhline(np.mean(ISIs), ls=":", lw=1, c="k")
     ax4.text(nr_ISIs / 2, popt[1] * 1.2, "$T_0 = T_\infty$", ha="center")
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig1.pdf")
+    #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/SUB2/figures/fig1.pdf")
     plt.show()
     plt.close()

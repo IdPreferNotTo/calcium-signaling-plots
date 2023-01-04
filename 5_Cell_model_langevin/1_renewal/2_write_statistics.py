@@ -8,7 +8,7 @@ def print_mean_CV_to_file():
     home = os.path.expanduser("~")
     K = 10
     N = 5
-    with open(home + "/Data/calcium_spikes_theory/markov_isi_mean_CV_K{:d}_N{:d}_no_adap.dat".format(K, N),
+    with open(home + "/Data/calcium_spikes_theory/langevin_isi_mean_CV_K{:d}_N{:d}_no_adap.dat".format(K, N),
               "w") as outfile:
         outfile.write("# tau | j | <T> | CV | n \n")
         print(np.logspace(0, 2, 41))
@@ -16,10 +16,10 @@ def print_mean_CV_to_file():
             for tau in np.logspace(0, 2, 41):
                 N += 1
                 print(N, p, tau)
-                data_isi = df.load_spike_times_markov(tau, p, cer=False)
+                data_isi = df.load_spike_times_langevin(tau, p, cer=False)
                 if data_isi.size < 2:
-                    T = np.nan
-                    CV = np.nan
+                    T = np.infty
+                    CV = 1.
                     n = data_isi.size
                 else:
                     T = np.mean(data_isi)

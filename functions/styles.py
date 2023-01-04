@@ -2,7 +2,7 @@ from matplotlib import rc
 from matplotlib import rcParams
 import warnings
 
-colors = ["#173F5F", "#20639B", "#3CAEA3", "#F6D55C", "#BF6B63", "#D9A384"]
+colors = ["#173F5F", "#20639B", "#3CAEA3", "#F6D55C", "#BF6B63", "#bd6861"]
 
 def lighten_color(color, amount):
     """
@@ -25,13 +25,14 @@ def lighten_color(color, amount):
 
 
 class Colors:
-    palette = ["#173F5F", "#19647E", "#3CAEA3", "#95C623" , "#E55812", "#D81E5B"]
+    #palette = ["#173F5F", "#20639b", "#3CAEA3", "#95C623" , "#f6d55c", "#ed553b"]
+    palette = ["#173F5F", "#20639b", "#3CAEA3", "#209b58" , "#f6d55c", "#eb5138ff", "#ed553b"]
     green =  ["#2b6636", "#409951", "#56cc6c", "#6bff87"]
-    red = ["#660f0f", "#991717", "#cc1f1f", "#ff2626"]
-    pink = ["#663055", "#99487f", "#cc60a9", "#ff78d4"]
-    blue = ["#0f4366", "#176599", "#1f87cc", "#26a8ff"]
-    cyan = ["#236660", "#349990", "#45ccc0", "#57fff0"]
-    orange = ["#ffc100", "#ff9a00", "#ff7400", "#ff4d00"]
+    #red = ["#660f0f", "#991717", "#cc1f1f", "#ff2626"]
+    #pink = ["#663055", "#99487f", "#cc60a9", "#ff78d4"]
+    #blue = ["#0f4366", "#176599", "#1f87cc", "#26a8ff"]
+    #cyan = ["#236660", "#349990", "#45ccc0", "#57fff0"]
+    #orange = ["#ffc100", "#ff9a00", "#ff7400", "#ff4d00"]
 
 
 def figsize(shape, size):
@@ -59,7 +60,7 @@ def set_default_plot_style():
     rcParams['text.latex.preamble'] = r'\usepackage{lmodern}'
     rcParams['font.family'] = 'serif'
     rcParams['font.serif'] = 'Latin Modern'
-    rcParams.update({'font.size': 11})
+    rcParams.update({'font.size': 10})
     rc('text', usetex=True)
 
 
@@ -75,3 +76,11 @@ def remove_all_axis(axis):
         ax.spines['left'].set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
+
+def remove_everything(axis):
+    for ax in axis:
+        ax.spines['top'].set_color('none')
+        ax.spines['bottom'].set_color('none')
+        ax.spines['left'].set_color('none')
+        ax.spines['right'].set_color('none')
+        ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)

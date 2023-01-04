@@ -108,7 +108,7 @@ if __name__ == "__main__":
     cmap_cividis = plt.get_cmap("YlGnBu", 10)
     cs_cv_markov = ax1.pcolormesh([t/5 for t in taus], [j/0.03 for j in js], CV_markov, linewidth=0, rasterized=True, shading='gouraud', vmin=0., vmax=0.3, cmap=cmap_cividis)
     cs1 = ax1.contour([t/5 for t in taus], [j/0.03 for j in js], CV_markov, linewidths=1, levels=[0.15], colors="k")
-    cs2 = ax1.contour([t/5 for t in taus], [j/0.03 for j in js], ISI_markov, linewidths=1, levels= [157], colors=colors.palette[5])
+    cs2 = ax1.contour([t/5 for t in taus], [j/0.03 for j in js], ISI_markov, linewidths=1, levels= [157], colors=st.colors[5])
 
     divider = make_axes_locatable(ax1)
     cax_cv_markov = divider.append_axes('right', size='5%', pad=0.05)
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     cv2 = np.power(cv, 2)
 
     tmax = max(ISIs_flat)
-    ax2.hist(ISIs_flat, color=st.colors[4], bins=20, alpha=1.0, density=True, zorder=2, label="HEK cells")
+    ax2.hist(ISIs_flat, color=st.colors[5], bins=20, alpha=1.0, density=True, zorder=2, label="HEK cells")
     ts_inv_gau = np.linspace(0, 3, 1001)
     inv_gaus = get_inverse_gaussian(ts_inv_gau, mean, cv)
     #ax1.plot(ts_inv_gau, inv_gaus, lw=1, c="k")
@@ -151,7 +151,7 @@ if __name__ == "__main__":
         vars_count.append(var_count)
         fanos_count.append(var_count/mean_count)
 
-    ax3.plot(dts, fanos_count, c=st.colors[4], label="Data")
+    ax3.plot(dts, fanos_count, c=st.colors[5], label="Data")
     ax3.axvline(mean, ls=":", c="C7")
     ax3.set_xscale("log")
     ax3.set_xlabel("$t$")
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     ax4.text(0.4, 1.3, "$r_0$")
     ax4.text(2, 1.3 * cv ** 2, "$r_0 CV_T^2$")
     #ax3.plot(fs, spectrum_theory, lw=1, c="k")
-    ax4.plot(fs, spectrum_data, c=st.colors[4])
+    ax4.plot(fs, spectrum_data, c=st.colors[5])
     ax4.set_xlabel("$f$")
     ax4.set_ylabel("$S(f)$")
     ax4.set_xscale("log")
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     tau = 14.446540880503141
     p = 0.004765556953179596
-    ax1.scatter(tau/5, p/0.03, zorder=3, s=50, ec="k", fc=colors.palette[5])
+    ax1.scatter(tau/5, p/0.03, zorder=3, s=50, ec="k", fc=st.colors[5])
     folder = home + "/Data/calcium_spikes_markov/Data_no_adap_zoom/"
     file_spikes = f"spike_times_markov_ip1.00_tau{tau:.2e}_j{p:.2e}_K10_0.dat"
     isis_model = np.loadtxt(folder + file_spikes)
@@ -249,5 +249,5 @@ if __name__ == "__main__":
     ax4.plot(fs, spectrum_data, lw = 1, color="k")
     ax2.legend(fancybox=False, loc=1, fontsize=9, framealpha=1.)
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig8.pdf", transparent=True)
+    #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig8.pdf", transparent=True)
     plt.show()

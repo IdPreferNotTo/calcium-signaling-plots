@@ -20,10 +20,10 @@ if __name__ == "__main__":
 
     st.remove_top_right_axis([ax1, ax2, ax3, ax4])
 
-    ax1.text(0.15, 0.95, r"A$_1$", fontsize=13, transform=ax1.transAxes, va='top')
-    ax2.text(0.15, 0.95, r"B$_1$", fontsize=13, transform=ax2.transAxes, va='top')
-    ax3.text(0.10, 0.95, r"A$_2$", fontsize=13, transform=ax3.transAxes, va='top')
-    ax4.text(0.10, 0.95, r"B$_2$", fontsize=13, transform=ax4.transAxes, va='top')
+    ax1.text(0.15, 0.95, r"A", fontsize=13, transform=ax1.transAxes, va='top')
+    ax2.text(0.15, 0.95, r"B", fontsize=13, transform=ax2.transAxes, va='top')
+    ax3.text(0.10, 0.95, r"C", fontsize=13, transform=ax3.transAxes, va='top')
+    ax4.text(0.10, 0.95, r"D", fontsize=13, transform=ax4.transAxes, va='top')
 
     home = os.path.expanduser("~")
 
@@ -69,8 +69,8 @@ if __name__ == "__main__":
         mus = []
         Ds = []
         for ca in cas:
-            mu = fc.mean_jp_single_theory(ca, N, M, 1, r_opn_single, r_ref)
-            D = fc.noise_intensity_jp_single_theory(ca, N, M, 1, r_opn_single, r_ref)
+            mu = fc.mean_jp_single_theory(ca, N, M, 1, r_ref)
+            D = fc.noise_intensity_jp_single_theory(ca, N, M, 1, r_ref = r_ref)
             mus.append(mu)
             Ds.append(D)
         if i == 3:
@@ -144,5 +144,5 @@ if __name__ == "__main__":
 
     ax2.axvspan(10, r_ref_bif, alpha=0.3, color="C7")
     ax2.axvline(r_ref_bif, lw=1, color="C7", zorder=1)
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig9.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/SUB2/figures/fig9.pdf", transparent=True)
     plt.show()

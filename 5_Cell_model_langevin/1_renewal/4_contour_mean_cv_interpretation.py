@@ -20,12 +20,12 @@ if __name__ == "__main__":
     axes_mean = [ax1, ax2, ax3]
     axes_cv = [ax4, ax5, ax6]
 
-    ax1.text(0.1, 0.1, r"C$_1$", fontsize=13, transform=ax1.transAxes)
-    ax2.text(0.1, 0.1, r"C$_2$", fontsize=13, transform=ax2.transAxes)
-    ax3.text(0.1, 0.1, r"C$_3$", fontsize=13, transform=ax3.transAxes)
-    ax4.text(0.1, 0.1, r"D$_1$", fontsize=13, transform=ax4.transAxes)
-    ax5.text(0.1, 0.1, r"D$_2$", fontsize=13, transform=ax5.transAxes)
-    ax6.text(0.1, 0.1, r"D$_3$", fontsize=13, transform=ax6.transAxes)
+    ax1.text(0.1, 0.1, r"A$_1$", fontsize=13, transform=ax1.transAxes)
+    ax2.text(0.1, 0.1, r"A$_2$", fontsize=13, transform=ax2.transAxes)
+    ax3.text(0.1, 0.1, r"A$_3$", fontsize=13, transform=ax3.transAxes)
+    ax4.text(0.1, 0.1, r"B$_1$", fontsize=13, transform=ax4.transAxes)
+    ax5.text(0.1, 0.1, r"B$_2$", fontsize=13, transform=ax5.transAxes)
+    ax6.text(0.1, 0.1, r"B$_3$", fontsize=13, transform=ax6.transAxes)
     colors = st.Colors()
     cmap_coolwarm = plt.get_cmap("coolwarm", 10)
 
@@ -149,7 +149,6 @@ if __name__ == "__main__":
     cbar2 = fig.colorbar(cs2, ax=axes_cv, orientation='vertical')
     cbar2.set_ticks([-0.5, 0., 0.5])
     cbar2.set_label(r"$(\widetilde{CV}_T - CV_T )/ CV_T$", loc="center")
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/SUB1/figures/fig6b.pdf", transparent=True)
     plt.show()
 
 

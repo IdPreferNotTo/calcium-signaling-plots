@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import scipy.special as sci
+from matplotlib.transforms import Bbox
 import os
 
 import styles as st
@@ -65,7 +66,7 @@ def get_ipis(data):
 
 if __name__ == "__main__":
     st.set_default_plot_style()
-    fig = plt.figure(tight_layout=True, figsize=(9, 4.5))
+    fig = plt.figure(figsize=(3.25, 4.7))
     gs = gridspec.GridSpec(nrows=3, ncols=4, width_ratios=[1, 1, 1, 1])
     # gs0 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=gs[0])
     # gs1 = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gs[0])
@@ -80,6 +81,70 @@ if __name__ == "__main__":
     ax_b3 = fig.add_subplot(gs[1, 3])
     ax_b4 = fig.add_subplot(gs[2, 2])
     ax_b5 = fig.add_subplot(gs[2, 3])
+    x_a1 = 0.07337988723415424
+    dx_a1 = 0.4124293156719101
+    y_a1 = 0.7786263259990046
+    dy_a1 = 0.18470700733432877 * (4.5/4.7)
+    x_a2 = 0.07337988723415424
+    dx_a2 = 0.1686404654807535
+    y_a2 = 0.45483009251512085 - 0.2 / 4.7
+    dy_a2 = 0.18470700733432877 * (4.5/4.7)
+    x_a3 = 0.3171687374253109
+    dx_a3 = 0.16864046548075345
+    y_a3 = 0.45483009251512085  - 0.2 / 4.7
+    dy_a3 = 0.18470700733432877 * (4.5/4.7)
+    x_a4 = 0.07337988723415424
+    dx_a4 = 0.1686404654807535
+    y_a4 = 0.1310338590312371
+    dy_a4 = 0.18470700733432877 * (4.5/4.7)
+    x_a5 = 0.3171687374253109
+    dx_a5 = 0.16864046548075345
+    y_a5 = 0.1310338590312371
+    dy_a5 = 0.18470700733432877 * (4.5/4.7)
+    x_b1 = 0.5609575876164675
+    dx_b1 = 0.4124293156719101
+    y_b1 = 0.7786263259990046
+    dy_b1 = 0.18470700733432877 * (4.5/4.7)
+    x_b2 = 0.5609575876164675
+    dx_b2 = 0.1686404654807534
+    y_b2 = 0.45483009251512085  - 0.2 / 4.7
+    dy_b2 = 0.18470700733432877 * (4.5/4.7)
+    x_b3 = 0.8047464378076241
+    dx_b3 = 0.1686404654807535
+    y_b3 = 0.45483009251512085  - 0.2 / 4.7
+    dy_b3 = 0.18470700733432877 * (4.5/4.7)
+    x_b4 = 0.5609575876164675
+    dx_b4 = 0.1686404654807534
+    y_b4 = 0.1310338590312371
+    dy_b4 = 0.18470700733432877 * (4.5/4.7)
+    x_b5 = 0.8047464378076241
+    dx_b5 = 0.1686404654807535
+    y_b5 = 0.1310338590312371
+    dy_b5 = 0.18470700733432877 * (4.5/4.7)
+
+    ys = [y_a1, y_a2, y_a3, y_a4, y_a5, y_b1, y_b2, y_b3, y_b4, y_b5]
+    dys = [dy_a1, dy_a2, dy_a3, dy_a4, dy_a5, dy_b1, dy_b2, dy_b3, dy_b4, dy_b5]
+
+    box_a1 = Bbox.from_bounds(x0=x_a1, y0=y_a1, width=dx_a1, height=dy_a1)
+    box_a2 = Bbox.from_bounds(x0=x_a2, y0=y_a2, width=dx_a2, height=dy_a2)
+    box_a3 = Bbox.from_bounds(x0=x_a3, y0=y_a3, width=dx_a3, height=dy_a3)
+    box_a4 = Bbox.from_bounds(x0=x_a4, y0=y_a4, width=dx_a4, height=dy_a4)
+    box_a5 = Bbox.from_bounds(x0=x_a5, y0=y_a5, width=dx_a5, height=dy_a5)
+    box_b1 = Bbox.from_bounds(x0=x_b1, y0=y_a1, width=dx_a1, height=dy_a1)
+    box_b2 = Bbox.from_bounds(x0=x_b2, y0=y_b2, width=dx_b2, height=dy_b2)
+    box_b3 = Bbox.from_bounds(x0=x_b3, y0=y_b3, width=dx_b3, height=dy_b3)
+    box_b4 = Bbox.from_bounds(x0=x_b4, y0=y_b4, width=dx_b4, height=dy_b4)
+    box_b5 = Bbox.from_bounds(x0=x_b5, y0=y_b5, width=dx_b5, height=dy_b5)
+    ax_a1.set_position(box_a1)
+    ax_a2.set_position(box_a2)
+    ax_a3.set_position(box_a3)
+    ax_a4.set_position(box_a4)
+    ax_a5.set_position(box_a5)
+    ax_b1.set_position(box_b1)
+    ax_b2.set_position(box_b2)
+    ax_b3.set_position(box_b3)
+    ax_b4.set_position(box_b4)
+    ax_b5.set_position(box_b5)
     axes = [ax_a1, ax_a2, ax_a3, ax_a4, ax_a5, ax_b1, ax_b2, ax_b3, ax_b4, ax_b5]
     st.remove_top_right_axis(axes)
     colors = st.Colors()
@@ -155,14 +220,8 @@ if __name__ == "__main__":
     ax_a1.fill_between(ts[t_left_index:t_right_index] - t_start, xs[t_left_index:t_right_index], color="#8B9FAF")
     ax_a1.set_xlim([t_left - 0.40, t_right + 0.4])
     ax_a1.set_ylim([0, 6])
-    ax_a1.text(stops_ipi[puff_index1] - t_start + 0.02, 3.5, "$A_{i}$", va="center", ha="center")
+    ax_a1.text(stops_ipi[puff_index1] - t_start + 0.05, 3.5, "$A_{i}$", va="center", ha="center")
     ax_a1.text(starts_ipi[puff_index2] - t_start - 0.12, 3.5, "$A_{i+1}$", va="center", ha="center")
-
-    line1, = ax_a1.plot([-1, -1], color=colors.palette[0], label="Sim.")
-    line2, = ax_a1.plot([-1, -1], color=colors.palette[5], label="Theory")
-    legend = ax_a1.legend(fancybox=False, framealpha=1., edgecolor="k", ncol=2, handles=[line1, line2], fontsize=9,
-                          loc=1, bbox_to_anchor=(1.0, 1.1))
-    legend.get_frame().set_linewidth(0.5)
 
     ax_a2.set_ylim([0, 1 / 5 + 0.15])
     ax_a2.set_xlabel(r"$n_{0}$")
@@ -404,5 +463,12 @@ if __name__ == "__main__":
     legend = ax_b4.legend(fancybox=False, framealpha=1., edgecolor="k", fontsize=8)
     legend.get_frame().set_linewidth(0.5)
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig2b.pdf", transparent=True)
+
+    line1, = ax_a1.plot([-1, -1], color=colors.palette[0], label="Sim.")
+    line2, = ax_a1.plot([-1, -1], color=colors.palette[5], label="Theory")
+    legend = fig.legend(fancybox=False, framealpha=1., edgecolor="k", ncol=2, handles=[line1, line2], fontsize=9,
+                          loc="center", bbox_to_anchor=(0.50, 0.675))
+    legend.get_frame().set_linewidth(0.5)
+
+    #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/SUB2/figures/fig2b.pdf", transparent=True)
     plt.show()

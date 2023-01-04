@@ -1,6 +1,8 @@
 import numpy as np
 from typing import List
-from scipy.integrate import quad
+import scipy.special as special
+
+import default_parameters as df
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -24,6 +26,7 @@ def theta(a, b):
     else:
         return 1
 
+
 def equally_spaced_puff_data(data, dt):
     # data = time, state, idx
     data = [x if x[1] > 0 else np.asarray([x[0], 0, x[2]]) for x in data]
@@ -39,6 +42,7 @@ def equally_spaced_puff_data(data, dt):
             data_equal.append([t, data[n-1][1]])
     return data_equal
 
+
 def autocorrelation(data):
     mean = np.mean(data)
     data = [x - mean for x in data]
@@ -47,6 +51,7 @@ def autocorrelation(data):
         corr += x * y
     corr /= len(data[1:])
     return corr
+
 
 def autocorrelation_function(data, dt):
     mean = np.mean(data)
@@ -84,7 +89,7 @@ def fano_factor_interspike_intervals(isis, dt):
     return mean_count, var_count
 
 
-def puff_open_probability(data):
+def p_open_cluster_data(data):
     data = [ele for ele in data if ele[2]==0]
     t, state, idx, sums = np.transpose(data)
     t_open = 0
@@ -97,7 +102,7 @@ def puff_open_probability(data):
     return t_open/(t_open + t_closed)
 
 
-def puff_tau_closed(data):
+def tau_close_cluster_data(data):
     data = [ele for ele in data if ele[2]==0]
     ts, ss, idx, sums = np.transpose(data)
     nr = 0
@@ -113,7 +118,8 @@ def puff_tau_closed(data):
             t_open += t2 - t1
     return t_closed/nr
 
-def puff_tau_open(data):
+
+def tau_open_cluster_data(data):
     data = [ele for ele in data if ele[2]==0]
     ts, ss, idx, sums = np.transpose(data)
     nr = -1
@@ -129,6 +135,74 @@ def puff_tau_open(data):
             t_open += t2 - t1
     return t_open/nr
 
+
+def p_open_cluster_theory(ci, N, M, r_cls=df.r_cls, r_ref=df.r_ref):
+    tau_open = tau_open_cluster_theory(N, r_cls)
+    tau_close = tau_close_cluster_theory(ci, M, r_ref)
+    return tau_open/(tau_close + tau_open)
+
+
+def tau_open_cluster_theory(N, r_cls = df.r_cls):
+    return (N+1)/(2*r_cls)
+
+
+def tau_close_cluster_theory(ci, M, r_ref = df.r_ref):
+    r_opn = df.r_opn(ci)
+    return (M-1)/r_ref + 1/r_opn
+
+
+def tau_total_cluster_theory(ci, N, M, r_cls=df.r_cls, r_ref=df.r_ref):
+    return tau_open_cluster_theory(N, r_cls) + tau_close_cluster_theory(ci, M, r_ref)
+
+
+def mean_puff_strength_cluster_theory(N, r_cls = df.r_cls):
+    return (N+1)*(N+2)/(6*r_cls)
+
+
+def mean_jp_single_theory(ci, N, M, s, r_ref = df.r_ref):
+    return mean_puff_strength_cluster_theory(N) / tau_total_cluster_theory(ci, N, M, r_ref = r_ref)
+
+
+def noise_intensity_jp_single_theory(ci, N, M, s, r_cls=df.r_cls, r_ref=df.r_ref):
+    r_opn = df.r_opn(ci, s, N)
+
+    xs = get_states(N, M)
+    idxs = [i for i in range(N+M)]
+    p0s = steady_states_theory_invert_M(r_ref, r_opn, r_cls, N, M)
+
+    D_theory = 0
+    for k in idxs:
+        sum_over_i = 0
+        f_from_k_to = f_from_k_invert_M(k, r_ref, r_opn, r_cls, N, M)
+        for i in idxs:
+            sum_over_i += xs[i] * f_from_k_to[i]
+        D_theory += xs[k] * p0s[k] * sum_over_i
+    return D_theory
+
+
+def drift_theory(ci, p, tau, K, N, M, s, c0 = 0.2, cer=1):
+    return -(ci - c0)/tau + p * K * cer * mean_jp_single_theory(ci, N, M, s)
+
+
+def diffusion_theory(ci, p, K, N, M, s):
+    return p*p*2*K*noise_intensity_jp_single_theory(ci, N, M, s=s)
+
+
+def pbif(tau, K, N, M, s, c0 = 0.2, cT=0.5):
+    return (cT - c0)/(tau*K*mean_jp_single_theory(cT, N, M, s))
+
+def gaussian_dist(xs, mean, cv2):
+    std = np.sqrt(cv2)*mean
+    return 1 / np.sqrt(2 * np.pi * (std ** 2)) * np.exp(-((xs - mean) ** 2) / (2 * std ** 2))
+
+def inverse_gaussian_dist(xs, mean, cv2):
+    return np.sqrt(mean/(2*np.pi*cv2*xs**3))*np.exp(-(xs - mean)**2 /(2*mean*cv2*xs))
+
+
+def gamma_dist(xs, mean, cv2):
+    taus = xs / (mean * cv2)
+    return np.power(taus, 1/cv2) * np.exp(-taus)/(xs * special.gamma(1/cv2))
+
 def moments(xs, k):
     """
     Calculates the k-th moment of the sample data xs:
@@ -142,14 +216,6 @@ def moments(xs, k):
     return moment/len(xs)
 
 
-def gaussian_dist(xs, mean, std):
-    ys = []
-    for x in xs:
-        y = 1/np.sqrt(2*np.pi*(std**2)) * np.exp(-((x - mean)**2)/(2*std**2))
-        ys.append(y)
-    return ys
-
-
 def coarse_grain_list(l: List[float], f: int):
     """
     Create a coarse grained version of the original list where the elements of the new list
@@ -157,11 +223,10 @@ def coarse_grain_list(l: List[float], f: int):
     f determines how many elements are averaged l_new[i] = mean(l[f*(i):f*(i+1)])
     """
     l_new = []
-    max = int(len(l)/f) - 1
-    for i in range(max):
-        mean = np.mean(l[f*i:f*(i+1)])
-        l_new.append(mean)
+    for subl in chunks(l, f):
+        l_new.append(np.mean(subl))
     return l_new
+
 
 def moving_coarse_grain_list(l: List[float], n: int):
     """
@@ -211,7 +276,6 @@ def steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m):
     p0s = Minv.dot(inhomgeneity)
     return p0s
 
-
 def f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m):
     M = np.zeros([n + m, n + m])
     for i in range(n + m):
@@ -238,90 +302,6 @@ def f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m):
     return f_from_k
 
 
-def mean_puff_single(x, n, m, IP3, r_opn_single, r_ref):
-    r_opn = n * r_opn_single * np.power(x / 0.2, 3) * ((1 + 0.2 ** 3) / (1 + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
-    r_ref = r_ref
-    r_cls = 50
-
-    p0s = steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
-    xs = get_states(n, m)
-    mean = sum([x * p for x, p in zip(xs, p0s)])
-    return mean
-
-
-def intensity_puff_single(x, n, m, IP3, r_opn_single, r_ref):
-    r_opn = n * r_opn_single * np.power(x / 0.20, 3) * ((1. + 0.20 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
-    r_ref = r_ref #* np.power(x / 0.20, 3) * ((1. + 0.20 ** 3) / (1. + x ** 3)) * np.power(IP3 / 1., 3) * ((1. + 1. ** 3) / (1. + IP3 ** 3))
-    r_cls = 50
-
-    xs = get_states(n, m)
-    idxs = [i for i in range(n+m)]
-    p0s = steady_states_theory_invert_M(r_ref, r_opn, r_cls, n, m)
-
-    D_theory = 0
-    for k in idxs:
-        sum_over_i = 0
-        f_from_k_to = f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m)
-        for i in idxs:
-            sum_over_i += xs[i] * f_from_k_to[i]
-        D_theory += xs[k] * p0s[k] * sum_over_i
-    return D_theory
-
-
-def d_func(x, j, N, n, m, IP3, r_opn_single, r_ref):
-    if x == 0:
-        return 0
-    else:
-        return np.power(j, 2) * N * intensity_puff_single(x, n, m, IP3, r_opn_single, r_ref)
-
-
-def f_func(x, tau, j, N, n, m, IP3, r_opn_single, r_ref):
-    if x == 0:
-        return -(x - 0.20) / tau
-    else:
-        f = mean_puff_single(x, n, m, IP3, r_opn_single, r_ref)
-        return -(x - 0.20) / tau + j * N * f
-
-
-def g_func(x, tau, j, N, n, m, IP3):
-    f = f_func(x, tau, j, N, n, m, IP3)
-    d = d_func(x, j, N, n, m, IP3)
-    return f/d
-
-
-def h_func(x, tau, j, N, n, m, IP3):
-    #dca = 0.0001
-    #h = 0
-    #ca = 0.20
-    #while(ca <= x):
-    #    print(ca)
-    #    g = g_func(ca, tau, j, N, n, m, IP3)
-    #    h += g*dca
-    #    ca += dca
-    h = quad(g_func, 0.20, x, args=(tau, j, N, n, m, IP3))[0]
-    return h
-
-
-def firing_rate_no_adap(tau, j, N, n, m, IP3 = 1):
-    cas_theory = np.linspace(0.30, 1, 10*700 + 1)
-    dca = cas_theory[1] - cas_theory[0]
-    p0s_theo_ca = []
-    integral = 0
-
-    for ca in reversed(cas_theory[1:]):
-        print(f"{ca:.3f}")
-        h = h_func(ca, tau, j, N, n, m, IP3)
-        d = d_func(ca, j, N, n, m, IP3)
-        if ca == 1:
-            integral += 0
-        elif ca >= 0.20:
-            integral += np.exp(-h)*dca
-        p0s_theo_ca.append(integral * np.exp(h) / d)
-    print(p0s_theo_ca)
-    norm = np.sum(p0s_theo_ca) * dca
-    r0 = 1 / norm
-    return r0
-
 def k_corr(data1, data2, k):
     # Get two arbitrary data set and calculate their correlation with lag k.
     mu1 = np.mean(data1)
@@ -346,6 +326,7 @@ def fourier_transformation_isis(f, isis):
         trafo += np.exp(1j*2*np.pi*f*t)
     return trafo
 
+
 def power_spectrum_isis(fs, isis, Tmax=2000):
     ISIs_chunks = []
     chunks = []
@@ -369,10 +350,13 @@ def power_spectrum_isis(fs, isis, Tmax=2000):
     return spectrum
 
 
-def inverse_gaussian(T, CV):
-    ps = []
-    ts = np.linspace(0, 2*T, 500)
-    for t in ts:
-        p = np.sqrt(T / (2 * np.pi * (CV**2) * (t ** 3))) * np.exp(-(t - T) ** 2 / (2 * T * (CV**2) * t))
-        ps.append(p)
-    return ts, ps
+def power_spectrum_inverse_gaussian(fs, mean, cv2):
+    arg = (1 - np.sqrt(1 - 1j * 4 * np.pi * fs * mean * cv2)) / cv2
+    return (1/mean) * (1 - np.power(np.absolute(np.exp(arg)), 2)) / (np.power(np.absolute(1 - np.exp(arg)), 2))
+
+
+def exponential_Ti(i, T0, T8, tau):
+    return T0*np.exp(-i/tau) + T8*(1 - np.exp(-i/tau))
+
+def linear_function(x, a, b):
+    return b*(x - a)

@@ -101,7 +101,7 @@ if __name__ == "__main__":
         dx = xs[1] - xs[0]
         ca_drifts = []
         for x in xs:
-            ca_drift = -(x- ca_r)/tau + j*N*fc.mean_jp_single_theory(x, n, m, ip3, r_opn_single, r_ref)
+            ca_drift = -(x- ca_r)/tau + j*N*fc.mean_jp_single_theory(x, n, m, ip3)
             if ca_drift < 0 and ca_drift_tmp > 0:
                 ca_fix = x
             ca_drift_tmp = ca_drift
@@ -117,8 +117,14 @@ if __name__ == "__main__":
                 count += 1
                 spike_times.append(ts[max_i])
             max_i += 1
-        ax11.plot(ts, cas, color=plt_color)
-        ax12.plot(ts_puff, [j*n for n in ns_puff], color=plt_color)
+
+        t_offset = ts[500]
+        ts_shift = ts[500:] - ts[500]
+        ts_puff_shift = ts_puff[500:] - ts_puff[500]
+        cas_shift = cas[500:]
+
+        ax11.plot(ts_shift, cas_shift, color=plt_color)
+        ax12.plot(ts_puff_shift, [j*n for n in ns_puff[500:]], color=plt_color)
         #ax12.plot(ts[:max_i], jpuffs[:max_i], color=plt_color)
 
         #Plot ax2
@@ -189,11 +195,17 @@ if __name__ == "__main__":
         ax3b.plot(ts_dist, gamma_dist_langevin, color=color.palette[5], ls=":")
 
         for i in range(max_spikes-1):
-            x_left = spike_times[i]
-            x_right = spike_times[i+1]
+            x_left = spike_times[i] - t_offset
+            x_right = spike_times[i+1] -t_offset
             dx = spike_times[i+1] - spike_times[i]
-            ax11.text(x_left + dx/2, 0.65, f"$T_{i+1}$", ha="center", va="center", clip_on=False)
-
+            if i == 1:
+                ax11.text(x_left + dx/2, 0.65, "$T_{i-1}$", ha="center", va="center", clip_on=False)
+            elif i == 2:
+                ax11.text(x_left + dx/2, 0.65, "$T_{i}$", ha="center", va="center", clip_on=False)
+            elif i == 3:
+                ax11.text(x_left + dx / 2, 0.65, "$T_{i+1}$", ha="center", va="center", clip_on=False)
+            else:
+                ax11.text(x_left + dx / 2, 0.65, "$\dots$", ha="center", va="center", clip_on=False)
             ax11.arrow(x_left + 0.05*dx, 0.55, 0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
                     clip_on=False)
             ax11.arrow(x_right -0.05*dx, 0.55, -0.9*dx, 0, fc = "k", length_includes_head=True, head_width=0.05, head_length=5.0, lw=0.5,
@@ -211,12 +223,15 @@ if __name__ == "__main__":
         ax12.set_xlabel("$t$ / s")
         ax12.set_xlim([0, spike_times[max_spikes - 1] + 20])
         ax12.set_ylabel(r"$j_{\rm puff}$")
-        ax12.set_ylim([0, 0.7])
 
         ax2.set_ylim([0, 11])
         ax2.set_xlabel(r"$c_{\rm i}$")
         ax2.set_ylabel(r"$p_0(c_{\rm i})$")
 
+        if k == 0:
+            ax12.set_ylim([0, 0.7])
+        else:
+            ax12.set_ylim([0, 1.4])
 
         if k==0:
             ax2.set_xticks([ca_r, ca_t])
@@ -250,5 +265,5 @@ if __name__ == "__main__":
             ax3a.set_xticklabels([])
 
 
-    #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/figures/fig5.pdf",transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_1_BiophysJ/SUB2/figures/fig5.pdf",transparent=True)
     plt.show()

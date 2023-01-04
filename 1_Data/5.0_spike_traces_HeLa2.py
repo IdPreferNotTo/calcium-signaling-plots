@@ -28,8 +28,6 @@ if __name__ == "__main__":
                 ax1.set_ylabel("Ratio (340/380)")
                 ax1.set_xlim([0, 1500])
                 ax1.plot(times, data, lw=1, color=st.colors[4])
-                plt.savefig(
-                    home + f"/Data/calcium_spikes_experimental/Spikes/HeLa/100microMHistaminePLT/HeLa_{nr:s}_{idx:d}_{histamine:.1f}histamine_{i:d}.png",
-                    dpi=300)
+                #plt.savefig(home + f"/Data/calcium_spikes_experimental/Spikes/HeLa/100microMHistaminePLT/HeLa_{nr:s}_{idx:d}_{histamine:.1f}histamine_{i:d}.png", dpi=300)
                 plt.show()
                 plt.close()

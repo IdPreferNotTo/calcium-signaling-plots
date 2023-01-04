@@ -7,8 +7,8 @@ if __name__ == "__main__":
     exetuable = home + "/CLionProjects/PhD/calcium/calcium_firing_rate/cmake-build-release/calcium_firing_rate"
 
     a = 0.5
-    tau = 1.78 #5.62
-    j = 0.0355 #0.0126
+    tau = 5 #1.78 #5.62
+    j = 0.015 #0.0355 #0.0126
     ip3s = np.linspace(0.5, 1.5, 101)
     r0s = []
     N = 1

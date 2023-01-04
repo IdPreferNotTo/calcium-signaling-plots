@@ -32,20 +32,29 @@ if __name__ == "__main__":
     N = 5
     M = 3
     home = os.path.expanduser("~")
-    data_markov = np.loadtxt(home + f"/Data/calcium_spikes_theory/markov_isi_mean_CV_K{K:d}_N{N:d}_no_adap.dat")
+    data_markov = np.loadtxt(home + f"/Data/calcium_spikes_theory/langevin_isi_mean_CV_K{K:d}_N{N:d}_no_adap.dat")
     taus_m, js_m, Ts_m, cvs_m, num_m = np.transpose(data_markov)
 
     taus = np.logspace(0, 2, size)
     js = np.logspace(-3, -1, size)
 
-    taus_m = taus_m.reshape(size, size)
-    js_m = js_m.reshape(size, size)
-    Ts_m = Ts_m.reshape(size, size)
-    cvs_m = cvs_m.reshape(size, size)
+    ISI_markov = np.empty([size, size])
+    CV_markov = np.empty([size, size])
+    for k, T in enumerate(Ts_m):
+        if T >= 1_000:
+            ISI_markov[k // size, k % size] = np.nan
+        else:
+            ISI_markov[k // size, k % size] = T
+    for k, cv in enumerate(cvs_m):
+        if cv == 1:
+            CV_markov[k // size, k % size] = np.nan
+        else:
+            CV_markov[k // size, k % size] = cv
+    # st.remove_top_right_axis([ax11, ax12, ax13, ax14, ax21, ax22, ax23, ax24])
 
     cmap_cividis = plt.get_cmap("YlGnBu", 10)
 
-    cs_mean_markov = ax_mean_markov.pcolormesh(taus_m, js_m, Ts_m, linewidth=0, rasterized=True, shading='gouraud', cmap=cmap_cividis,
+    cs_mean_markov = ax_mean_markov.pcolormesh(taus, js, ISI_markov, linewidth=0, rasterized=True, shading='gouraud', cmap=cmap_cividis,
                                                norm=mcolors.SymLogNorm(linthresh=0.01, base=10, vmin=1., vmax=1000))
     #ax_cv_markov.contour(taus, js, ISI_markov, linewidths=1, levels= [157], colors=colors.palette[5])
 
@@ -67,7 +76,7 @@ if __name__ == "__main__":
     ax_cv_markov.set_xlim([tmin, tmax])
     ax_cv_markov.set_ylim([pmin, pmax])
 
-    cs_cv_markov = ax_cv_markov.pcolormesh(taus_m, js_m, cvs_m, linewidth=0, rasterized=True, shading='gouraud', vmin=0., vmax=1.0, cmap=cmap_cividis)
+    cs_cv_markov = ax_cv_markov.pcolormesh(taus, js, CV_markov, linewidth=0, rasterized=True, shading='gouraud', vmin=0., vmax=1.0, cmap=cmap_cividis)
     divider = make_axes_locatable(ax_cv_markov)
     cax_cv_markov = divider.append_axes('right', size='5%', pad=0.05)
     cbar_cv_markov = fig.colorbar(cs_cv_markov, cax=cax_cv_markov, orientation='vertical')
