@@ -2,9 +2,9 @@ import json
 import numpy as np
 import os
 
-def write_parameter_file(model, n, i, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_adap, eps_adap, K, N, M, r_opn_single, r_ref, r_cls, x):
+def write_parameter_file(n, i, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_adap, eps_adap, K, N, M, r_opn_single, r_ref, r_cls, x):
     home = os.path.expanduser('~')
-    with open(home + '/CLionProjects/PhD/calcium/calcium_spikes_{}/parameter/{}.json'.format(model, n), 'w') as file:
+    with open(home + f'/CLionProjects/PhD/calcium/calcium_spikes_markov_transient/parameter/{n:d}.json', 'w') as file:
         json.dump({
             "num parameter": {
                 "run": i,
@@ -13,7 +13,7 @@ def write_parameter_file(model, n, i, ip3, bool_ca_fix, ca_fix, tau, p, bool_ada
                 "dt": 10 ** (-3),
                 "dt langevin": 10 ** (-2),
                 "t_out": 10 ** (-2),
-                "max spikes": 5_000,
+                "max spikes": 5000,
                 "max time": 1_000_000
             },
             "cell": {
@@ -50,11 +50,11 @@ def write_parameter_file(model, n, i, ip3, bool_ca_fix, ca_fix, tau, p, bool_ada
 
 
 if __name__ == "__main__":
+    n0 = 63
     n = 0
-    for i in range(1):
+    for i in range(21):
         for j in range(1):
             for k in range(1):
-                model = "markov"
                 K = 10
                 N = 5
                 M = 3
@@ -64,13 +64,14 @@ if __name__ == "__main__":
                 ip3 = 1
                 bool_ca_fix = False
                 ca_fix = 0.2
-                tau = 5
-                p = 0.015
+                tau = 1
+                p = 0.06
                 bool_adap = True
-                tau_adap = 500
-                eps_adap = 0.025
+                tau_adap = 200 # np.logspace(1, 3, 21)[i]
+                eps_adap = np.logspace(-2, 0, 21)[i] # 0.05
+                print(i+n0, f"{tau_adap:.2e}")
                 run = 5
                 x = 0
-                write_parameter_file(model, n, run, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_adap, eps_adap, K, N, M, r_opn_single, r_ref, r_cls, x)
+                write_parameter_file(n0 + n, run, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_adap, eps_adap, K, N, M, r_opn_single, r_ref, r_cls, x)
                 n+=1
-    print(n)
+    print(n0 + n)

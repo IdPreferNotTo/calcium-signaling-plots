@@ -63,11 +63,11 @@ if __name__ == "__main__":
                 ip3 = 1
                 bool_ca_fix = False
                 ca_fix = 0.2
-                tau = 1
-                p = 0.06
+                tau = 5
+                p = 0.015
                 bool_adap = True
-                tau_adap = np.logspace(1, 3, 21)[i]
-                eps_adap = 0.05
+                tau_adap = np.logspace(1, 3, 21)[i] # 200
+                eps_adap = 0.05 # np.logspace(-2, 0, 21)[i]
                 run = 5
                 x = 0
                 write_parameter_file(n, run, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_adap, eps_adap, K, N, M, r_opn_single, r_ref, r_cls, x)

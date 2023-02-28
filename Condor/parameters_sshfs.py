@@ -13,7 +13,7 @@ def write_parameter_file(n, i, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_
                 "dt": 10 ** (-4),
                 "dt langevin": 10 ** (-2),
                 "t_out": 10 ** (-2),
-                "max spikes": 5000,
+                "max spikes": 2_000,
                 "max time": 1_000_000
             },
             "cell": {
@@ -50,9 +50,9 @@ def write_parameter_file(n, i, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_
 
 
 if __name__ == "__main__":
-    n = 0
-    for i in range(41):
-        for j in range(41):
+    n = 100
+    for i in range(100):
+        for j in range(1):
             for k in range(1):
                 K = 10
                 N = 5
@@ -64,10 +64,10 @@ if __name__ == "__main__":
                 bool_ca_fix = False
                 ca_fix = 0.2
                 tau = 5
-                p = 0.015
-                bool_adap = True
-                tau_adap = 300
-                eps_adap = 0.1
+                p = 0.015 * np.linspace(0.7, 1.0, 100)[i]
+                bool_adap = False
+                tau_adap = 0 # np.logspace(1, 3, 21)[i]
+                eps_adap = 0 # np.logspace(-2, 0, 21)[i]
                 run = 5
                 x = 0
                 write_parameter_file(n, run, ip3, bool_ca_fix, ca_fix, tau, p, bool_adap, tau_adap, eps_adap, K, N, M, r_opn_single, r_ref, r_cls, x)
