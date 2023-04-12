@@ -72,13 +72,13 @@ if __name__ == "__main__":
     ax2.set_ylabel(r"$\tau_{\rm eff}$")
     ax2.set_xlabel(r"$\varepsilon$")
     ax2.set_xscale("log")
-    ax2.set_ylim([0, 250])
+    ax2.set_ylim([0, 600])
 
     # Use mean-driven parameters only.
     tau = 5
     p = 0.015
     eps_er_fix = 0.05
-    tau_er_fix = 200
+    tau_er_fix = 500
     tau_ers = np.logspace(1, 3, 21)
     eps_ers = np.logspace(-2, 0, 21)
     tau_effs = []
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     # Calculate tau1, tau2 (approx to tau_eff) as a function of tau_er
     for tau_er in tau_ers:
         file = f"transient_adaptation_markov_ip1.00_taua{tau_er:.2e}_ampa{eps_er_fix:.2e}_tau{tau:.2e}_j{p:.2e}_K10_5.dat"
-        data = np.loadtxt("/home/lukas/CLionProjects/PhD/calcium/calcium_spikes_markov_transient/out/" + file,
+        data = np.loadtxt("/home/lukas/Data/calcium_spikes_markov/Data_adap_transient/" + file,
                           usecols=np.arange(0, 1000))
         mean_cer = np.mean(data, axis=0)
         tau_eff = fc.measure_tau_eff(tau, p, tau_er, eps_er_fix)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     # Calculate tau1, tau2 (approx to tau_eff) as a function of eps_er
     for eps_er in eps_ers:
         file = f"transient_adaptation_markov_ip{1.00:.2f}_taua{tau_er_fix:.2e}_ampa{eps_er:.2e}_tau{tau:.2e}_j{p:.2e}_K{10}_{5:d}.dat"
-        data = np.loadtxt("/home/lukas/CLionProjects/PhD/calcium/calcium_spikes_markov_transient/out/" + file,
+        data = np.loadtxt("/home/lukas/Data/calcium_spikes_markov/Data_adap_transient/" + file,
                           usecols=np.arange(0, 1000))
         mean_cer = np.mean(data, axis=0)
         tau_eff = fc.measure_tau_eff(tau, p, tau_er_fix, eps_er)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     ax2.plot([0.01, 1], [tau_er_fix, tau_er_fix], ls=(0, (1, 1)), c="C7")
 
     # Save and show figure
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig3.2.pdf")
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig6.pdf")
     plt.show()
 
 
