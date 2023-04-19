@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, least_squares
 
 import styles as st
 import functions as fc
@@ -96,60 +96,71 @@ if __name__ == "__main__":
     # Parameters
     taus = [5.0, 1.0]
     ps = [0.015, 0.06]
-    eps_er_fix = 0.05
-    tau_er_fix = 500
-    tau_ers = np.logspace(1, 3, 21)
-    eps_ers = np.logspace(-2, 0, 21)
+    eps_er_fix = 0.03
+    tau_er_fix = 300
+    tau_ers = np.logspace(1, 3, 11)
+    eps_ers = np.logspace(-2, 0, 11)
 
     home = os.path.expanduser("~")
     for i, (tau, p), in enumerate(zip(taus, ps)):
         dTs = []
         n_trs = []
+        dTs_langevin = []
+        n_trs_langevin = []
         dTs_theory = []
         n_trs_theory = []
-        n_trs_theory2 = []
         for tau_er in tau_ers:
             data_isi = df.load_spike_times_markov_transient(tau, p, tau_er, eps_er_fix)
             rows, cols = data_isi.shape
             idx_max = cols
             idxs = np.arange(idx_max)
             means_Tidx = [np.mean(data_isi[:, idx]) for idx in idxs] # calculate the mean column wise
-            func = lambda x, t8, ntr: fc.exponential_Ti(x, means_Tidx[0], t8, ntr)
-            popt, pcov = curve_fit(func, idxs, means_Tidx, p0=(150, 2))
-            T8 = popt[0]
-            n_tr = popt[1]
-            dTs.append(T8 - means_Tidx[0])
+            popt, pcov = curve_fit(fc.exponential_Ti, idxs, means_Tidx, bounds=([0, 0 ,0], [np.inf, np.inf, np.inf]))
+            T0 = popt[0]
+            T8 = popt[1]
+            n_tr = popt[2]
+            dTs.append(T8 - T0)
             n_trs.append(n_tr)
-            eps_fix = eps_er_fix / (1 - eps_er_fix/2)
-            n_trs_theory2.append((tau_er/T8)/(1 + eps_fix * tau_er / T8))
+
+            data_isi = df.load_spike_times_langevin_transient(tau, p, tau_er, eps_er_fix)
+            rows, cols = data_isi.shape
+            idx_max = cols
+            idxs = np.arange(idx_max)
+            means_Tidx = [np.mean(data_isi[:, idx]) for idx in idxs] # calculate the mean column wise
+            popt, pcov = curve_fit(fc.exponential_Ti, idxs, means_Tidx, bounds=([0, 0 ,0], [np.inf, np.inf, np.inf]))
+            T0 = popt[0]
+            T8 = popt[1]
+            n_tr = popt[2]
+            dTs_langevin.append(T8 - T0)
+            n_trs_langevin.append(n_tr)
 
             T0_theory = fc.calculate_T_init(tau, p)
-            T8_theory = fc.calculate_T_infty(tau, p, tau_er, eps_er_fix)
+            T8_theory = fc.self_consistent_T_infty(tau, p, tau_er, eps_er_fix)
             dTs_theory.append(T8_theory - T0_theory)
             tau_1, tau_2 = fc.calculate_tau_1(tau, p, tau_er, eps_er_fix)
             n_trs_theory.append(tau_1/T0_theory)
 
+        ax1.plot(tau_ers, n_trs_langevin, c=st.colors[i], zorder=1)
+        ax2.plot(tau_ers, dTs_langevin, c=st.colors[i], zorder=1)
         if i == 0:
             label="mean-driven"
-            ax1.scatter(tau_ers, n_trs, fc="w", ec=st.colors[0], s=15, label=label)
-            ax2.scatter(tau_ers, dTs, fc="w", ec=st.colors[0], s=15)
+            ax1.scatter(tau_ers, n_trs, fc="w", ec=st.colors[0], s=20, label=label)
+            ax2.scatter(tau_ers, dTs, fc="w", ec=st.colors[0], s=20)
         else:
             label="excitable"
-            ax1.scatter(tau_ers, n_trs, fc="w", ec=st.colors[1], s=15, label=label)
-            ax2.scatter(tau_ers, dTs, fc="w", ec=st.colors[1], s=15)
+            ax1.scatter(tau_ers, n_trs, fc="w", ec=st.colors[1], s=20, label=label)
+            ax2.scatter(tau_ers, dTs, fc="w", ec=st.colors[1], s=20)
 
         if i == 0:
             ax1.plot(tau_ers, n_trs_theory, c=st.colors[5], zorder=3, label="Theory")
-        #else:
-        #    ax1.plot(tau_ers, n_trs_theory, c=st.colors[5], zorder=3)
-        ax1.plot(tau_ers, n_trs_theory2, c=st.colors[5], ls="--")
         ax2.plot(tau_ers, dTs_theory, c=st.colors[5])
 
         dTs = []
         n_trs = []
+        dTs_langevin = []
+        n_trs_langevin = []
         dTs_theory = []
         n_trs_theory = []
-        n_trs_theory2 = []
         for eps_er in eps_ers:
             print(eps_er)
             data_isi = df.load_spike_times_markov_transient(tau, p, tau_er_fix, eps_er)
@@ -157,30 +168,42 @@ if __name__ == "__main__":
             idx_max = cols
             idxs = np.arange(idx_max)
             means_Tidx = [np.mean(data_isi[:, idx]) for idx in idxs] # calculate the mean column wise
-            func = lambda x, t8, ntr: fc.exponential_Ti(x, means_Tidx[0], t8, ntr)
-            popt, pcov = curve_fit(func, idxs, means_Tidx, p0=(150, 2))
-            T8 = popt[0]
-            n_tr = popt[1]
-            dTs.append(T8 - means_Tidx[0])
+            popt, pcov = curve_fit(fc.exponential_Ti, idxs, means_Tidx, bounds=([0, 0 ,0], [np.inf, np.inf, np.inf]))
+            T0 = popt[0]
+            T8 = popt[1]
+            n_tr = popt[2]
+            dTs.append(T8 - T0)
             n_trs.append(n_tr)
-            eps = eps_er / (1 - eps_er/2)
 
-            n_trs_theory2.append((tau_er_fix/T8)/(1 + eps * tau_er_fix / T8))
+            data_isi = df.load_spike_times_langevin_transient(tau, p, tau_er_fix, eps_er)
+            rows, cols = data_isi.shape
+            idx_max = cols
+            idxs = np.arange(idx_max)
+            means_Tidx = [np.mean(data_isi[:, idx]) for idx in idxs] # calculate the mean column wise
+            popt, pcov = curve_fit(fc.exponential_Ti, idxs, means_Tidx, bounds=([0, 0 ,0], [np.inf, np.inf, np.inf]))
+            T0 = popt[0]
+            T8 = popt[1]
+            n_tr = popt[2]
+            dTs_langevin.append(T8 - T0)
+            n_trs_langevin.append(n_tr)
+
             T0_theory = fc.calculate_T_init(tau, p)
-            T8_theory = fc.calculate_T_infty(tau, p, tau_er_fix, eps_er)
+            T8_theory = fc.self_consistent_T_infty(tau, p, tau_er_fix, eps_er)
             dTs_theory.append(T8_theory - T0_theory)
             tau_1, tau_2 = fc.calculate_tau_1(tau, p, tau_er_fix, eps_er)
             n_trs_theory.append(tau_1/T0_theory)
 
+
+        ax3.plot(eps_ers, n_trs_langevin, c=st.colors[i], zorder=1)
+        ax4.plot(eps_ers, dTs_langevin, c=st.colors[i], zorder=1)
         if i == 0:
-            ax3.scatter(eps_ers, n_trs, fc="w", ec=st.colors[0], s=15)
-            ax4.scatter(eps_ers, dTs, fc="w", ec=st.colors[0], s=15)
+            ax3.scatter(eps_ers, n_trs, fc="w", ec=st.colors[0], s=20)
+            ax4.scatter(eps_ers, dTs, fc="w", ec=st.colors[0], s=20)
             ax3.plot(eps_ers, n_trs_theory, c=st.colors[5])
         else:
-            ax3.scatter(eps_ers, n_trs, fc="w", ec=st.colors[1], s=15)
-            ax4.scatter(eps_ers, dTs, fc="w", ec=st.colors[1], s=15)
-        ax3.plot(eps_ers, n_trs_theory2, c=st.colors[5], ls="--")
-
+            ax3.scatter(eps_ers, n_trs, fc="w", ec=st.colors[1], s=20)
+            ax4.scatter(eps_ers, dTs, fc="w", ec=st.colors[1], s=20)
+        #ax3.plot(eps_ers, n_trs_theory2, c=st.colors[5], ls="--")
         ax4.plot(eps_ers, dTs_theory, c=st.colors[5])
 
 

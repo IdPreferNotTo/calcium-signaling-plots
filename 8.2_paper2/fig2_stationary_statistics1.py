@@ -35,7 +35,6 @@ if __name__ == "__main__":
     ax1.text(0.05, 0.95, r"A", fontsize=11, transform=ax1.transAxes, va='top')
     ax2.text(0.05, 0.95, r"B", fontsize=11, transform=ax2.transAxes, va='top')
 
-
     ax1.set_title(r"$p(T_{i+1}, T_{i})$")
     ax1.set_xlabel(r"$T_i / \langle T \rangle$")
     ax1.set_ylabel(r"$T_{i+1} /  \langle T \rangle$")
@@ -52,8 +51,8 @@ if __name__ == "__main__":
 
     ax2.set_xlabel("$f$ / Hz")
     ax2.set_ylabel("$S(f)$ / Hz")
-    ax2.set_ylim([0, 0.022])
-    ax2.set_xlim([0, 0.022])
+    ax2.set_ylim([0, 0.032])
+    ax2.set_xlim([0, 0.032])
     axins2 = ax2.inset_axes((0.55, 0.5, .40, .40))
 
     axins2.tick_params(which="both", direction="in")
@@ -67,34 +66,47 @@ if __name__ == "__main__":
 
     rect = patches.Rectangle((0., 0.), 0.005, 0.005, linewidth=0.75, edgecolor='k', facecolor='none', zorder=1)
     ax2.add_patch(rect)
-    ax2.plot([0.0, 0.55], [5/22, 0.90], ls=":", c="k", lw=0.75, transform=ax2.transAxes)
-    ax2.plot([5/22, 0.95], [0.0, 0.50], ls=":", c="k", lw=0.75, transform=ax2.transAxes)
+    ax2.plot([0.0, 0.55], [0.005/0.032, 0.90], ls=":", c="k", lw=0.75, transform=ax2.transAxes)
+    ax2.plot([0.005/0.032, 0.955], [0.0, 0.50], ls=":", c="k", lw=0.75, transform=ax2.transAxes)
     # Parameters
     tau = 5
     p = 0.015
-    tau_er = 500
-    eps_er = 0.05
+    tau_er = 300
+    eps_er = 0.03
 
     cmap_YlGnBu = plt.get_cmap("YlGnBu", 10)
 
-    data_isi = df.load_spike_times_markov(tau, p, cer=True, taua=tau_er, ampa=eps_er)
+    home = os.path.expanduser("~")
+    file = home + f"/Data/calcium/markov/adaptive/sequence/long_spike_times_markov_ip1.00_taua{tau_er:.2e}_ampa{eps_er:.2e}_tau{tau:.2e}_j{p:.2e}_K10_5.dat"
+    data_isi = np.loadtxt(file)
     print(len(data_isi))
     mean = np.mean(data_isi)
     std = np.std(data_isi)
 
-    h1 = ax1.hist2d(data_isi[:-1] / mean, data_isi[1:] / mean, range=[[0.35, 2.5], [0.35, 2.5]], density=True, bins=25, cmap=cmap_YlGnBu)
+    h1 = ax1.hist2d(data_isi[:-1] / mean, data_isi[1:] / mean, range=[[0.5, 2.1], [0.5, 2.1]], density=True, bins=25, cmap=cmap_YlGnBu)
     divider = make_axes_locatable(ax1)
     caxr = divider.append_axes('right', size='5%', pad=0.05)
     cbar = fig.colorbar(h1[3], cax=caxr, orientation='vertical')
 
+    #norm_isi = data_isi/mean
+    #con_isi = [[] for _ in range(20)]
+    #for n_isi2, n_isi1 in zip(norm_isi[1:], norm_isi[:-1]):
+    #    idx = int((0.8 - n_isi1)/0.02)
+    #    if idx < 0 or idx > 19:
+    #        continue
+    #    else:
+    #        con_isi[idx].append(n_isi2)
+    #con_mean_isi = [np.mean(isis) for isis in con_isi]
+    #ax1.plot(np.linspace(0.8, 1.2, 20), con_mean_isi)
+
     Tmax = 5000
     fmin = 1/Tmax
-    fmax = 0.025
+    fmax = 0.035
     ks = np.arange(1, 6)
     pks = []
     for k in ks:
         pks.append(fc.k_corr(data_isi, data_isi, k)/(std**2))
-    axins1.scatter(ks, pks, fc="w", ec=st.colors[0], s=15, zorder=3)
+    axins1.scatter(ks, pks, fc="w", ec=st.colors[0], s=20, zorder=3)
     n = int(fmax/fmin)
     fs = fmin*np.arange(n)
     Ps = fc.power_spectrum_isis(fs, data_isi, Tmax=Tmax)
@@ -104,12 +116,12 @@ if __name__ == "__main__":
     np.random.shuffle(data_isi)
     Tmax = 5000
     fmin = 1/Tmax
-    fmax = 0.025
+    fmax = 0.035
     ks = np.arange(1, 6)
     pks = []
     for k in ks:
         pks.append(fc.k_corr(data_isi, data_isi, k)/(std**2))
-    axins1.scatter(ks, pks, fc="w", ec=st.colors[3], s=15, zorder=2)
+    axins1.scatter(ks, pks, fc="w", ec=st.colors[3], s=20, zorder=2)
     n = int(fmax/fmin)
     fs = fmin*np.arange(n)
     Ps2 = fc.power_spectrum_isis(fs, data_isi, Tmax=Tmax)

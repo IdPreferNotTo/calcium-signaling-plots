@@ -58,12 +58,11 @@ if __name__ == "__main__":
     ax1.set_yticks([ca_r, ca_t])
     ax1.set_ylim([0.1, 1.1])
     ax1.set_yticklabels(["$c_R$", "$c_T$"])
-    ax1.axhline(ca_r, ls=":", lw=1, c="k")
     ax1.axhline(ca_t, ls=":", lw=1, c="k")
 
     ax2.set_xlabel("$t$ / s")
     ax2.set_ylabel(r"$c_{\rm er}(t)$")
-    ax2.set_ylim([0.75, 1.1])
+    ax2.set_ylim([0.85, 1.05])
     ax2.set_xlim([-100, 600])
 
     ax3.set_xlabel("$i$")
@@ -74,8 +73,8 @@ if __name__ == "__main__":
 
     tau = 5.0
     p = 0.015
-    eps_er = 0.05
-    tau_er = 500
+    eps_er = 0.03
+    tau_er = 300
 
     # Plot traces
     home = os.path.expanduser("~")
@@ -86,7 +85,8 @@ if __name__ == "__main__":
     cers_plot = []
     n_spikes = 0
     spike_times = []
-    ceris = []
+    cr_spike_times = []
+
     for t, ci, jp, cer in zip(ts, cis, jps, cers):
         t = t - 100
         if t >= 1_000:
@@ -94,16 +94,19 @@ if __name__ == "__main__":
         ts_plot.append(t)
         cis_plot.append(ci)
         cers_plot.append(cer)
-        if ci == 0.5 and jp == 0:
+
+        if jp == 69:
             spike_times.append(t)
             ts_plot.append(t)
             cis_plot.append(0.5 + cer / 2)
             cers_plot.append(cer)
             ts_plot.append(t)
             cis_plot.append(0.2)
-            cers_plot.append(cer * (1 - eps_er))
-            ceris.append(cer)
+            cers_plot.append(cer)
+            cr_spike_times.append(0.2*cer)
             n_spikes += 1
+
+    ax1.plot(spike_times, cr_spike_times, ls=":", lw=1, c="k")
     ax1.plot(ts_plot, cis_plot, lw=1, color=st.colors[0])
     ax2.plot(ts_plot, cers_plot, lw=1, color=st.colors[0], label = r"$c_{\rm er}(t)$")
 
@@ -117,13 +120,6 @@ if __name__ == "__main__":
     data_isi_trans = df.load_spike_times_markov_transient(tau, p, tau_er, eps_er)
     spike_times_trans = turn_2d_isis_into_spike_times(data_isi_trans)
     mean_isis = np.mean(data_isi_trans, axis=0)
-    t8 = mean_isis[-1]
-    eps = eps_er/(1 - eps_er/2)
-    cer_fix = 1/(1 + eps*tau_er/t8)
-    print(cer_fix)
-    ax2.text(0, cer_fix*1.01, r"$\langle c_{\rm er}^* \rangle$", fontsize=8, ha="center", va='bottom')
-
-    ax2.axhline(cer_fix, ls=":", lw=1, c="k")
 
     data_isi = df.load_spike_times_markov_transient(tau, p, tau_er, eps_er)
     rows, cols = data_isi.shape
@@ -132,7 +128,7 @@ if __name__ == "__main__":
     means_Tidx = [np.mean(data_isi[:, idx]) for idx in idxs]  # calculate the mean column wise
 
     for row in np.arange(1):
-        ax3.scatter(idxs, data_isi[row, :20], fc="w", ec=st.colors[1], alpha=0.75, s=20, zorder=1)
+        ax3.scatter(idxs, data_isi[row, :idx_max], fc="w", ec=st.colors[1], alpha=0.75, s=20, zorder=1)
     ax3.scatter(idxs, means_Tidx, fc="w", ec="C7", s=20, zorder=2)
     popt, pcov = curve_fit(fc.exponential_Ti, idxs, means_Tidx, p0=(100, 150, 2))
     ax3.axvspan(0, popt[2], alpha=0.3, color="C7")
@@ -151,13 +147,17 @@ if __name__ == "__main__":
     p1 = patches.FancyArrowPatch((0 - 0.5, popt[1] * 1.1), (popt[2] + 1, popt[1] * 1.1), arrowstyle='<->', mutation_scale=10)
     ax3.add_patch(p1)
     ax3.text(popt[2] / 2, popt[1] * 1.2, r"$n_{\rm tr}$", fontsize=8, ha="center", va='bottom')
-
-    data_isi = df.load_spike_times_markov(tau, p, cer=True, taua=tau_er, ampa=eps_er)
-    mean = np.mean(data_isi)
+    file = home + f"/Data/calcium/markov/adaptive/sequence/long_spike_times_markov_ip1.00_taua{tau_er:.2e}_ampa{eps_er:.2e}_tau{tau:.2e}_j{p:.2e}_K10_5.dat"
+    data_isi = np.loadtxt(file)
+    mean = np.mean(data_isi[20:])
+    eps = eps_er / (1 - eps_er / 2)
+    cer_fix = 1 / (1 + eps * tau_er / mean)
+    ax2.text(0, cer_fix * 1.01, r"$\langle c_{\rm er}^* \rangle$", fontsize=8, ha="center", va='bottom')
+    ax2.axhline(cer_fix, ls=":", lw=1, c="k")
     std = np.std(data_isi)
     cv = std/mean
     cv2 = cv**2
-    print(cv2)
+    print(mean, cv)
     ts = np.linspace(0, 1+4*cv, 501)
     p_inv_gaus = fc.inverse_gaussian_dist(ts, 1, cv2)
     l1, = ax4.plot(ts, p_inv_gaus, lw=1, c="k", label="Inv.\ Gaus.")

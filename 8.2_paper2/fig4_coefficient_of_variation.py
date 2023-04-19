@@ -56,16 +56,16 @@ if __name__ == "__main__":
     ax5.set_title("excitable")
     ax6.set_title("excitable")
 
-    ax1.scatter(500, 0.04, marker="x", c="k", zorder=3)
-    ax1.scatter(500, 0.4, marker="*", c="k", zorder=3)
+    ax1.scatter(500, 0.02, marker="x", c="k", zorder=3)
+    ax1.scatter(500, 0.2, marker="*", c="k", zorder=3)
     ax4.scatter(500, 0.1, marker="p", c="k", zorder=3)
 
-    ax2.scatter(500, 0.04, marker="x", c="k", zorder=3)
-    ax2.scatter(500, 0.4, marker="*", c="k", zorder=3)
+    ax2.scatter(500, 0.02, marker="x", c="k", zorder=3)
+    ax2.scatter(500, 0.2, marker="*", c="k", zorder=3)
     ax5.scatter(500, 0.1, marker="p", c="k", zorder=3)
 
-    ax3.scatter(500, 0.04, marker="x", c="k", zorder=3)
-    ax3.scatter(500, 0.4, marker="*", c="k", zorder=3)
+    ax3.scatter(500, 0.02, marker="x", c="k", zorder=3)
+    ax3.scatter(500, 0.2, marker="*", c="k", zorder=3)
     ax6.scatter(500, 0.1, marker="p", c="k", zorder=3)
     colors = st.Colors()
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         T0 = np.mean(ISIs_no_adap)
         CV0 = np.std(ISIs_no_adap)/T0
 
-        data_markov = np.loadtxt(home + f"/Data/calcium_spikes_theory/markov_ca_stationary_statistics_tau{tau:.2e}_j{p:.2e}_K10_N5_adap.dat")
+        data_markov = np.loadtxt(home + f"/Data/calcium/theory/markov_mean_cv_tau{tau:.2e}_j{p:.2e}_K10_N5_adap.dat")
         taus_a, eps_a, Ts, cvs, count = np.transpose(data_markov)
         taus_a = taus_a.reshape(size, size)
         eps_a = eps_a.reshape(size, size)
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         divider = make_axes_locatable(ax2)
         cax_cv_markov = divider.append_axes('right', size='5%', pad=0.05)
         cbar_cv_markov = fig.colorbar(cs_cv_markov, cax=cax_cv_markov, orientation='vertical')
-        cbar_cv_markov.set_label(r"$CV_T$", loc="center")
+        cbar_cv_markov.set_label(r"$C_V$", loc="center")
         cbar_cv_markov.set_ticks([0, 0.5, 1.0])
 
         cs_dcv_markov = ax3.pcolormesh(taus_a, eps_a, dcvs, linewidth=0, rasterized=True, shading='gouraud', vmin=-1.0, vmax=1.0, cmap=plt.get_cmap("RdBu_r", 11))
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         divider = make_axes_locatable(ax3)
         cax_dcv_markov = divider.append_axes('right', size='5%', pad=0.05)
         cbar_dcv_markov = fig.colorbar(cs_dcv_markov, cax=cax_dcv_markov, orientation='vertical')
-        cbar_dcv_markov.set_label(r"$\delta CV_T$", loc="center")
+        cbar_dcv_markov.set_label(r"$\delta C_V$", loc="center")
         cbar_dcv_markov.set_ticks([-1., 0, 1.0])
 
     ax7.text(0.1, 0.9, r"C", fontsize=11, transform=ax7.transAxes)
@@ -142,11 +142,11 @@ if __name__ == "__main__":
     ax11.text(0.1, 0.9, r"E", fontsize=11, transform=ax11.transAxes)
     ax7.scatter(2.5, 4., s=50, marker="*", c="k", zorder=3)
     ax9.scatter(2.5, 1.6, s=50, marker="x", c="k", zorder=3)
-    ax11.scatter(2.5, 0.8, s=50, marker="p", c="k", zorder=3)
+    ax11.scatter(2.5, 1.3, s=50, marker="p", c="k", zorder=3)
     #ax8.set_ylim([-5, 5])
     #ax10.set_ylim([-1.1, 1.1])
     #ax12.set_ylim([-1.1, 1.1])
-    for ax1, ax2, tau, p, tau_er, eps_er in zip([ax7, ax9, ax11], [ax8, ax10, ax12], [5, 5, 1], [0.015, 0.015, 0.06], [500, 500, 500], [0.4, 0.04, 0.1]):
+    for ax1, ax2, tau, p, tau_er, eps_er in zip([ax7, ax9, ax11], [ax8, ax10, ax12], [5, 5, 1], [0.015, 0.015, 0.06], [500, 500, 500], [0.2, 0.02, 0.1]):
         ax1.set_xlim([0, 3])
         ax2.set_xlim([0, 3])
         ax1.set_xlabel("")
@@ -164,7 +164,8 @@ if __name__ == "__main__":
         ax1.hist(data_isi/mean, density=True, fc="C7", bins=25, alpha=0.75)
         ax2.plot(ts/mean, corr/abs(corr[0]), c="C7")
 
-        data_isi = df.load_spike_times_markov(tau, p, cer=True, taua=tau_er, ampa=eps_er)
+        data_isi = np.loadtxt(home + f"/Data/calcium/markov/adaptive/sequence/"
+                                     f"long_spike_times_markov_ip1.00_taua{tau_er:.2e}_ampa{eps_er:.2e}_tau{tau:.2e}_j{p:.2e}_K10_5.dat")
         print(data_isi[0])
         print(data_isi.size)
         mean = np.mean(data_isi)
@@ -174,7 +175,7 @@ if __name__ == "__main__":
         ax2.plot(ts/mean, corr/abs(corr[0]))
 
 
-    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures_ordered/fig4.pdf", transparent=True)
+    plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig4.pdf", transparent=True)
     plt.show()
 
 

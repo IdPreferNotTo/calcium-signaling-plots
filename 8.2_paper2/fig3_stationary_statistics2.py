@@ -9,47 +9,6 @@ import styles as st
 import functions as fc
 import default_parameters as df
 
-def interpolated_intercept(x, y1, y2):
-    """Find the intercept of two curves, given by the same x data"""
-
-    def intercept(point1, point2, point3, point4):
-        """find the intersection between two lines
-        the first line is defined by the line between point1 and point2
-        the first line is defined by the line between point3 and point4
-        each point is an (x,y) tuple.
-
-        So, for example, you can find the intersection between
-        intercept((0,0), (1,1), (0,1), (1,0)) = (0.5, 0.5)
-
-        Returns: the intercept, in (x,y) format
-        """
-
-        def line(p1, p2):
-            A = (p1[1] - p2[1])
-            B = (p2[0] - p1[0])
-            C = (p1[0]*p2[1] - p2[0]*p1[1])
-            return A, B, -C
-
-        def intersection(L1, L2):
-            D  = L1[0] * L2[1] - L1[1] * L2[0]
-            Dx = L1[2] * L2[1] - L1[1] * L2[2]
-            Dy = L1[0] * L2[2] - L1[2] * L2[0]
-
-            x = Dx / D
-            y = Dy / D
-            return x,y
-
-        L1 = line([point1[0],point1[1]], [point2[0],point2[1]])
-        L2 = line([point3[0],point3[1]], [point4[0],point4[1]])
-
-        R = intersection(L1, L2)
-
-        return R
-
-    idx = np.argwhere(np.diff(np.sign(y1 - y2)) != 0)
-    xc, yc = intercept((x[idx], y1[idx]),((x[idx+1], y1[idx+1])), ((x[idx], y2[idx])), ((x[idx+1], y2[idx+1])))
-    return xc,yc
-
 
 if __name__ == "__main__":
     home = os.path.expanduser("~")
@@ -106,21 +65,28 @@ if __name__ == "__main__":
     ax6.set_xscale("log")
     ax6.set_ylim([-0.5, 0.2])
     ax6.axhline(0, ls=":", c="C7")
-
     # Parameters
     taus = [5.0, 1.0]
     ps = [0.015, 0.06]
-    eps_er_fix = 0.05
-    tau_er_fix = 500
-    tau_ers = np.logspace(1, 3, 21)
-    eps_ers = np.logspace(-2, 0, 21)
+    eps_er_fix = 0.03
+    tau_er_fix = 300
+    tau_ers = np.logspace(1, 3, 11)
+    eps_ers = np.logspace(-2, 0, 11)
 
     for i, (tau, p) in enumerate(zip(taus, ps)):
+        if i == 0:
+            label = "mean-driven"
+        else:
+            label = "excitable"
         means = []
         cvs = []
         p1s = []
-        mean_isis_theory = []
-        for tau_er in tau_ers:
+        means_theory = []
+        means_langevin = []
+        cvs_langevin = []
+        p1s_langevin = []
+        for ii, tau_er in enumerate(tau_ers):
+            print(tau, p, tau_er)
             data_isi = df.load_spike_times_markov(tau, p, cer=True, taua=tau_er, ampa=eps_er_fix)
             mean = np.mean(data_isi)
             std = np.std(data_isi)
@@ -131,28 +97,43 @@ if __name__ == "__main__":
             cvs.append(cv)
             p1s.append(p1)
 
-            mean_isi_theory = fc.calculate_T_infty(tau, p, tau_er, eps_er_fix)
-            mean_isis_theory.append(mean_isi_theory)
+            data_isi_langevin = df.load_spike_times_langevin(tau, p, cer=True, taua=tau_er, ampa=eps_er_fix)
+            mean = np.mean(data_isi_langevin)
+            std = np.std(data_isi_langevin)
+            var = np.var(data_isi_langevin)
+            cv = std / mean
+            p1 = fc.k_corr(data_isi_langevin, data_isi_langevin, 1) / var
+            means_langevin.append(mean)
+            cvs_langevin.append(cv)
+            p1s_langevin.append(p1)
 
-        if i==0:
-            label="mean-driven"
-        else:
-            label="excitable"
-        ax1.scatter(tau_ers, means, fc="w", ec=st.colors[i], s=15, zorder=3, label=label)
-        if i == 1:
-            ax1.plot(tau_ers, mean_isis_theory, c=st.colors[5], zorder=3, label="Theory")
-        else:
-            ax1.plot(tau_ers, mean_isis_theory, c=st.colors[5], zorder=3)
+            mean_isi_theory = fc.self_consistent_T_infty(tau, p, tau_er, eps_er_fix)
+            means_theory.append(mean_isi_theory)
 
         ax1.plot(tau_ers, tau_ers, c="C7", ls=":")
-        ax2.scatter(tau_ers, cvs, fc="w", ec=st.colors[i], s=15, zorder=3)
-        ax3.scatter(tau_ers, p1s, fc="w", ec=st.colors[i], s=15, zorder=3)
+
+        ax1.plot(tau_ers, means_langevin, c=st.colors[i], zorder=1)
+        ax2.plot(tau_ers, cvs_langevin, c=st.colors[i], zorder=1)
+        ax3.plot(tau_ers, p1s_langevin, c=st.colors[i], zorder=1)
+
+        ax1.scatter(tau_ers, means, fc="w", ec=st.colors[i], s=20, label=label, zorder=2)
+        ax2.scatter(tau_ers, cvs, fc="w", ec=st.colors[i], s=20, zorder=2)
+        ax3.scatter(tau_ers, p1s, fc="w", ec=st.colors[i], s=20, zorder=2)
+
+        if i == 1:
+            ax1.plot(tau_ers, means_theory, c=st.colors[5], zorder=3, label="theory")
+        else:
+            ax1.plot(tau_ers, means_theory, c=st.colors[5], zorder=3)
 
         means = []
         cvs = []
         p1s = []
-        mean_isis_theory = []
-        for eps_er in eps_ers:
+        means_theory = []
+
+        means_langevin = []
+        cvs_langevin = []
+        p1s_langevin = []
+        for ii, eps_er in enumerate(eps_ers):
             data_isi = df.load_spike_times_markov(tau, p, cer=True, taua=tau_er_fix, ampa=eps_er)
             mean = np.mean(data_isi)
             std = np.std(data_isi)
@@ -163,13 +144,28 @@ if __name__ == "__main__":
             cvs.append(cv)
             p1s.append(p1)
 
-            mean_isi_theory = fc.calculate_T_infty(tau, p, tau_er_fix, eps_er)
-            mean_isis_theory.append(mean_isi_theory)
+            data_isi_langevin = df.load_spike_times_langevin(tau, p, cer=True, taua=tau_er_fix, ampa=eps_er)
+            mean = np.mean(data_isi_langevin)
+            std = np.std(data_isi_langevin)
+            var = np.var(data_isi_langevin)
+            cv = std / mean
+            p1 = fc.k_corr(data_isi_langevin, data_isi_langevin, 1) / var
+            means_langevin.append(mean)
+            cvs_langevin.append(cv)
+            p1s_langevin.append(p1)
 
-        ax4.scatter(eps_ers, means, fc="w", ec=st.colors[i], s=15, zorder=3)
-        ax4.plot(eps_ers, mean_isis_theory, c=st.colors[5], zorder=3)
-        ax5.scatter(eps_ers, cvs, fc="w", ec=st.colors[i], s=15, zorder=3)
-        ax6.scatter(eps_ers, p1s, fc="w", ec=st.colors[i], s=15, zorder=3)
+            mean_isi_theory = fc.self_consistent_T_infty(tau, p, tau_er_fix, eps_er)
+            means_theory.append(mean_isi_theory)
+
+        ax4.plot(eps_ers, means_langevin, c=st.colors[i], zorder=1)
+        ax5.plot(eps_ers, cvs_langevin, c=st.colors[i], zorder=1)
+        ax6.plot(eps_ers, p1s_langevin, c=st.colors[i], zorder=1)
+
+        ax4.scatter(eps_ers, means, fc="w", ec=st.colors[i], s=20, zorder=2)
+        ax5.scatter(eps_ers, cvs, fc="w", ec=st.colors[i], s=20, zorder=2)
+        ax6.scatter(eps_ers, p1s, fc="w", ec=st.colors[i], s=20, zorder=2)
+
+        ax4.plot(eps_ers, means_theory, c=st.colors[5], zorder=3)
 
     leg = ax1.legend(fancybox=False, fontsize=8, edgecolor="k", bbox_to_anchor=(0.0, 1.1, 2.465, .0), loc=3,
                       ncol=4, mode="expand", borderaxespad=0)

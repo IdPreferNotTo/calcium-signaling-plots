@@ -34,8 +34,8 @@ if __name__ == "__main__":
     # Parameters
     tau = 5.0
     p = 0.015
-    eps_er_fix = 0.05
-    tau_er_fix = 200
+    eps_er_fix = 0.03
+    tau_er_fix = 300
     tau_ers = np.logspace(1, 3, 21)
     eps_ers = np.logspace(-2, 0, 21)
     cmap_YlGnBu = plt.get_cmap("YlGnBu", 21)
