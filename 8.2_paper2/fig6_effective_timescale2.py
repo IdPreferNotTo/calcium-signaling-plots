@@ -17,10 +17,10 @@ if __name__ == "__main__":
     st.set_default_plot_style()
     w = 3.25 * 1.25
     h = 1.75 * 1.25
-    fig = plt.figure(tight_layout=True, figsize=(w, h))
-    gs = gridspec.GridSpec(1, 2)
-    ax1 = fig.add_subplot(gs[0])
-    ax2 = fig.add_subplot(gs[1])
+    fig, axs = plt.subplots(nrows=1, ncols=2, layout="constrained", figsize=(w, h))
+    ax1 = axs[0]
+    ax2 = axs[1]
+
     ax1.text(0.1, 0.95, r"A", fontsize=11, transform=ax1.transAxes, va='top')
     ax2.text(0.1, 0.95, r"B", fontsize=11, transform=ax2.transAxes, va='top')
     st.remove_top_right_axis([ax1, ax2])
@@ -38,8 +38,8 @@ if __name__ == "__main__":
     p = 0.015
     eps_er_fix = 0.03
     tau_er_fix = 300
-    tau_ers = np.logspace(1, 3, 21)
-    eps_ers = np.logspace(-2, 0, 21)
+    tau_ers = np.logspace(1, 3, 11)
+    eps_ers = np.logspace(-2, 0, 11)
     tau_effs = []
     tau_0s = []
     tau_1s = []
@@ -60,11 +60,11 @@ if __name__ == "__main__":
     ax1.axvspan(xmin=8, xmax=30, color="C7", alpha=0.5)
     ax1.scatter(tau_ers, tau_effs, fc="w", ec=st.colors[0], s=20, label=r"$\tau_{\rm eff}$")
     ax1.plot(np.linspace(10, 1000, 10_000), np.linspace(10, 1000, 10_000), ls=(0, (1, 1)), c="C7", label=r"$\tau_{\rm er}$")
-    ax1.plot(tau_ers, tau_0s, c=st.colors[5], ls="--", label=r"$\tau_1$")
-    ax1.plot(tau_ers, tau_1s, c=st.colors[5], label=r"$\tau_2$")
+    ax1.plot(tau_ers, tau_0s, c=st.colors[5], ls=":", label=r"$\tau_1$")
+    ax1.plot(tau_ers, tau_1s, c=st.colors[5], ls=(0, (3,1)), label=r"$\tau_2$")
 
     # Plot legend to span both axes
-    leg = ax1.legend(fancybox=False, fontsize=8, edgecolor="k", bbox_to_anchor=(0.0, 1.1, 2.465, .0), loc=3,
+    leg = ax1.legend(fancybox=False, fontsize=8, edgecolor="k", bbox_to_anchor=(0.0, 1.1, 2.36, 0.0), loc=3,
                      ncol=4, mode="expand", borderaxespad=0)
     leg.get_frame().set_linewidth(1.)
 
@@ -85,9 +85,11 @@ if __name__ == "__main__":
 
     # Plot tau_eff, tau1, tau2 over eps_er
     ax2.scatter(eps_ers, tau_effs, fc="w", ec=st.colors[0], s=20)
-    ax2.plot(eps_ers, tau_0s, c=st.colors[5], ls="--")
-    ax2.plot(eps_ers, tau_1s, c=st.colors[5])
+    ax2.plot(eps_ers, tau_0s, c=st.colors[5], ls=":")
+    ax2.plot(eps_ers, tau_1s, c=st.colors[5], ls=(0, (3,1)))
     ax2.plot([0.01, 1], [tau_er_fix, tau_er_fix], ls=(0, (1, 1)), c="C7")
+
+
 
     # Save and show figure
     #plt.savefig(home + f"/Dropbox/LUKAS_BENJAMIN/RamLin22_2_BiophysJ/figures/fig6.pdf")
