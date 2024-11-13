@@ -2,7 +2,8 @@ from matplotlib import rc
 from matplotlib import rcParams
 import warnings
 
-colors = ["#173F5F", "#20639B", "#3CAEA3", "#F6D55C", "#BF6B63", "#bd6861"]
+# ""#F6D55C" old yellow
+colors = ["#173F5F", "#20639B", "#18776E", "#007A45", "#75CB78","#e6b400", "#e6842e", "#bf3c30", "#BF6B63"]
 
 def lighten_color(color, amount):
     """
@@ -42,11 +43,11 @@ def figsize(shape, size):
     :return: width, height the resulting plot size
     """
     if size == "large":
-        height = 200
-        width = 300
+        height = 2.
+        width = 3.
     elif size == "small":
-        height = 150
-        width = 200
+        height = 1.5
+        width = 2.
     else:
         return warnings.warn("No valid plot size specified. Options are \"small\" and \"large\". ")
     x = shape[0]
@@ -60,7 +61,7 @@ def set_default_plot_style():
     rcParams['text.latex.preamble'] = r'\usepackage{lmodern}'
     rcParams['font.family'] = 'serif'
     rcParams['font.serif'] = 'Latin Modern'
-    rcParams.update({'font.size': 10})
+    rcParams.update({'font.size': 9})
     rc('text', usetex=True)
 
 

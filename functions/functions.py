@@ -1,6 +1,9 @@
+import os.path
+
 import numpy as np
 from typing import List
 import scipy.special as special
+from scipy.optimize import curve_fit
 
 import default_parameters as df
 
@@ -138,7 +141,7 @@ def tau_open_cluster_data(data):
 
 def p_open_cluster_theory(ci, N, M, r_cls=df.r_cls, r_ref=df.r_ref):
     tau_open = tau_open_cluster_theory(N, r_cls)
-    tau_close = tau_close_cluster_theory(ci, M, r_ref)
+    tau_close = tau_close_cluster_theory(ci, M, N, r_ref)
     return tau_open/(tau_close + tau_open)
 
 
@@ -146,13 +149,13 @@ def tau_open_cluster_theory(N, r_cls = df.r_cls):
     return (N+1)/(2*r_cls)
 
 
-def tau_close_cluster_theory(ci, M, r_ref = df.r_ref):
-    r_opn = df.r_opn(ci)
+def tau_close_cluster_theory(ci, M, N=5, r_ref = df.r_ref):
+    r_opn = df.r_opn(ci, N=N)
     return (M-1)/r_ref + 1/r_opn
 
 
 def tau_total_cluster_theory(ci, N, M, r_cls=df.r_cls, r_ref=df.r_ref):
-    return tau_open_cluster_theory(N, r_cls) + tau_close_cluster_theory(ci, M, r_ref)
+    return tau_open_cluster_theory(N, r_cls) + tau_close_cluster_theory(ci, M, N, r_ref)
 
 
 def mean_puff_strength_cluster_theory(N, r_cls = df.r_cls):
@@ -191,13 +194,18 @@ def diffusion_theory(ci, p, K, N, M, s):
 def pbif(tau, K, N, M, s, c0 = 0.2, cT=0.5):
     return (cT - c0)/(tau*K*mean_jp_single_theory(cT, N, M, s))
 
-def gaussian_dist(xs, mean, cv2):
+def gaussian_dist_std(xs, mean, std):
+    return 1 / np.sqrt(2 * np.pi * (std ** 2)) * np.exp(-((xs - mean) ** 2) / (2 * std ** 2))
+
+def gaussian_dist_cv(xs, mean, cv2):
     std = np.sqrt(cv2)*mean
     return 1 / np.sqrt(2 * np.pi * (std ** 2)) * np.exp(-((xs - mean) ** 2) / (2 * std ** 2))
 
 def inverse_gaussian_dist(xs, mean, cv2):
     return np.sqrt(mean/(2*np.pi*cv2*xs**3))*np.exp(-(xs - mean)**2 /(2*mean*cv2*xs))
 
+def inverse_gaussian_at_x(x, mean, cv2):
+    return np.sqrt(mean / (2 * np.pi * cv2 * x ** 3)) * np.exp(-(x - mean) ** 2 / (2 * mean * cv2 * x))
 
 def gamma_dist(xs, mean, cv2):
     taus = xs / (mean * cv2)
@@ -304,19 +312,71 @@ def f_from_k_invert_M(k, r_ref, r_opn, r_cls, n, m):
 
 def k_corr(data1, data2, k):
     # Get two arbitrary data set and calculate their correlation with lag k.
-    mu1 = np.mean(data1)
-    mu2 = np.mean(data2)
-    data1 = [x - mu1 for x in data1]
-    data2 = [x - mu2 for x in data2]
-    k_corr = 0
     if k == 0:
+        mu1 = np.mean(data1)
+        mu2 = np.mean(data2)
+        data1 = [x - mu1 for x in data1]
+        data2 = [x - mu2 for x in data2]
+        k_corr = 0
         for x, y in zip(data1, data2):
             k_corr += x * y
     else:
+        mu1 = np.mean(data1[:-k])
+        mu2 = np.mean(data2[k:])
+        data1 = [x - mu1 for x in data1]
+        data2 = [x - mu2 for x in data2]
+        k_corr = 0
         for x, y in zip(data1[:-k], data2[k:]):
             k_corr += x * y
     return k_corr / len(data2[k:])
 
+def nth_order_density_from_(isis, n, mean_max = 3):
+    N = isis.size
+    mean = np.mean(isis)
+    ts = np.linspace(0, mean_max*mean, 100)
+    dt = ts[1] - ts[0]
+
+    n_isis = np.zeros(N - (n-1))
+    for i in range(N - (n-1)):
+        n_isis[i] = np.sum(isis[i:i+n])
+
+    count = np.zeros(100)
+
+    for n_isi in n_isis:
+        idx = int(n_isi/dt)
+        if idx > 99:
+            continue
+        else:
+            count[idx] += 1
+    dens = np.asarray([x/N for x in count])
+    return ts, dens
+
+def isis_to_spike_times(isis):
+    t = 0
+    spike_times = []
+    for I in isis:
+        t += I
+        spike_times.append(t)
+    return np.asarray(spike_times)
+
+def autocorrelation_from_spike_times(spike_times, mean_isi):
+    r0 = 1/mean_isi
+    N = spike_times.size
+    ts = np.linspace(0, 3*mean_isi, 50)
+    dt = ts[1] - ts[0]
+    count = np.zeros(50)
+    for i, t in enumerate(spike_times):
+        for s in spike_times[i+1:]:
+            if s - t < 5*mean_isi:
+                idx = int((s-t)/dt)
+                if idx >= 50:
+                    continue
+                else:
+                    count[idx] += 1
+            else:
+                break
+    corr = [r0*((x/N)/dt - r0) for x in count]
+    return ts, np.asarray(corr)
 
 def fourier_transformation_isis(f, isis):
     t = 0
@@ -358,5 +418,208 @@ def power_spectrum_inverse_gaussian(fs, mean, cv2):
 def exponential_Ti(i, T0, T8, tau):
     return T0*np.exp(-i/tau) + T8*(1 - np.exp(-i/tau))
 
+
+def exponential_cer(t, cer8, tau):
+    return cer8 + (1. - cer8) * np.exp(-t / tau)
+
+
+def double_exponential_cer(t, x0, tau):
+    return x0 * ((1. + x0) + (1. - x0)*np.exp(-t/tau))/((1. + x0) - (1. - x0)*np.exp(-t/tau))
+
+
 def linear_function(x, a, b):
     return b*(x - a)
+
+
+def measure_n_tr(tau, p, tau_er, eps_er):
+    data_isi = df.load_spike_times_markov_transient(tau, p, tau_er, eps_er)
+    rows, cols = data_isi.shape
+    idx_max = cols
+    idxs = np.arange(idx_max)
+    means_Tidx = [np.mean(data_isi[:, idx]) for idx in idxs]  # calculate the mean column wise
+    popt, pcov = curve_fit(exponential_Ti, idxs, means_Tidx, p0=(100, 150, 2))
+    return popt[2]
+
+
+def measure_tau_eff(tau, p, tau_er, eps_er):
+    file = f"transient_adaptation_markov_ip1.00_taua{tau_er:.2e}_ampa{eps_er:.2e}_tau{tau:.2e}_j{p:.2e}_K10_5.dat"
+    data = np.loadtxt("/home/lukas/Data/calcium/markov/adaptive/transient/" + file,
+                      usecols=np.arange(0, 1000))
+    mean_cer = np.mean(data, axis=0)
+    ts = np.linspace(0, 1000, 1000)
+    popt, pcov = curve_fit(exponential_cer, ts, mean_cer, p0=(0.9, 100))
+    return popt[1]
+
+
+def measure_double_exp_tau_eff(tau, p, tau_er, eps_er):
+    file = f"transient_adaptation_markov_ip1.00_taua{tau_er:.2e}_ampa{eps_er:.2e}_tau{tau:.2e}_j{p:.2e}_K10_5.dat"
+    data = np.loadtxt("/home/lukas/CLionProjects/PhD/calcium/calcium_spikes_markov_transient/out/" + file,
+                      usecols=np.arange(0, 1000))
+    mean_cer = np.mean(data, axis=0)
+    ts = np.linspace(0, 1000, 1000)
+    popt, pcov = curve_fit(double_exponential_cer, ts, mean_cer, p0=(0.9, 100))
+    return popt[1]
+
+def interpolated_intercept(x, y1, y2):
+    """Find the intercept of two curves, given by the same x data"""
+
+    def intercept(point1, point2, point3, point4):
+        """find the intersection between two lines
+        the first line is defined by the line between point1 and point2
+        the first line is defined by the line between point3 and point4
+        each point is an (x,y) tuple.
+
+        So, for example, you can find the intersection between
+        intercept((0,0), (1,1), (0,1), (1,0)) = (0.5, 0.5)
+
+        Returns: the intercept, in (x,y) format
+        """
+
+        def line(p1, p2):
+            A = (p1[1] - p2[1])
+            B = (p2[0] - p1[0])
+            C = (p1[0]*p2[1] - p2[0]*p1[1])
+            return A, B, -C
+
+        def intersection(L1, L2):
+            D  = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+
+            x = Dx / D
+            y = Dy / D
+            return x,y
+
+        L1 = line([point1[0],point1[1]], [point2[0],point2[1]])
+        L2 = line([point3[0],point3[1]], [point4[0],point4[1]])
+
+        R = intersection(L1, L2)
+
+        return R
+
+    idx = np.argwhere(np.diff(np.sign(y1 - y2)) != 0)
+    xc, yc = intercept((x[idx], y1[idx]),((x[idx+1], y1[idx+1])), ((x[idx], y2[idx])), ((x[idx+1], y2[idx+1])))
+    return xc,yc
+
+
+def linear_interpolate(x0, xs, ys):
+    for i, (x1, x2) in enumerate(zip(xs[:-1], xs[1:])):
+        if (x1 < x0 and x0 <= x2) or (x1 >= x0 and x0 > x2):
+            y1 = ys[i]
+            y2 = ys[i+1]
+            return y1 + (y2 - y1)/(x2 - x1)*(x0 - x1)
+
+
+# def linear_interpolate(xaim, xs, ys):
+#     for i, x in enumerate(xs):
+#         if xaim > x:
+#             continue
+#         else:
+#             if i < xs.size-1:
+#                 x1 = xs[i]
+#                 x2 = xs[i+1]
+#                 y1 = ys[i]
+#                 y2 = ys[i+1]
+#                 return y1 + (y2 - y1)/(x2 - x1)*(xaim - x1)
+#             else:
+#                 return ys[i]
+
+
+def calculate_tau_1(tau, p, tau_er, eps_er):
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_r0_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, r0s_f = np.transpose(data_fpe)
+    eps = eps_er / (1 - eps_er/ 2)
+    r0s_er = np.zeros(401)
+    for ii, cer in enumerate(cers_f):
+        r0s_er[ii] = (1. - cer) / (eps * tau_er * cer)
+    x, y = interpolated_intercept(cers_f, r0s_er, r0s_f)
+
+    # Calculate tau1 by approximation of r(c_er) around the stationary value c_er=<c_er^*>.
+    r0_self = y[0, 0]
+    tau_0_1 = tau_er / (1.  + eps * tau_er * r0_self)
+
+    # Calculate tau1 by approximation of r(c_er) around the non-adaptive value c_er=1.
+    r0 = r0s_f[-1]
+    tau_0_2 = tau_er / (1. + + eps * tau_er * r0)
+    return tau_0_1, tau_0_2
+
+def calculate_tau_2(tau, p, tau_er, eps_er):
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_r0_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, r0s_f = np.transpose(data_fpe)
+    dr0s_f = []
+    for r1, r2, c1, c2 in zip(r0s_f[:-1], r0s_f[1:], cers_f[:-1], cers_f[1:]):
+        dr0s_f.append((r2 - r1) / (c2 - c1))
+    eps = eps_er / (1 - eps_er/ 2)
+    r0s_er = np.zeros(401)
+    for ii, cer in enumerate(cers_f):
+        r0s_er[ii] = (1. - cer) / (eps * tau_er * cer)
+    x, y = interpolated_intercept(cers_f, r0s_er, r0s_f)
+
+    # Calculate tau2 by approximation of r(c_er) around the stationary value c_er=<c_er^*>.
+    cer_self = x[0, 0]
+    r0_self = y[0, 0]
+    dr0_self = linear_interpolate(cer_self, cers_f[:-1], dr0s_f)
+    a = eps * tau_er * dr0_self
+    b = -(1 + eps * tau_er * r0_self - eps * tau_er * dr0_self * cer_self)
+    tau_1_1 = tau_er / (np.sqrt(b**2 + 4*a))
+
+    # Calculate tau1 by approximation of r(c_er) around the non-adaptive value c_er=1.
+    cer = 1.
+    r0 = r0s_f[-1]
+    dr0 = (r0s_f[-2] - r0s_f[-1]) / (cers_f[-2] - cers_f[-1])
+    a = eps * tau_er * dr0
+    b = -(1 + eps * tau_er * r0 - eps * tau_er * dr0 * cer)
+    tau_1_2 = tau_er / (np.sqrt(b**2 + 4*a))
+    return tau_1_1, tau_1_2
+
+
+def calculate_T_init(tau, p):
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_r0_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, r0s_f = np.transpose(data_fpe)
+    r0 = r0s_f[-1]
+    return 1/r0
+
+
+def self_consistent_cer_infty(tau, p, tau_er, eps_er):
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_r0_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, r0s_f = np.transpose(data_fpe)
+    eps = eps_er / (1 - eps_er / 2)
+    r0s_er = np.zeros(401)
+    for ii, cer in enumerate(cers_f):
+        r0s_er[ii] = (1. - cer) / (eps * tau_er * cer)
+    x, y = interpolated_intercept(cers_f, r0s_er, r0s_f)
+    cer_self = x[0, 0]
+    return cer_self
+
+def self_consistent_T_infty(tau, p, tau_er, eps_er):
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_r0_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, r0s_f = np.transpose(data_fpe)
+    eps = eps_er / (1 - eps_er / 2)
+    r0s_er = np.zeros(401)
+    for ii, cer in enumerate(cers_f):
+        r0s_er[ii] = (1. - cer) / (eps * tau_er * cer)
+    x, y = interpolated_intercept(cers_f, r0s_er, r0s_f)
+    r0_self = y[0, 0]
+    return 1/r0_self
+
+def stationary_firing_rate(cer, tau, p):
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_r0_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, r0s_f = np.transpose(data_fpe)
+    x, y = linear_interpolate(cer, cers_f, r0s_f)
+    cer_self = x[0, 0]
+    r0_self = y[0, 0]
+    return 1/r0_self
+
+def self_consistent_CV_infty(tau, p, tau_er, eps_er):
+    cer_infty = self_consistent_cer_infty(tau, p, tau_er, eps_er)
+    home = os.path.expanduser("~")
+    data_fpe = np.loadtxt(home + f"/Data/calcium/theory/cer_cv_fpe_tau{tau:.2e}_j{p:.2e}.dat")
+    cers_f, cvs_f = np.transpose(data_fpe)
+    cv_self = linear_interpolate(cer_infty, cers_f, cvs_f)
+    return cv_self
